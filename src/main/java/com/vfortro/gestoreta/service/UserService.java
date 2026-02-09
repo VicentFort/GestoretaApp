@@ -16,8 +16,9 @@ public class UserService {
     @Autowired
     private UserConversor userConversor;
 
-    public void createUser(UserCreateDto user) {
-        userRepository.save(userConversor.fromDto2Entity(user));
+    public UserCreateDto createUser(UserCreateDto user) {
+        User saved = userRepository.save(userConversor.fromDto2Entity(user));
+        return userConversor.fromEntity2Dto(saved);
     }
 
     public UserCreateDto readUser(Long userId) {

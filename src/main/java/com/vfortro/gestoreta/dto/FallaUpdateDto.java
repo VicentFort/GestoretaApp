@@ -1,18 +1,19 @@
 package com.vfortro.gestoreta.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
 
 import java.time.LocalDate;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(description = "Dto enviado para actualizar una falla.")
 public class FallaUpdateDto {
+    @Schema(example = "Falla súper guay.", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String name;
+    @Schema(example = "2000-01-01", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private LocalDate creationDate;
+    @Schema(example = "", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String shieldUrl;
 }

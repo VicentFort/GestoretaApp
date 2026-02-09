@@ -1,9 +1,6 @@
 package com.vfortro.gestoreta.controller;
 
-import com.vfortro.gestoreta.dto.FallaUpdateDto;
-import com.vfortro.gestoreta.dto.FallaCreateDto;
-import com.vfortro.gestoreta.dto.RequestDto;
-import com.vfortro.gestoreta.dto.UserCreateDto;
+import com.vfortro.gestoreta.dto.*;
 import com.vfortro.gestoreta.service.FallaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -43,7 +40,7 @@ public class FallaController {
 
     @Operation(summary = "Crea una falla en la base de datos.")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", content = {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class), examples = {
+            @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
                     @ExampleObject(name = "Falla creada", value = "Falla creada con id: 1")
             })}),
     })
@@ -56,17 +53,17 @@ public class FallaController {
 
     @Operation(summary = "Actualiza una falla de la base de datos.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))}),
-            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class), examples = {
-                    @ExampleObject(name = "Falla no encontrada", value = "Falla con id: 1 no encontrada")
+            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
+            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Falla no encontrada", value = "{\"message\":\"Falla con id: 1 no encontrada\",\"success\":false}")
             })})
     })
     @PutMapping("/update/{idFalla}")
-    public ResponseEntity<String> updateFalla(@Valid @RequestBody FallaUpdateDto newFalla,
+    public ResponseEntity<?> updateFalla(@Valid @RequestBody FallaUpdateDto newFalla,
                                                 @PathVariable @Valid Long idFalla) {
         FallaCreateDto result = fallaService.updateFalla(newFalla, idFalla);
         if(Objects.isNull(result)) {
-            return new ResponseEntity<>("Falla con id: " + idFalla + " no encontrada.", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ApiMessageResponse("Falla con id: " + idFalla + " no encontrada.", false), HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>("Falla actualizada", HttpStatus.OK);
     }
@@ -74,15 +71,15 @@ public class FallaController {
     @Operation(summary = "Busca una falla en la base de datos dado su nombre.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = FallaCreateDto.class))}),
-            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class), examples = {
-                    @ExampleObject(name = "Falla no encontrada." , value = "Falla con nombre: FALLA GRAN no econtrada.")
+            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Falla no encontrada." , value = "{\"message\":\"Falla con nombre: FALLA GRAN no econtrada.\",\"success\":false}")
             })})
     })
     @GetMapping("/getByName")
     public ResponseEntity<?> getByName(@RequestParam("fallaName") @Valid String fallaName) {
         FallaCreateDto falla = fallaService.readFalla(fallaName);
         if(Objects.isNull(falla)) {
-            return new ResponseEntity<>("Falla con nombre: " + fallaName + " no encontrada.", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ApiMessageResponse("Falla con nombre: " + fallaName + " no encontrada.", false), HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(falla,HttpStatus.OK);
     }
@@ -90,8 +87,8 @@ public class FallaController {
     @Operation(summary = "Busca una falla en la base de datos dada su id.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = FallaCreateDto.class))}),
-            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class), examples = {
-                    @ExampleObject(name = "Falla no encontrada." , value = "Falla con id: 1 no econtrada.")
+            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Falla no encontrada." , value = "{\"message\":\"Falla con id: 1 no econtrada.\",\"success\":false}")
             })})
     })
     @GetMapping("/{fallaId}")
@@ -106,14 +103,14 @@ public class FallaController {
     @Operation(summary = "Devuelve los usuarios que pertenencen una falla.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json")}),
-            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class), examples = {
-                    @ExampleObject(name = "Falla no encontrada." , value = "Falla con id: 1 no econtrada.")
+            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Falla no encontrada." , value = "{\"message\":\"Falla con id: 1 no econtrada.\",\"success\":false}")
             })})
     })
     @GetMapping("/users/{fallaId}")
     public ResponseEntity<?> getUsers(@PathVariable @Valid Long fallaId) {
         if(Objects.isNull(fallaService.readFalla(fallaId))) {
-            return new ResponseEntity<>("Falla con id: " + fallaId + " no encontrada.", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ApiMessageResponse("Falla con id: " + fallaId + " no encontrada.", false), HttpStatus.NOT_FOUND);
         }
         List<UserCreateDto> result = fallaService.getUsers(fallaId);
     return new ResponseEntity<>(result, HttpStatus.OK);
@@ -122,14 +119,14 @@ public class FallaController {
     @Operation(summary = "Devuelve las solicitudes de usuarios a una falla.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RequestDto.class))}),
-            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class),examples = {
-                    @ExampleObject(name = "Falla no encontrada." , value = "Falla con id: 1 no econtrada.")
+            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class),examples = {
+                    @ExampleObject(name = "Falla no encontrada." , value = "{\"message\":\"Falla con id: 1 no econtrada.\",\"success\":false}")
             })})
     })
     @GetMapping("/requests/{fallaId}")
     public ResponseEntity<?> getRequests(@PathVariable @Valid Long fallaId) {
         if(Objects.isNull(fallaService.readFalla(fallaId))) {
-            return new ResponseEntity<>("Falla con id: " + fallaId + " no encontrada.", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ApiMessageResponse("Falla con id: " + fallaId + " no encontrada.", false), HttpStatus.NOT_FOUND);
         }
         List<RequestDto> result = fallaService.getRequests(fallaId);
         return new ResponseEntity<>(result, HttpStatus.OK);
