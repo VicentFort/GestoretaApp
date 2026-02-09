@@ -14,9 +14,13 @@ public class OpenAPIConfiguration {
 
     @Bean
     public OpenAPI defineOpenApi() {
-        Server server = new Server();
-        server.setUrl("http://localhost:8080");
-        server.setDescription("Gestoreta APP");
+        Server localhost = new Server();
+        localhost.setUrl("http://localhost:8080");
+        localhost.setDescription("Gestoreta APP");
+
+        Server pcLocal = new Server();
+        pcLocal.setUrl("http://192.168.1.21:8080");
+        pcLocal.setDescription("Gestoreta APP Máquina privada");
 
         Contact myContact = new Contact();
         myContact.setName("Vicent Fort Tronch");
@@ -26,6 +30,6 @@ public class OpenAPIConfiguration {
                 .version("2.0")
                 .contact(myContact);
 
-        return new OpenAPI().info(information).servers(List.of(server));
+        return new OpenAPI().info(information).servers(List.of(pcLocal, localhost));
     }
 }
