@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -51,9 +53,16 @@ public class Event {
     @NotNull
     @Column(name = "date", nullable = false)
     private Instant date;
+
     @NotNull
     @Column(name = "title", nullable = false, length = Integer.MAX_VALUE)
     private String title;
+
+    @OneToMany(mappedBy = "event")
+    private Set<Assist> assists = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "events")
+    private Set<Attendant> attendants = new LinkedHashSet<>();
 
 
 }

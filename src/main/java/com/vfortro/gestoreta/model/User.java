@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -41,6 +43,18 @@ public class User {
     @ColumnDefault("false")
     @Column(name = "show_bday", nullable = false)
     private Boolean showBday;
+
+    @OneToMany(mappedBy = "user")
+    private Set<Assist> assists = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "user")
+    private Set<FoodNeed> foodNeeds = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "user")
+    private Set<Request> requests = new LinkedHashSet<>();
+
+    @ManyToMany
+    private Set<Position> positions = new LinkedHashSet<>();
 
 
 }

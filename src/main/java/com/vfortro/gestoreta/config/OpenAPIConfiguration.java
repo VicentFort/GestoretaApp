@@ -22,6 +22,9 @@ public class OpenAPIConfiguration {
         pcLocal.setUrl("http://192.168.1.21:8080");
         pcLocal.setDescription("Gestoreta APP Máquina privada");
 
+        Server publicServer = new Server();
+        publicServer.setUrl("http://37.135.29.68:8080");
+
         Contact myContact = new Contact();
         myContact.setName("Vicent Fort Tronch");
 
@@ -30,6 +33,6 @@ public class OpenAPIConfiguration {
                 .version("2.0")
                 .contact(myContact);
 
-        return new OpenAPI().info(information).servers(List.of(pcLocal, localhost));
+        return new OpenAPI().info(information).servers(List.of(pcLocal,publicServer, localhost));
     }
 }

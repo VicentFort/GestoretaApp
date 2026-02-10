@@ -30,11 +30,18 @@ public class Falla {
     @Column(name = "shield_url", length = Integer.MAX_VALUE)
     private String shieldUrl;
 
+    @NotNull
+    @Column(name = "id_falla", nullable = false)
+    private Long idFalla;
+
     @OneToMany(mappedBy = "falla")
     private Set<EventTag> eventTags = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "falla")
     private Set<Event> events = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "falla")
+    private Set<Position> positions = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "falla")
     private Set<Request> requests = new LinkedHashSet<>();

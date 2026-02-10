@@ -23,7 +23,6 @@ public class EventTag {
     @JoinColumn(name = "falla", nullable = false)
     private Falla falla;
 
-
     @OneToMany(mappedBy = "eventTag")
     private Set<Event> events = new LinkedHashSet<>();
 
