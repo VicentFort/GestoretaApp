@@ -45,6 +45,7 @@ public class RequestService {
 
     @Transactional
     public void updateRequest(RequestDto dto, String email) throws AccessDeniedException {
+        if(!Objects.equals(dto.getIdFalla(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         Request request = requestRepository.findRequestById(dto.getRequestId());
         request.setAproved(dto.getAproved());

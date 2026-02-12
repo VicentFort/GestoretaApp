@@ -60,10 +60,10 @@ public class FallaService {
 
     @Transactional
     public void updateFalla(FallaUpdateDto newFalla, Long idFalla, String email) throws AccessDeniedException {
-        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin acceso.");
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
 
         Falla updatedFalla = fallaRepository.findFallaById(idFalla);
-        if(!Objects.equals(updatedFalla.getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin acceso a fallas ajenas.");
+        if(!Objects.equals(updatedFalla.getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso a esta falla.");
         if(newFalla.getName() != null) updatedFalla.setName(newFalla.getName());
         if(newFalla.getCreationDate() != null) updatedFalla.setCreationDate(newFalla.getCreationDate());
         if(newFalla.getShieldUrl() != null) updatedFalla.setShieldUrl(newFalla.getShieldUrl());
@@ -82,7 +82,7 @@ public class FallaService {
     public List<UserCreateDto> getUsers(Long fallaId, String email) throws AccessDeniedException {
         if(!fallaRepository.existsById(fallaId)) return null;
         Falla falla = fallaRepository.findFallaById(fallaId);
-        if(!Objects.equals(falla.getId(), userService.readUser(email).getUserId())) throw new AccessDeniedException("Sin permiso para esta falla.");
+        if(!Objects.equals(falla.getId(), userService.readUser(email).getUserId())) throw new AccessDeniedException("Sin permiso a esta falla.");
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         Set<User> users = falla.getUsers();
         List<UserCreateDto> usersDto = new ArrayList<>();

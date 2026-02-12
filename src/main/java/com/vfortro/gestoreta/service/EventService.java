@@ -63,9 +63,8 @@ public class EventService {
         if(Objects.isNull(tagService.readEventTag(event.getTagId()))) {
             throw new EntityNotFoundException("La etiqueta a la que se está asociando el evento: " + event.getTitle() + " no existe");
         }
-
-        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("El usuario no tiene permiso para crear eventos.");
-        if(!Objects.equals(event.getFallaId(), userService.readUser(email).getFallaId())) throw new IllegalArgumentException("La falla del usuario no coincide con la del evento.");
+        if(!Objects.equals(event.getFallaId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         return eventConversor.fromEntity2Dto(eventRepository.save(eventConversor.fromDto2Entity(event)));
     }
     @Transactional(readOnly = true)
@@ -88,16 +87,18 @@ public class EventService {
 
     @Transactional
     public void deleteEvent(Long eventId, String email) throws AccessDeniedException {
-        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("El usuario no tiene permiso para eliminar eventos.");
+        Event event = eventRepository.findEventById(eventId);
+        if(!Objects.equals(event.getFalla().getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         eventRepository.deleteById(eventId);
     }
 
     @Transactional
     public EventCreateDto updateEvent(EventUpdateDto newEvent, Long eventId, String email) throws AccessDeniedException {
-        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("El usuario no tiene permiso para editar eventos.");
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         Event updatedEvent = eventRepository.findEventById(eventId);
         if(!Objects.equals(updatedEvent.getFalla().getId(), userService.readUser(email).getFallaId())) {
-           throw new AccessDeniedException("El usuario no tiene permiso para editar eventos de fallas ajenas");
+           throw new AccessDeniedException("Sin permiso para esta falla.");
         }
         if(newEvent.getDone() != null) updatedEvent.setDone(newEvent.getDone());
         if(newEvent.getPublicField() != null) updatedEvent.setPublicField(newEvent.getPublicField());
@@ -115,9 +116,9 @@ public class EventService {
 
     @Transactional(readOnly = true)
     public List<AssistResultDto> getAssists(@Valid Long eventId, String email) throws AccessDeniedException {
-        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("El usuario no tiene acceso");
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         Event event = eventRepository.findEventById(eventId);
-        if(!Objects.equals(event.getFalla().getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("El usuario no tiene acceso a eventos de fallas ajenas");
+        if(!Objects.equals(event.getFalla().getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
         List<AssistResultDto> dtoList = new ArrayList<>();
         for(Assist assist : event.getAssists()) {
             AssistResultDto assistDto = new AssistResultDto();
@@ -130,8 +131,10 @@ public class EventService {
     }
 
     @Transactional(readOnly = true)
-    public List<FoodNeedResultDto> getFoodNeeds (Long eventId) {
+    public List<FoodNeedResultDto> getFoodNeeds (Long eventId, String email) throws AccessDeniedException {
         Event event = eventRepository.findEventById(eventId);
+        if(!Objects.equals(event.getFalla().getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         List<Assist> eventAssists = event.getAssists().stream().toList();
         if(eventAssists.isEmpty()) throw new NullPointerException("El evento con id: " + eventId + " no tiene asistencias.");
         List<FoodNeedResultDto> needsDto = new ArrayList<>();
@@ -153,9 +156,9 @@ public class EventService {
 
     @Transactional(readOnly = true)
     public int getPeopleCount(Long eventId,String email) throws AccessDeniedException {
-        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin acceso");
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         Event event = eventRepository.findEventById(eventId);
-        if(!Objects.equals(event.getFalla().getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin acceso a fallas ajenas.");
+        if(!Objects.equals(event.getFalla().getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso a esta falla.");
         return event.getAssists().size();
     }
 

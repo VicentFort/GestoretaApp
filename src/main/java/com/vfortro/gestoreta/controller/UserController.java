@@ -73,6 +73,9 @@ public class UserController {
             })}),
             @ApiResponse(responseCode = "500", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
                     @ExampleObject(name = "Actualización fallida", value = "{\"message\":\"El usuario con id: 1 no se ha podido actualizar\",\"success\":false}")
+            })}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
             })})
     })
     @PutMapping("/update/{userId}")
@@ -104,6 +107,9 @@ public class UserController {
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = UserCreateDto.class))}),
             @ApiResponse(responseCode = "404", content = {@Content(mediaType = "text/json", schema = @Schema(implementation =  ApiMessageResponse.class), examples = {
                     @ExampleObject(name = "Usuario no encontrado", value = "{\"message\":\"El usuario con id: 1 no existe.\",\"success\":false}")
+            })}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}")
             })})
     })
     @GetMapping("/{userId}")
@@ -131,6 +137,9 @@ public class UserController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
                     @ExampleObject(name = "Necesidad alimentaria creada.", value = "{\"message\":\"Necesidad alimentaria creada con id 1\",\"success\":false}")
+            })}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}")
             })})
     })
     @PostMapping("/addFoodNeed")
@@ -164,6 +173,9 @@ public class UserController {
             })}),
             @ApiResponse(responseCode = "500", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
                     @ExampleObject(name = "Conflicto usuario/falla", value = "{\"message\":\"El usuario con id: 1 ya está en una falla\",\"success\":false}")
+            })}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}")
             })})
     })
     @PostMapping("/createRequest")

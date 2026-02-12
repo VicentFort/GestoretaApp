@@ -73,6 +73,10 @@ public class FallaController {
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
             @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
                     @ExampleObject(name = "Falla no encontrada", value = "{\"message\":\"Falla con id: 1 no encontrada\",\"success\":false}")
+            })}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
+                    @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
             })})
     })
     @PutMapping("/update/{idFalla}")
@@ -140,6 +144,10 @@ public class FallaController {
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json")}),
             @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
                     @ExampleObject(name = "Falla no encontrada." , value = "{\"message\":\"Falla con id: 1 no econtrada.\",\"success\":false}")
+            })}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
+                    @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
             })})
     })
     @GetMapping("/users/{fallaId}")
@@ -169,6 +177,10 @@ public class FallaController {
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RequestDto.class))}),
             @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class),examples = {
                     @ExampleObject(name = "Falla no encontrada." , value = "{\"message\":\"Falla con id: 1 no econtrada.\",\"success\":false}")
+            })}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
+                    @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
             })})
     })
     @GetMapping("/requests/{fallaId}")
@@ -198,6 +210,9 @@ public class FallaController {
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
             @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
                     @ExampleObject(name = "Solicitud no encontrada", value ="{\"message\":\"La solicitud con id: 1 no existe.\",\"success\":false}")
+            })}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
             })})
     })
     @PutMapping("/update")

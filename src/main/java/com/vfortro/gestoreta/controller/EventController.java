@@ -68,6 +68,10 @@ public class EventController {
             @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
                     @ExampleObject(name = "Falla inexistente", value = "{\"message\":\"La falla a la que se está asociando el evento: GRAN EVENTO no existe\",\"success\":false}"),
                     @ExampleObject(name = "Etiqueta de evento inexistente", value = "{\"message\":\"La etiqueta a la que se está asociando el evento: GRAN EVENTO no existe\",\"success\":false}"),
+            })}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
+                    @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
             })})
     })
     @PostMapping("/create")
@@ -79,9 +83,7 @@ public class EventController {
             return new ResponseEntity<>(new ApiMessageResponse("Evento creado.", true), HttpStatus.CREATED);
         } catch(EntityNotFoundException entityEx) {
             return new ResponseEntity<>(new ApiMessageResponse(entityEx.getMessage(), false), HttpStatus.NOT_FOUND);
-        } catch(IllegalArgumentException illEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(illEx.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (AccessDeniedException accEx) {
+        }  catch (AccessDeniedException accEx) {
             return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
         }
     }
@@ -114,12 +116,22 @@ public class EventController {
             @Tag(name = "Eventos")
     })
     @Operation(summary = "Elimina un evento de la base de datos dada su id.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
+            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Evento inexsitente", value = "{\"message\":\"El evento a eliminar no existe.\",\"success\":false}" )
+            })}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
+                    @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
+            })})
+    })
     @DeleteMapping("/delete/{eventId}")
     public ResponseEntity<?> deleteEvent(@PathVariable @Valid Long eventId,
                                          Authentication authentication) {
         String email = authentication.getName();
         if(Objects.isNull(eventService.readEvent(eventId))) {
-            return new ResponseEntity<>(new ApiMessageResponse("El evento a eliminar no existe",false), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ApiMessageResponse("El evento a eliminar no existe.",false), HttpStatus.NOT_FOUND);
         }
         try {
             eventService.deleteEvent(eventId, email);
@@ -142,6 +154,10 @@ public class EventController {
             })}),
             @ApiResponse(responseCode = "500", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
                     @ExampleObject(name = "Error al actualizar", value = "{\"message\":\"El evento con id: 1 no se ha podido actualizar.\",\"success\":false}")
+            })}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation =  ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
+                    @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
             })})
     })
     @PutMapping("/update/{eventId}")
@@ -216,6 +232,10 @@ public class EventController {
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
             @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
                     @ExampleObject(name = "Evento inexistente.", value = "El evento con id: 1 no existe.")
+            })}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation =  ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
+                    @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
             })})
     })
     @GetMapping("/assists/{eventId}")
@@ -241,16 +261,31 @@ public class EventController {
             @Tag(name = "Eventos")
     })
     @Operation(summary = "Obtiene las necesidades alimentarias del evento")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = FoodNeedResultDto.class))}),
+            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Evento no encontrado", value = "{\"message\":\"El evento con id: 1 no existe.\",\"success\":false}"),
+                    @ExampleObject(name = "Evento sin usuarios con necesidades", value = "{\"message\":\"El evento con id: 1 no tiene asistencias.\",\"success\":false}")
+            })}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation =  ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
+                    @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
+            })})
+    })
     @GetMapping("/foodNeed/{eventId}")
-    public ResponseEntity<?> getFoodNeeds(@PathVariable @Valid Long eventId) {
+    public ResponseEntity<?> getFoodNeeds(@PathVariable @Valid Long eventId,
+                                          Authentication authentication) {
+        String email = authentication.getName();
         if(Objects.isNull(eventService.readEvent(eventId))) {
             return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + eventId + " no existe.", false), HttpStatus.NOT_FOUND);
         }
         try {
-            List<FoodNeedResultDto> result = eventService.getFoodNeeds(eventId);
+            List<FoodNeedResultDto> result = eventService.getFoodNeeds(eventId,email);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (NullPointerException nullEx) {
             return new ResponseEntity<>(new ApiMessageResponse(nullEx.getMessage(),false),HttpStatus.NOT_FOUND);
+        } catch (AccessDeniedException accEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
         }
     }
 
@@ -260,6 +295,17 @@ public class EventController {
             @Tag(name = "Eventos")
     })
     @Operation(summary = "Devuelve la cantidad de gente que hay apuntada en un evento")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "text/plain", schema = @Schema(implementation = Integer.class))}),
+            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Evento no encontrado", value = "{\"message\":\"El evento con id: 1 no existe.\",\"success\":false}")
+            })}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
+                    @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
+
+            })})
+    })
     @GetMapping("/peopleCount/{eventId}")
     public ResponseEntity<?> getPeopleCount(@PathVariable @Valid Long eventId,
                                             Authentication authentication) {
