@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.util.*;
 
 @Service
@@ -25,6 +26,9 @@ public class FallaService {
 
     @Autowired
     private UserConversor userConversor;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private RequestConversor requestConversor;
@@ -55,18 +59,16 @@ public class FallaService {
     }
 
     @Transactional
-    public FallaCreateDto updateFalla(FallaUpdateDto newFalla, Long idFalla) {
-        Falla updatedFalla = fallaRepository.findById(idFalla).map(
-                falla -> {
-                    if(newFalla.getName() != null) falla.setName(newFalla.getName());
-                    if(newFalla.getCreationDate() != null) falla.setCreationDate(newFalla.getCreationDate());
-                    if(newFalla.getShieldUrl() != null) falla.setShieldUrl(newFalla.getShieldUrl());
-                    return fallaRepository.save(falla);
-                }).orElseGet(() -> {
-                    return null;
-                });
-        if(updatedFalla == null) return null;
-        return fallaConversor.fromEntity2DTO(updatedFalla);
+    public void updateFalla(FallaUpdateDto newFalla, Long idFalla, String email) throws AccessDeniedException {
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin acceso.");
+
+        Falla updatedFalla = fallaRepository.findFallaById(idFalla);
+        if(!Objects.equals(updatedFalla.getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin acceso a fallas ajenas.");
+        if(newFalla.getName() != null) updatedFalla.setName(newFalla.getName());
+        if(newFalla.getCreationDate() != null) updatedFalla.setCreationDate(newFalla.getCreationDate());
+        if(newFalla.getShieldUrl() != null) updatedFalla.setShieldUrl(newFalla.getShieldUrl());
+        fallaRepository.save(updatedFalla);
+
     }
 
     @Transactional(readOnly = true)
@@ -77,9 +79,11 @@ public class FallaService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserCreateDto> getUsers(Long fallaId) {
+    public List<UserCreateDto> getUsers(Long fallaId, String email) throws AccessDeniedException {
         if(!fallaRepository.existsById(fallaId)) return null;
         Falla falla = fallaRepository.findFallaById(fallaId);
+        if(!Objects.equals(falla.getId(), userService.readUser(email).getUserId())) throw new AccessDeniedException("Sin permiso para esta falla.");
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         Set<User> users = falla.getUsers();
         List<UserCreateDto> usersDto = new ArrayList<>();
         for(User user : users) {
@@ -91,9 +95,11 @@ public class FallaService {
 
 
     @Transactional(readOnly = true)
-    public List<RequestDto> getRequests(Long fallaId) {
+    public List<RequestDto> getRequests(Long fallaId, String email) throws AccessDeniedException {
         if(!fallaRepository.existsById(fallaId)) return null;
         Falla falla = fallaRepository.findFallaById(fallaId);
+        if(!fallaId.equals(userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         Set<Request> reqs = falla.getRequests();
         List<RequestDto> reqsDto = new ArrayList<>();
         for(Request req : reqs) {

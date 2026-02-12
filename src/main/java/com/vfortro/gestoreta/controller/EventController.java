@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Objects;
 
@@ -45,7 +46,9 @@ public class EventController {
             })})
     })
     @GetMapping("/{eventId}")
-    public ResponseEntity<?> getEventById(@PathVariable @Valid Long eventId) {
+    public ResponseEntity<?> getEventById(@PathVariable @Valid Long eventId,
+                                          Authentication authentication) {
+        String email = authentication.getName();
         EventCreateDto eventCreateDto = eventService.readEvent(eventId);
         if(!Objects.nonNull(eventCreateDto)) {
             return new ResponseEntity<>(new ApiMessageResponse("Evento no encontrado", false), HttpStatus.NOT_FOUND);
@@ -68,13 +71,19 @@ public class EventController {
             })})
     })
     @PostMapping("/create")
-    public ResponseEntity<?> postEvent(@Valid @RequestBody EventCreateDto event) {
+    public ResponseEntity<?> postEvent(@Valid @RequestBody EventCreateDto event,
+                                       Authentication auth) {
+        String email = auth.getName();
         try {
-            eventService.createEvent(event);
+            eventService.createEvent(event, email);
+            return new ResponseEntity<>(new ApiMessageResponse("Evento creado.", true), HttpStatus.CREATED);
         } catch(EntityNotFoundException entityEx) {
             return new ResponseEntity<>(new ApiMessageResponse(entityEx.getMessage(), false), HttpStatus.NOT_FOUND);
+        } catch(IllegalArgumentException illEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(illEx.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (AccessDeniedException accEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
         }
-        return new ResponseEntity<>(new ApiMessageResponse("Evento creado.", true), HttpStatus.CREATED);
     }
 
     @Tags({
@@ -106,12 +115,19 @@ public class EventController {
     })
     @Operation(summary = "Elimina un evento de la base de datos dada su id.")
     @DeleteMapping("/delete/{eventId}")
-    public ResponseEntity<?> deleteEvent(@PathVariable @Valid Long eventId) {
+    public ResponseEntity<?> deleteEvent(@PathVariable @Valid Long eventId,
+                                         Authentication authentication) {
+        String email = authentication.getName();
         if(Objects.isNull(eventService.readEvent(eventId))) {
             return new ResponseEntity<>(new ApiMessageResponse("El evento a eliminar no existe",false), HttpStatus.NOT_FOUND);
         }
-        eventService.deleteEvent(eventId);
-        return new ResponseEntity<>(new ApiMessageResponse("Evento eliminado",true), HttpStatus.OK);
+        try {
+            eventService.deleteEvent(eventId, email);
+            return new ResponseEntity<>(new ApiMessageResponse("Evento eliminado",true), HttpStatus.OK);
+        } catch(AccessDeniedException accEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+        }
+
     }
 
     @Tags({
@@ -130,15 +146,22 @@ public class EventController {
     })
     @PutMapping("/update/{eventId}")
     public ResponseEntity<?> updateEvent(@PathVariable @Valid Long eventId,
-                                         @RequestBody @Valid EventUpdateDto newEvent) {
+                                         @RequestBody @Valid EventUpdateDto newEvent,
+                                         Authentication authentication) {
+        String email = authentication.getName();
         if(Objects.isNull(eventService.readEvent(eventId))) {
             return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + eventId + " no existe.", false), HttpStatus.NOT_FOUND);
         }
-        EventCreateDto result = eventService.updateEvent(newEvent, eventId);
-        if(Objects.isNull(result)) {
-            return new ResponseEntity<>(new ApiMessageResponse("El evento con id:" + eventId + " no se ha podido actualizar", false), HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+            EventCreateDto result = eventService.updateEvent(newEvent, eventId, email);
+            if(Objects.isNull(result)) {
+                return new ResponseEntity<>(new ApiMessageResponse("El evento con id:" + eventId + " no se ha podido actualizar", false), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            return new ResponseEntity<>("Evento actualizado.", HttpStatus.OK);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
         }
-        return new ResponseEntity<>("Evento actualizado.", HttpStatus.OK);
+
     }
 
     @Tags({
@@ -196,13 +219,19 @@ public class EventController {
             })})
     })
     @GetMapping("/assists/{eventId}")
-    public ResponseEntity<?> getAssists(@PathVariable @Valid Long eventId) {
+    public ResponseEntity<?> getAssists(@PathVariable @Valid Long eventId,
+                                        Authentication authentication) {
+        String email = authentication.getName();
         EventCreateDto event = eventService.readEvent(eventId);
         if(Objects.isNull(event)) {
             return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + eventId + " no existe.",false), HttpStatus.NOT_FOUND);
         }
-        List<AssistResultDto> result = eventService.getAssists(eventId);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        try {
+            List<AssistResultDto> result = eventService.getAssists(eventId, email);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
+        }
 
     }
 
@@ -238,7 +267,12 @@ public class EventController {
         if(Objects.isNull(eventService.readEvent(eventId))) {
             return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + eventId + " no existe.", false), HttpStatus.NOT_FOUND);
         }
-        int result = eventService.getPeopleCount(eventId);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        try {
+            int result = eventService.getPeopleCount(eventId, email);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (AccessDeniedException accEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+        }
+
     }
 }

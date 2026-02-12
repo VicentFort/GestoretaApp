@@ -15,8 +15,10 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Objects;
 
@@ -75,12 +77,17 @@ public class FallaController {
     })
     @PutMapping("/update/{idFalla}")
     public ResponseEntity<?> updateFalla(@Valid @RequestBody FallaUpdateDto newFalla,
-                                                @PathVariable @Valid Long idFalla) {
-        FallaCreateDto result = fallaService.updateFalla(newFalla, idFalla);
-        if(Objects.isNull(result)) {
-            return new ResponseEntity<>(new ApiMessageResponse("Falla con id: " + idFalla + " no encontrada.", false), HttpStatus.NOT_FOUND);
+                                         @PathVariable @Valid Long idFalla,
+                                         Authentication authentication)
+    {
+        String email = authentication.getName();
+        if(Objects.isNull(fallaService.readFalla(idFalla))) return new ResponseEntity<>(new ApiMessageResponse("La falla con id: " + idFalla + " no existe.", false),HttpStatus.NOT_FOUND);
+        try {
+            fallaService.updateFalla(newFalla, idFalla, email);
+            return new ResponseEntity<>(new ApiMessageResponse("Falla actaulizada.",true), HttpStatus.OK);
+        } catch(AccessDeniedException accEx) {
+            return new ResponseEntity<>( new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
         }
-        return new ResponseEntity<>("Falla actualizada", HttpStatus.OK);
     }
 
     @Tags({
@@ -136,12 +143,19 @@ public class FallaController {
             })})
     })
     @GetMapping("/users/{fallaId}")
-    public ResponseEntity<?> getUsers(@PathVariable @Valid Long fallaId) {
+    public ResponseEntity<?> getUsers(@PathVariable @Valid Long fallaId,
+                                      Authentication authentication) {
+        String email = authentication.getName();
         if(Objects.isNull(fallaService.readFalla(fallaId))) {
             return new ResponseEntity<>(new ApiMessageResponse("Falla con id: " + fallaId + " no encontrada.", false), HttpStatus.NOT_FOUND);
         }
-        List<UserCreateDto> result = fallaService.getUsers(fallaId);
-    return new ResponseEntity<>(result, HttpStatus.OK);
+        try {
+            List<UserCreateDto> result = fallaService.getUsers(fallaId, email);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (AccessDeniedException accEx) {
+        return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(),false), HttpStatus.FORBIDDEN);
+        }
+
     }
 
     @Tags({
@@ -158,12 +172,19 @@ public class FallaController {
             })})
     })
     @GetMapping("/requests/{fallaId}")
-    public ResponseEntity<?> getRequests(@PathVariable @Valid Long fallaId) {
+    public ResponseEntity<?> getRequests(@PathVariable @Valid Long fallaId,
+                                         Authentication authentication) {
+        String email = authentication.getName();
         if(Objects.isNull(fallaService.readFalla(fallaId))) {
             return new ResponseEntity<>(new ApiMessageResponse("Falla con id: " + fallaId + " no encontrada.", false), HttpStatus.NOT_FOUND);
         }
-        List<RequestDto> result = fallaService.getRequests(fallaId);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        try {
+            List<RequestDto> result = fallaService.getRequests(fallaId,email);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (AccessDeniedException accEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(),false),HttpStatus.FORBIDDEN);
+        }
+
     }
 
     @Tags({
@@ -180,12 +201,19 @@ public class FallaController {
             })})
     })
     @PutMapping("/update")
-    public ResponseEntity<?> acceptRequest(@RequestBody @Valid RequestDto dto) {
+    public ResponseEntity<?> acceptRequest(@RequestBody @Valid RequestDto dto,
+                                           Authentication authentication) {
+        String email = authentication.getName();
         if(Objects.isNull(requestService.readRequest(dto.getRequestId()))) {
             return new ResponseEntity<>(new ApiMessageResponse("La solicitud de unión con id: " + dto.getRequestId() + " no existe.", false), HttpStatus.NOT_FOUND);
         }
-        requestService.updateRequest(dto);
-        return new ResponseEntity<>(new ApiMessageResponse("Solicitud con id: "+ dto.getRequestId() +" aceptada",true), HttpStatus.OK);
+        try {
+            requestService.updateRequest(dto, email);
+            return new ResponseEntity<>(new ApiMessageResponse("Solicitud con id: "+ dto.getRequestId() +" aceptada",true), HttpStatus.OK);
+        } catch(AccessDeniedException accEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+        }
+
     }
 
 }

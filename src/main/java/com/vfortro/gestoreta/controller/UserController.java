@@ -17,8 +17,10 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.Objects;
 
 @RestController
@@ -75,15 +77,22 @@ public class UserController {
     })
     @PutMapping("/update/{userId}")
     public ResponseEntity<?> updateUser(@RequestBody UserUpdateDto newUser,
-                                        @PathVariable @Valid Long userId) {
+                                        @PathVariable @Valid Long userId,
+                                        Authentication authentication) {
+        String email = authentication.getName();
         if(Objects.isNull(userService.readUser(userId))) {
             return new ResponseEntity<>(new ApiMessageResponse("El usuario con id: " + userId + " no existe.", false), HttpStatus.NOT_FOUND);
         }
-        UserCreateDto result = userService.updateUser(newUser, userId);
-        if(Objects.isNull(result)) {
-            return new ResponseEntity<>(new ApiMessageResponse("El usuario con id: " + userId +" no se ha podido actualizar", false), HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+            UserCreateDto result = userService.updateUser(newUser, userId, email);
+            if(Objects.isNull(result)) {
+                return new ResponseEntity<>(new ApiMessageResponse("El usuario con id: " + userId +" no se ha podido actualizar", false), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            return new ResponseEntity<>(new ApiMessageResponse("El usuario con id: " + userId + " ha sido actualizado correctamente", true), HttpStatus.OK);
+        } catch (AccessDeniedException accEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(),false), HttpStatus.FORBIDDEN);
         }
-        return new ResponseEntity<>(new ApiMessageResponse("El usuario con id: " + userId + " ha sido actualizado correctamente", true), HttpStatus.OK);
+
     }
 
     @Tags({
@@ -98,12 +107,19 @@ public class UserController {
             })})
     })
     @GetMapping("/{userId}")
-    public ResponseEntity<?> getUserById(@PathVariable @Valid Long userId) {
-        UserCreateDto result = userService.readUser(userId);
-        if(Objects.isNull(result)) {
-            return new ResponseEntity<>(new ApiMessageResponse("El usuario con id: " + userId + " no existe.", false), HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> getUserById(@PathVariable @Valid Long userId,
+                                         Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            UserCreateDto result = userService.readUserSecure(userId, email);
+            if(Objects.isNull(result)) {
+                return new ResponseEntity<>(new ApiMessageResponse("El usuario con id: " + userId + " no existe.", false), HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (AccessDeniedException accEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
         }
-        return new ResponseEntity<>(result, HttpStatus.OK);
+
     }
 
     @Tags({
@@ -118,9 +134,16 @@ public class UserController {
             })})
     })
     @PostMapping("/addFoodNeed")
-    public ResponseEntity<?> addFoodNeed(@RequestBody @Valid FoodNeedCreateDto foodNeed) {
-        FoodNeedCreateDto result = foodNeedService.createFoodNeed(foodNeed);
-        return new ResponseEntity<>(new ApiMessageResponse("Necesidad alimentaria creada con id: " + result.getFoodNeedId(), true), HttpStatus.CREATED);
+    public ResponseEntity<?> addFoodNeed(@RequestBody @Valid FoodNeedCreateDto foodNeed,
+                                         Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            FoodNeedCreateDto result = foodNeedService.createFoodNeed(foodNeed, email);
+            return new ResponseEntity<>(new ApiMessageResponse("Necesidad alimentaria creada con id: " + result.getFoodNeedId(), true), HttpStatus.CREATED);
+        } catch(AccessDeniedException accEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+        }
+
     }
 
     @Tags({
@@ -144,9 +167,11 @@ public class UserController {
             })})
     })
     @PostMapping("/createRequest")
-    public ResponseEntity<?> createRequest(@RequestBody @Valid RequestCreateDto requestDto) {
+    public ResponseEntity<?> createRequest(@RequestBody @Valid RequestCreateDto requestDto,
+                                           Authentication authentication) {
+        String email = authentication.getName();
         try {
-            RequestDto result = requestService.createRequest(requestDto);
+            RequestDto result = requestService.createRequest(requestDto, email);
             return new ResponseEntity<>(new ApiMessageResponse("Solicitud creada con id: " + result.getRequestId(), false), HttpStatus.CREATED);
         } catch(NullPointerException nullEx) {
             return new ResponseEntity<>(new ApiMessageResponse(nullEx.getMessage(), false), HttpStatus.FORBIDDEN);
@@ -154,6 +179,8 @@ public class UserController {
             return new ResponseEntity<>(new ApiMessageResponse(entEx.getMessage(), false), HttpStatus.NOT_FOUND);
         } catch(IllegalAccessException accEx) {
             return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch(AccessDeniedException accEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
         }
     }
 

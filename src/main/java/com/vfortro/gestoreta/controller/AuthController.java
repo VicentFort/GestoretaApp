@@ -2,6 +2,8 @@ package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.LoginRequest;
 import com.vfortro.gestoreta.service.auth.JwtService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +27,10 @@ public class AuthController {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    @Tags({
+            @Tag(name = "Usuarios"),
+            @Tag(name = "Auth")
+    })
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         authenticationManager.authenticate(

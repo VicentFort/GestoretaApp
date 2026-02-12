@@ -3,22 +3,22 @@ package com.vfortro.gestoreta.service;
 import com.vfortro.gestoreta.conversor.AssistConversor;
 import com.vfortro.gestoreta.conversor.EventConversor;
 import com.vfortro.gestoreta.dto.*;
-import com.vfortro.gestoreta.model.Assist;
-import com.vfortro.gestoreta.model.Event;
-import com.vfortro.gestoreta.model.FoodNeed;
-import com.vfortro.gestoreta.model.User;
+import com.vfortro.gestoreta.model.*;
 import com.vfortro.gestoreta.repository.EventRepository;
 import com.vfortro.gestoreta.repository.EventTagRepository;
+import com.vfortro.gestoreta.repository.UserRepository;
 import com.vfortro.gestoreta.specification.EventSpecifications;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -38,6 +38,8 @@ public class EventService {
     private AssistConversor assistConversor;
     @Autowired
     private EventTagRepository eventTagRepository;
+    @Autowired
+    private UserService userService;
 
     @Transactional(readOnly = true)
     public EventCreateDto readEvent(Long eventId) {
@@ -54,14 +56,17 @@ public class EventService {
     }
 
     @Transactional
-    public void createEvent(@Valid EventCreateDto event) throws EntityNotFoundException {
+    public EventCreateDto createEvent(@Valid EventCreateDto event, String email) throws EntityNotFoundException, AccessDeniedException {
         if(Objects.isNull(fallaService.readFalla(event.getFallaId()))) {
             throw new EntityNotFoundException("La falla a la que se está asociando el evento: " + event.getTitle() + " no existe");
         }
         if(Objects.isNull(tagService.readEventTag(event.getTagId()))) {
             throw new EntityNotFoundException("La etiqueta a la que se está asociando el evento: " + event.getTitle() + " no existe");
         }
-        eventRepository.save(eventConversor.fromDto2Entity(event));
+
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("El usuario no tiene permiso para crear eventos.");
+        if(!Objects.equals(event.getFallaId(), userService.readUser(email).getFallaId())) throw new IllegalArgumentException("La falla del usuario no coincide con la del evento.");
+        return eventConversor.fromEntity2Dto(eventRepository.save(eventConversor.fromDto2Entity(event)));
     }
     @Transactional(readOnly = true)
     public List<EventCreateDto> findByFilters(Long fallaId, EventFilter filters) {
@@ -82,35 +87,37 @@ public class EventService {
     }
 
     @Transactional
-    public void deleteEvent(Long eventId) {
+    public void deleteEvent(Long eventId, String email) throws AccessDeniedException {
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("El usuario no tiene permiso para eliminar eventos.");
         eventRepository.deleteById(eventId);
     }
 
     @Transactional
-    public EventCreateDto updateEvent(EventUpdateDto newEvent, Long eventId) {
-        Event updatedEvent = eventRepository.findById(eventId).map(
-                event -> {
-                    if(newEvent.getDone() != null) event.setDone(newEvent.getDone());
-                    if(newEvent.getPublicField() != null) event.setPublicField(newEvent.getPublicField());
-                    if(newEvent.getTitle() != null) event.setTitle(newEvent.getTitle());
-                    if(newEvent.getDescription() != null) event.setDescription(newEvent.getDescription());
-                    if(newEvent.getDate() != null) event.setDate(newEvent.getDate());
-                    if(newEvent.getTagId() != null && eventTagRepository.existsById(newEvent.getTagId())) {
-                        event.setEventTag(eventTagRepository.findTagById(newEvent.getTagId()));
-                    }
-                    if(newEvent.getUpdatePrice() != null && newEvent.getUpdatePrice()) event.setPrice(newEvent.getPrice());
-                    if(newEvent.getUpdateMaxPeople() != null && newEvent.getUpdateMaxPeople()) event.setMaxPeople(newEvent.getMaxPeople());
-                    return eventRepository.saveAndFlush(event);
-                }
-        ).orElse(null);
-        if(updatedEvent == null) return null;
-        return eventConversor.fromEntity2Dto(updatedEvent);
+    public EventCreateDto updateEvent(EventUpdateDto newEvent, Long eventId, String email) throws AccessDeniedException {
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("El usuario no tiene permiso para editar eventos.");
+        Event updatedEvent = eventRepository.findEventById(eventId);
+        if(!Objects.equals(updatedEvent.getFalla().getId(), userService.readUser(email).getFallaId())) {
+           throw new AccessDeniedException("El usuario no tiene permiso para editar eventos de fallas ajenas");
+        }
+        if(newEvent.getDone() != null) updatedEvent.setDone(newEvent.getDone());
+        if(newEvent.getPublicField() != null) updatedEvent.setPublicField(newEvent.getPublicField());
+        if(newEvent.getTitle() != null) updatedEvent.setTitle(newEvent.getTitle());
+        if(newEvent.getDescription() != null) updatedEvent.setDescription(newEvent.getDescription());
+        if(newEvent.getDate() != null) updatedEvent.setDate(newEvent.getDate());
+        if(newEvent.getTagId() != null && eventTagRepository.existsById(newEvent.getTagId())) {
+            updatedEvent.setEventTag(eventTagRepository.findTagById(newEvent.getTagId()));
+        }
+        if(newEvent.getUpdatePrice() != null && newEvent.getUpdatePrice()) updatedEvent.setPrice(newEvent.getPrice());
+        if(newEvent.getUpdateMaxPeople() != null && newEvent.getUpdateMaxPeople()) updatedEvent.setMaxPeople(newEvent.getMaxPeople());
+        return eventConversor.fromEntity2Dto(eventRepository.saveAndFlush(updatedEvent));
 
     }
 
     @Transactional(readOnly = true)
-    public List<AssistResultDto> getAssists(@Valid Long eventId) {
+    public List<AssistResultDto> getAssists(@Valid Long eventId, String email) throws AccessDeniedException {
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("El usuario no tiene acceso");
         Event event = eventRepository.findEventById(eventId);
+        if(!Objects.equals(event.getFalla().getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("El usuario no tiene acceso a eventos de fallas ajenas");
         List<AssistResultDto> dtoList = new ArrayList<>();
         for(Assist assist : event.getAssists()) {
             AssistResultDto assistDto = new AssistResultDto();
@@ -145,8 +152,11 @@ public class EventService {
     }
 
     @Transactional(readOnly = true)
-    public int getPeopleCount(Long eventId) {
+    public int getPeopleCount(Long eventId,String email) throws AccessDeniedException {
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin acceso");
         Event event = eventRepository.findEventById(eventId);
+        if(!Objects.equals(event.getFalla().getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin acceso a fallas ajenas.");
         return event.getAssists().size();
     }
+
 }

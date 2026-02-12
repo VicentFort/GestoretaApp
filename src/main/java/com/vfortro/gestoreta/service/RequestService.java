@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.util.Objects;
 
 @Service
@@ -23,7 +24,7 @@ public class RequestService {
     private RequestConversor requestConversor;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Transactional(readOnly = true)
     public RequestDto readRequest(Long requestId) {
@@ -33,7 +34,8 @@ public class RequestService {
     }
 
     @Transactional
-    public RequestDto createRequest(RequestCreateDto dto) throws NullPointerException, EntityNotFoundException, IllegalAccessException {
+    public RequestDto createRequest(RequestCreateDto dto, String email) throws NullPointerException, EntityNotFoundException, IllegalAccessException, AccessDeniedException {
+        if(!Objects.equals(dto.getIdUser(), userService.readUser(email).getUserId())) throw new AccessDeniedException("Sin permiso.");
         Request toSave = requestConversor.fromDto2Entity(dto);
         if(Objects.nonNull(toSave.getUser().getFalla()))
             throw new IllegalAccessException("El usuario con id:" + dto.getIdUser() + " ya está en una falla.");
@@ -42,13 +44,11 @@ public class RequestService {
     }
 
     @Transactional
-    public void updateRequest(RequestDto dto) {
-        Request req = requestRepository.findById(dto.getRequestId()).map(
-                request -> {
-                    request.setAproved(dto.getAproved());
-                    request.setReply(dto.getReply());
-                    return requestRepository.saveAndFlush(request);
-                }
-        ).orElse(null);
+    public void updateRequest(RequestDto dto, String email) throws AccessDeniedException {
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
+        Request request = requestRepository.findRequestById(dto.getRequestId());
+        request.setAproved(dto.getAproved());
+        request.setReply(dto.getReply());
+        requestRepository.saveAndFlush(request);
     }
 }
