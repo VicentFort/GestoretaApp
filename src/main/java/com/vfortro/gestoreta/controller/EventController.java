@@ -3,13 +3,14 @@ package com.vfortro.gestoreta.controller;
 import com.vfortro.gestoreta.dto.*;
 import com.vfortro.gestoreta.service.AssistService;
 import com.vfortro.gestoreta.service.EventService;
-import io.swagger.annotations.Example;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,11 @@ public class EventController {
     @Autowired
     private AssistService assistService;
 
+    @Tags({
+            @Tag(name = "Filtrado"),
+            @Tag(name = "Eventos")
+    })
+
     @Operation(summary = "Busca un evento en la base de datos dada su Id.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = EventCreateDto.class))}),
@@ -46,7 +52,10 @@ public class EventController {
         return new ResponseEntity<>(eventCreateDto,HttpStatus.OK);
     }
 
-
+    @Tags({
+            @Tag(name = "Creación"),
+            @Tag(name = "Eventos")
+    })
     @Operation(summary = "Crea un evento en la base de datos.", description = "Falla en caso de que exista un evento con la misma Id.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
@@ -67,6 +76,10 @@ public class EventController {
         return new ResponseEntity<>(new ApiMessageResponse("Evento creado.", true), HttpStatus.CREATED);
     }
 
+    @Tags({
+        @Tag(name = "Filtrado"),
+        @Tag(name = "Eventos")
+    })
     @Operation(summary = "Filtra los eventos de una falla")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = EventCreateDto.class))}),
@@ -86,6 +99,10 @@ public class EventController {
 
     }
 
+    @Tags({
+            @Tag(name = "Eliminación"),
+            @Tag(name = "Eventos")
+    })
     @Operation(summary = "Elimina un evento de la base de datos dada su id.")
     @DeleteMapping("/delete/{eventId}")
     public ResponseEntity<?> deleteEvent(@PathVariable @Valid Long eventId) {
@@ -96,6 +113,10 @@ public class EventController {
         return new ResponseEntity<>(new ApiMessageResponse("Evento eliminado",true), HttpStatus.OK);
     }
 
+    @Tags({
+            @Tag(name = "Actualización"),
+            @Tag(name = "Eventos")
+    })
     @Operation(summary = "Actualiza un evento en la base de datos.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
@@ -119,6 +140,10 @@ public class EventController {
         return new ResponseEntity<>("Evento actualizado.", HttpStatus.OK);
     }
 
+    @Tags({
+            @Tag(name = "Creación"),
+            @Tag(name = "Asistencias")
+    })
     @Operation(summary = "Apunta un usuario a un evento")
     @ApiResponses({
             @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
@@ -136,6 +161,10 @@ public class EventController {
         return new ResponseEntity<>(new ApiMessageResponse("Asistencia creada con id: " +  result.getAssistId(), true), HttpStatus.CREATED);
     }
 
+    @Tags({
+            @Tag(name = "Eliminación"),
+            @Tag(name = "Asistencias")
+    })
     @Operation(summary = "Elimina la asistencia de un usuario a un evento.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
@@ -154,6 +183,10 @@ public class EventController {
         return new ResponseEntity<>(new ApiMessageResponse("La asistencia con id: " +assist.getAssistId() + " ha sido eliminada.", true), HttpStatus.OK);
     }
 
+    @Tags({
+            @Tag(name = "Filtrado"),
+            @Tag(name = "Asistencias")
+    })
     @Operation(summary = "Obtiene las asistencias a un evento")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
@@ -171,4 +204,5 @@ public class EventController {
         return new ResponseEntity<>(result, HttpStatus.OK);
 
     }
+
 }

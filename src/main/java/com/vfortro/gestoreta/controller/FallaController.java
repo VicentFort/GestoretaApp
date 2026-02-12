@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,10 @@ public class FallaController {
     @Autowired
     private RequestService requestService;
 
+    @Tags({
+            @Tag(name = "Filtrado"),
+            @Tag(name = "Fallas")
+    })
     @Operation(summary = "Obtiene todas las fallas de la BD.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json",
@@ -40,7 +45,10 @@ public class FallaController {
         return new ResponseEntity<>(body,HttpStatus.OK);
     }
 
-
+    @Tags({
+            @Tag(name = "Creación"),
+            @Tag(name = "Fallas")
+    })
     @Operation(summary = "Crea una falla en la base de datos.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
@@ -54,6 +62,10 @@ public class FallaController {
 
     }
 
+    @Tags({
+            @Tag(name = "Actualización"),
+            @Tag(name = "Fallas")
+    })
     @Operation(summary = "Actualiza una falla de la base de datos.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
@@ -71,6 +83,10 @@ public class FallaController {
         return new ResponseEntity<>("Falla actualizada", HttpStatus.OK);
     }
 
+    @Tags({
+            @Tag(name = "Filtrado"),
+            @Tag(name = "Fallas")
+    })
     @Operation(summary = "Busca una falla en la base de datos dado su nombre.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = FallaCreateDto.class))}),
@@ -87,6 +103,10 @@ public class FallaController {
         return new ResponseEntity<>(falla,HttpStatus.OK);
     }
 
+    @Tags({
+            @Tag(name = "Filtrado"),
+            @Tag(name = "Fallas")
+    })
     @Operation(summary = "Busca una falla en la base de datos dada su id.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = FallaCreateDto.class))}),
@@ -103,6 +123,11 @@ public class FallaController {
         return new ResponseEntity<>(falla, HttpStatus.OK);
     }
 
+    @Tags({
+            @Tag(name = "Filtrado"),
+            @Tag(name = "Usuarios"),
+            @Tag(name = "Fallas")
+    })
     @Operation(summary = "Devuelve los usuarios que pertenencen una falla.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json")}),
@@ -119,6 +144,12 @@ public class FallaController {
     return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @Tags({
+            @Tag(name = "Filtrado"),
+            @Tag(name = "Solicitudes"),
+            @Tag(name = "Usuarios"),
+            @Tag(name = "Fallas")
+    })
     @Operation(summary = "Devuelve las solicitudes de usuarios a una falla.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RequestDto.class))}),
@@ -135,6 +166,12 @@ public class FallaController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @Tags({
+            @Tag(name = "Actualización"),
+            @Tag(name = "Solicitudes"),
+            @Tag(name = "Usuarios"),
+            @Tag(name = "Fallas")
+    })
     @Operation(summary = "Cambia el estado de una solicitud de un usuario")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),

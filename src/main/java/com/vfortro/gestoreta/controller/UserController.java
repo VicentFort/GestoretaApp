@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,10 @@ public class UserController {
     @Autowired
     private RequestService requestService;
 
+    @Tags({
+            @Tag(name = "Creación"),
+            @Tag(name = "Usuarios")
+    })
     @Operation(summary = "Crea un usuario en la base de datos.")
     @ApiResponses({
         @ApiResponse(
@@ -53,6 +59,10 @@ public class UserController {
         return new ResponseEntity<>(new ApiMessageResponse("Usuario con id: " + result.getUserId() + " creado en la base de datos.", true), HttpStatus.CREATED);
     }
 
+    @Tags({
+            @Tag(name = "Actualización"),
+            @Tag(name = "Usuarios")
+    })
     @Operation(summary = "Actualiza un usuario en la base de datos.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
@@ -76,6 +86,10 @@ public class UserController {
         return new ResponseEntity<>(new ApiMessageResponse("El usuario con id: " + userId + " ha sido actualizado correctamente", true), HttpStatus.OK);
     }
 
+    @Tags({
+            @Tag(name = "Filtrado"),
+            @Tag(name = "Usuarios")
+    })
     @Operation(summary = "Busca un usuario en la base de datos dado su nombre.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = UserCreateDto.class))}),
@@ -92,6 +106,11 @@ public class UserController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @Tags({
+            @Tag(name = "Creación"),
+            @Tag(name = "N. Alimentarias"),
+            @Tag(name = "Usuarios")
+    })
     @Operation(summary = "Crea una necesidad alimentaria para un usuario.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
@@ -104,6 +123,12 @@ public class UserController {
         return new ResponseEntity<>(new ApiMessageResponse("Necesidad alimentaria creada con id: " + result.getFoodNeedId(), true), HttpStatus.CREATED);
     }
 
+    @Tags({
+            @Tag(name = "Creación"),
+            @Tag(name = "Solicitudes"),
+            @Tag(name = "Fallas"),
+            @Tag(name = "Usuarios")
+    })
     @Operation(summary = "Crea una solicitud de un usuario a una falla")
     @ApiResponses({
             @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
