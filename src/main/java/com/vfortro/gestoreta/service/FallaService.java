@@ -10,6 +10,7 @@ import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -28,6 +29,7 @@ public class FallaService {
     @Autowired
     private RequestConversor requestConversor;
 
+    @Transactional(readOnly = true)
     public List<FallaCreateDto> getAll() {
         List<Falla> fallas = fallaRepository.findAll();
         List<FallaCreateDto> dtos = new ArrayList<FallaCreateDto>();
@@ -37,6 +39,7 @@ public class FallaService {
         return dtos;
     }
 
+    @Transactional(readOnly = true)
     public FallaCreateDto readFalla(String nombreFalla) {
         Falla falla = fallaRepository.findByName(nombreFalla);
         if(!Objects.nonNull(falla)) {
@@ -45,11 +48,13 @@ public class FallaService {
         return fallaConversor.fromEntity2DTO(falla);
     }
 
+    @Transactional
     public FallaCreateDto createFalla(FallaCreateDto falla) {
         Falla saved = fallaRepository.save(fallaConversor.fromDto2Entity(falla));
         return fallaConversor.fromEntity2DTO(saved);
     }
 
+    @Transactional
     public FallaCreateDto updateFalla(FallaUpdateDto newFalla, Long idFalla) {
         Falla updatedFalla = fallaRepository.findById(idFalla).map(
                 falla -> {
@@ -64,12 +69,14 @@ public class FallaService {
         return fallaConversor.fromEntity2DTO(updatedFalla);
     }
 
+    @Transactional(readOnly = true)
     public FallaCreateDto readFalla(Long fallaId) {
         Falla falla = fallaRepository.findById(fallaId).orElse(null);
         if(falla == null) return null;
         return fallaConversor.fromEntity2DTO(falla);
     }
 
+    @Transactional(readOnly = true)
     public List<UserCreateDto> getUsers(Long fallaId) {
         if(!fallaRepository.existsById(fallaId)) return null;
         Falla falla = fallaRepository.findFallaById(fallaId);
@@ -83,6 +90,7 @@ public class FallaService {
     }
 
 
+    @Transactional(readOnly = true)
     public List<RequestDto> getRequests(Long fallaId) {
         if(!fallaRepository.existsById(fallaId)) return null;
         Falla falla = fallaRepository.findFallaById(fallaId);

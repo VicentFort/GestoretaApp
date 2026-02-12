@@ -44,16 +44,28 @@ public class User {
     @Column(name = "show_bday", nullable = false)
     private Boolean showBday;
 
-    @OneToMany(mappedBy = "user")
+    @NotNull
+    @ColumnDefault("'1234'")
+    @Column(name = "password", nullable = false, length = Integer.MAX_VALUE)
+    private String password;
+
+    @Column(name = "email", length = Integer.MAX_VALUE)
+    private String email;
+
+    @OneToMany
+    @JoinColumn(name = "user_id")
     private Set<Assist> assists = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany
+    @JoinColumn(name = "user_id")
     private Set<FoodNeed> foodNeeds = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany
+    @JoinColumn(name = "user_id")
     private Set<Request> requests = new LinkedHashSet<>();
 
     @ManyToMany
+    @JoinTable(name = "user_positions", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "position_id")})
     private Set<Position> positions = new LinkedHashSet<>();
 
 

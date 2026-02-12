@@ -9,6 +9,7 @@ import com.vfortro.gestoreta.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 
@@ -24,12 +25,14 @@ public class RequestService {
     @Autowired
     private UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public RequestDto readRequest(Long requestId) {
         Request req = requestRepository.findById(requestId).orElse(null);
         if(req == null) return null;
         return requestConversor.fromEntity2Dto(req);
     }
 
+    @Transactional
     public RequestDto createRequest(RequestCreateDto dto) throws NullPointerException, EntityNotFoundException, IllegalAccessException {
         Request toSave = requestConversor.fromDto2Entity(dto);
         if(Objects.nonNull(toSave.getUser().getFalla()))
@@ -38,6 +41,7 @@ public class RequestService {
         return requestConversor.fromEntity2Dto(saved);
     }
 
+    @Transactional
     public void updateRequest(RequestDto dto) {
         Request req = requestRepository.findById(dto.getRequestId()).map(
                 request -> {

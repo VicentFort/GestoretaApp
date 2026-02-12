@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -200,9 +201,44 @@ public class EventController {
         if(Objects.isNull(event)) {
             return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + eventId + " no existe.",false), HttpStatus.NOT_FOUND);
         }
-        List<AssistDto> result = eventService.getAssists(eventId);
+        List<AssistResultDto> result = eventService.getAssists(eventId);
         return new ResponseEntity<>(result, HttpStatus.OK);
 
     }
 
+    @Tags({
+            @Tag(name = "Filtrado"),
+            @Tag(name = "N. Alimentarias"),
+            @Tag(name = "Eventos")
+    })
+    @Operation(summary = "Obtiene las necesidades alimentarias del evento")
+    @GetMapping("/foodNeed/{eventId}")
+    public ResponseEntity<?> getFoodNeeds(@PathVariable @Valid Long eventId) {
+        if(Objects.isNull(eventService.readEvent(eventId))) {
+            return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + eventId + " no existe.", false), HttpStatus.NOT_FOUND);
+        }
+        try {
+            List<FoodNeedResultDto> result = eventService.getFoodNeeds(eventId);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (NullPointerException nullEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(nullEx.getMessage(),false),HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Tags({
+            @Tag(name = "Filtrado"),
+            @Tag(name = "Asistencias"),
+            @Tag(name = "Eventos")
+    })
+    @Operation(summary = "Devuelve la cantidad de gente que hay apuntada en un evento")
+    @GetMapping("/peopleCount/{eventId}")
+    public ResponseEntity<?> getPeopleCount(@PathVariable @Valid Long eventId,
+                                            Authentication authentication) {
+        String email = authentication.getName();
+        if(Objects.isNull(eventService.readEvent(eventId))) {
+            return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + eventId + " no existe.", false), HttpStatus.NOT_FOUND);
+        }
+        int result = eventService.getPeopleCount(eventId);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 }

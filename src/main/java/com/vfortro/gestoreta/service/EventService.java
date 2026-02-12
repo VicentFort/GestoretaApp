@@ -2,12 +2,11 @@ package com.vfortro.gestoreta.service;
 
 import com.vfortro.gestoreta.conversor.AssistConversor;
 import com.vfortro.gestoreta.conversor.EventConversor;
-import com.vfortro.gestoreta.dto.AssistDto;
-import com.vfortro.gestoreta.dto.EventCreateDto;
-import com.vfortro.gestoreta.dto.EventFilter;
-import com.vfortro.gestoreta.dto.EventUpdateDto;
+import com.vfortro.gestoreta.dto.*;
 import com.vfortro.gestoreta.model.Assist;
 import com.vfortro.gestoreta.model.Event;
+import com.vfortro.gestoreta.model.FoodNeed;
+import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.repository.EventRepository;
 import com.vfortro.gestoreta.repository.EventTagRepository;
 import com.vfortro.gestoreta.specification.EventSpecifications;
@@ -15,8 +14,10 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,18 +39,21 @@ public class EventService {
     @Autowired
     private EventTagRepository eventTagRepository;
 
+    @Transactional(readOnly = true)
     public EventCreateDto readEvent(Long eventId) {
         Event event = eventRepository.findById(eventId).orElse(null);
         if(event == null) return null;
         return eventConversor.fromEntity2Dto(event);
     }
 
+    @Transactional(readOnly = true)
     public EventCreateDto readEvent(@NotNull String title) {
         Event event = eventRepository.findEventByTitle(title);
         if(event == null) return null;
         return eventConversor.fromEntity2Dto(event);
     }
 
+    @Transactional
     public void createEvent(@Valid EventCreateDto event) throws EntityNotFoundException {
         if(Objects.isNull(fallaService.readFalla(event.getFallaId()))) {
             throw new EntityNotFoundException("La falla a la que se está asociando el evento: " + event.getTitle() + " no existe");
@@ -59,7 +63,7 @@ public class EventService {
         }
         eventRepository.save(eventConversor.fromDto2Entity(event));
     }
-
+    @Transactional(readOnly = true)
     public List<EventCreateDto> findByFilters(Long fallaId, EventFilter filters) {
         List<Event> eventsFiltered = eventRepository.findAll(
                 Specification.where(EventSpecifications.hasTitle(filters.title()))
@@ -77,10 +81,12 @@ public class EventService {
         return dtos;
     }
 
+    @Transactional
     public void deleteEvent(Long eventId) {
         eventRepository.deleteById(eventId);
     }
 
+    @Transactional
     public EventCreateDto updateEvent(EventUpdateDto newEvent, Long eventId) {
         Event updatedEvent = eventRepository.findById(eventId).map(
                 event -> {
@@ -102,12 +108,45 @@ public class EventService {
 
     }
 
-    public List<AssistDto> getAssists(@Valid Long eventId) {
+    @Transactional(readOnly = true)
+    public List<AssistResultDto> getAssists(@Valid Long eventId) {
         Event event = eventRepository.findEventById(eventId);
-        List<AssistDto> dtoList = new ArrayList<>();
+        List<AssistResultDto> dtoList = new ArrayList<>();
         for(Assist assist : event.getAssists()) {
-            dtoList.add(assistConversor.formEntity2Dto(assist));
+            AssistResultDto assistDto = new AssistResultDto();
+            assistDto.setEventTitle(event.getTitle());
+            assistDto.setUserName(assist.getUser().getName());
+            assistDto.setUserSurname(assist.getUser().getSurname());
+            dtoList.add(assistDto);
         }
         return dtoList;
+    }
+
+    @Transactional(readOnly = true)
+    public List<FoodNeedResultDto> getFoodNeeds (Long eventId) {
+        Event event = eventRepository.findEventById(eventId);
+        List<Assist> eventAssists = event.getAssists().stream().toList();
+        if(eventAssists.isEmpty()) throw new NullPointerException("El evento con id: " + eventId + " no tiene asistencias.");
+        List<FoodNeedResultDto> needsDto = new ArrayList<>();
+        for(Assist assist : eventAssists) {
+            User user = assist.getUser();
+            if(!user.getFoodNeeds().isEmpty()) {
+                for(FoodNeed need : user.getFoodNeeds()) {
+                    FoodNeedResultDto aux = new FoodNeedResultDto();
+                    aux.setFoodNeedDesc(need.getDescription());
+                    aux.setUserName(user.getName());
+                    aux.setUserSurname(user.getSurname());
+                    aux.setEventTitle(event.getTitle());
+                    needsDto.add(aux);
+                }
+            }
+        }
+        return needsDto;
+    }
+
+    @Transactional(readOnly = true)
+    public int getPeopleCount(Long eventId) {
+        Event event = eventRepository.findEventById(eventId);
+        return event.getAssists().size();
     }
 }

@@ -6,6 +6,7 @@ import com.vfortro.gestoreta.model.EventTag;
 import com.vfortro.gestoreta.repository.EventTagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class EventTagService {
@@ -15,6 +16,7 @@ public class EventTagService {
     @Autowired
     private EventTagConversor eventTagConversor;
 
+    @Transactional(readOnly = true)
     public EventTagDto readEventTag(Long tagId) {
         EventTag tag = eventTagRepository.findById(tagId).orElse(null);
         if(tag == null) return null;

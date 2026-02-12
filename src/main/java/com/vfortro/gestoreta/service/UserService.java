@@ -7,6 +7,7 @@ import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
@@ -16,17 +17,19 @@ public class UserService {
     @Autowired
     private UserConversor userConversor;
 
+    @Transactional
     public UserCreateDto createUser(UserCreateDto user) {
         User saved = userRepository.save(userConversor.fromDto2Entity(user));
         return userConversor.fromEntity2Dto(saved);
     }
 
+    @Transactional(readOnly = true)
     public UserCreateDto readUser(Long userId) {
         User user = userRepository.findById(userId).orElse(null);
         if(user == null) return null;
         return userConversor.fromEntity2Dto(user);
     }
-
+    @Transactional
     public UserCreateDto updateUser(UserUpdateDto newUser, Long userId) {
         User updatedUser = userRepository.findById(userId).map(
                 user -> {
