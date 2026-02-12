@@ -1,9 +1,12 @@
 package com.vfortro.gestoreta.service;
 
+import com.vfortro.gestoreta.conversor.AssistConversor;
 import com.vfortro.gestoreta.conversor.EventConversor;
+import com.vfortro.gestoreta.dto.AssistDto;
 import com.vfortro.gestoreta.dto.EventCreateDto;
 import com.vfortro.gestoreta.dto.EventFilter;
 import com.vfortro.gestoreta.dto.EventUpdateDto;
+import com.vfortro.gestoreta.model.Assist;
 import com.vfortro.gestoreta.model.Event;
 import com.vfortro.gestoreta.repository.EventRepository;
 import com.vfortro.gestoreta.repository.EventTagRepository;
@@ -30,6 +33,8 @@ public class EventService {
     private EventTagService tagService;
     @Autowired
     private EventConversor eventConversor;
+    @Autowired
+    private AssistConversor assistConversor;
     @Autowired
     private EventTagRepository eventTagRepository;
 
@@ -95,5 +100,14 @@ public class EventService {
         if(updatedEvent == null) return null;
         return eventConversor.fromEntity2Dto(updatedEvent);
 
+    }
+
+    public List<AssistDto> getAssists(@Valid Long eventId) {
+        Event event = eventRepository.findEventById(eventId);
+        List<AssistDto> dtoList = new ArrayList<>();
+        for(Assist assist : event.getAssists()) {
+            dtoList.add(assistConversor.formEntity2Dto(assist));
+        }
+        return dtoList;
     }
 }

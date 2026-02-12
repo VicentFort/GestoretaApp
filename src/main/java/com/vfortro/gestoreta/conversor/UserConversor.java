@@ -7,6 +7,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 public class UserConversor {
 
@@ -18,7 +20,7 @@ public class UserConversor {
         dto.setUserId(user.getId());
         dto.setName(user.getName());
         dto.setSurname(user.getSurname());
-        dto.setFallaId(user.getFalla().getId());
+        if(Objects.nonNull(user.getFalla())) dto.setFallaId(user.getFalla().getId());
         dto.setUrlPfp(user.getUrlPfp());
         dto.setBirthday(user.getBirthday());
         dto.setShowBday(user.getShowBday());

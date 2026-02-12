@@ -25,9 +25,6 @@ public class Assist {
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 
-    @Column(name = "falla_id")
-    private Integer fallaId;
-
     @Column(name = "paid")
     private Boolean paid;
 

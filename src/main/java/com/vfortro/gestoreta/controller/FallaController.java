@@ -2,6 +2,7 @@ package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.*;
 import com.vfortro.gestoreta.service.FallaService;
+import com.vfortro.gestoreta.service.RequestService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -25,7 +26,9 @@ public class FallaController {
     @Autowired
     private FallaService fallaService;
 
-    @Tag(name = "falla-controller" ,description = "Obtiene todas las fallas de la BD.")
+    @Autowired
+    private RequestService requestService;
+
     @Operation(summary = "Obtiene todas las fallas de la BD.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json",
@@ -130,6 +133,22 @@ public class FallaController {
         }
         List<RequestDto> result = fallaService.getRequests(fallaId);
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Cambia el estado de una solicitud de un usuario")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
+            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Solicitud no encontrada", value ="{\"message\":\"La solicitud con id: 1 no existe.\",\"success\":false}")
+            })})
+    })
+    @PutMapping("/update")
+    public ResponseEntity<?> acceptRequest(@RequestBody @Valid RequestDto dto) {
+        if(Objects.isNull(requestService.readRequest(dto.getRequestId()))) {
+            return new ResponseEntity<>(new ApiMessageResponse("La solicitud de unión con id: " + dto.getRequestId() + " no existe.", false), HttpStatus.NOT_FOUND);
+        }
+        requestService.updateRequest(dto);
+        return new ResponseEntity<>(new ApiMessageResponse("Solicitud con id: "+ dto.getRequestId() +" aceptada",true), HttpStatus.OK);
     }
 
 }

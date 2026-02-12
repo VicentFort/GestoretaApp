@@ -1,9 +1,7 @@
 package com.vfortro.gestoreta.controller;
 
-import com.vfortro.gestoreta.dto.ApiMessageResponse;
-import com.vfortro.gestoreta.dto.EventCreateDto;
-import com.vfortro.gestoreta.dto.EventFilter;
-import com.vfortro.gestoreta.dto.EventUpdateDto;
+import com.vfortro.gestoreta.dto.*;
+import com.vfortro.gestoreta.service.AssistService;
 import com.vfortro.gestoreta.service.EventService;
 import io.swagger.annotations.Example;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,6 +26,9 @@ public class EventController {
 
     @Autowired
     private EventService eventService;
+
+    @Autowired
+    private AssistService assistService;
 
     @Operation(summary = "Busca un evento en la base de datos dada su Id.")
     @ApiResponses({
@@ -116,5 +117,58 @@ public class EventController {
             return new ResponseEntity<>(new ApiMessageResponse("El evento con id:" + eventId + " no se ha podido actualizar", false), HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>("Evento actualizado.", HttpStatus.OK);
+    }
+
+    @Operation(summary = "Apunta un usuario a un evento")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
+            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                @ExampleObject(name = "Asistencia inexistente.", value = "La asistencia del usuario con id: 1 al evento con id: 1 ya existe.")
+            })})
+    })
+    @PostMapping("/join/{eventId}")
+    public ResponseEntity<?> joinEvent(@PathVariable @Valid Long eventId,
+                                       @RequestParam("userId") @Valid Long userId) {
+        if(Objects.nonNull(assistService.readAssist(userId, eventId))) {
+            return new ResponseEntity<>(new ApiMessageResponse("La asistencia del usuario con id: " + userId + " al evento con id: " +eventId + " ya existe.",false), HttpStatus.CONFLICT);
+        }
+        AssistDto result = assistService.createAssist(userId, eventId);
+        return new ResponseEntity<>(new ApiMessageResponse("Asistencia creada con id: " +  result.getAssistId(), true), HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Elimina la asistencia de un usuario a un evento.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
+            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Asistencia inexistente.", value = "La asistencia del usuario con id: 1 al evento con id: 1 no existe.")
+            })})
+    })
+    @DeleteMapping("/leave/{eventId}")
+    public ResponseEntity<?> leaveEvent(@PathVariable @Valid Long eventId,
+                                        @RequestParam("userId") @Valid Long userId) {
+        AssistDto assist = assistService.readAssist(userId, eventId);
+        if(Objects.isNull(assist)) {
+            return new ResponseEntity<>(new ApiMessageResponse("La asistencia del usuario con id: " + userId + " al evento con id: " + eventId + " no existe.", false), HttpStatus.NOT_FOUND);
+        }
+        assistService.deleteAssist(assist.getAssistId());
+        return new ResponseEntity<>(new ApiMessageResponse("La asistencia con id: " +assist.getAssistId() + " ha sido eliminada.", true), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Obtiene las asistencias a un evento")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
+            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Evento inexistente.", value = "El evento con id: 1 no existe.")
+            })})
+    })
+    @GetMapping("/assists/{eventId}")
+    public ResponseEntity<?> getAssists(@PathVariable @Valid Long eventId) {
+        EventCreateDto event = eventService.readEvent(eventId);
+        if(Objects.isNull(event)) {
+            return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + eventId + " no existe.",false), HttpStatus.NOT_FOUND);
+        }
+        List<AssistDto> result = eventService.getAssists(eventId);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+
     }
 }

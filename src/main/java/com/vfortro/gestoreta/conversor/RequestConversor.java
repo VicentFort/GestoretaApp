@@ -1,5 +1,6 @@
 package com.vfortro.gestoreta.conversor;
 
+import com.vfortro.gestoreta.dto.RequestCreateDto;
 import com.vfortro.gestoreta.dto.RequestDto;
 import com.vfortro.gestoreta.model.Request;
 import com.vfortro.gestoreta.repository.FallaRepository;
@@ -29,21 +30,40 @@ public class RequestConversor {
         return dto;
     }
 
-    public Request fromDto2Entity(RequestDto dto) {
+    public Request fromDto2Entity(RequestCreateDto dto) throws NullPointerException, EntityNotFoundException {
+        Request req = new Request();
+
+        if(dto.getIdUser() == null) throw new NullPointerException("La solicitud debe tener una id de usuario.");
+        if(!userRepository.existsById(dto.getIdUser())) throw new EntityNotFoundException("El usuario con id: " + dto.getIdUser() + " no existe.");
+        req.setUser(userRepository.findUserById(dto.getIdUser()));
+
+        if(dto.getIdFalla() == null) throw new NullPointerException("La solicitud debe tener una id de falla.");
+        if(!fallaRepository.existsById(dto.getIdFalla())) throw new EntityNotFoundException("La falla con id: " + dto.getIdFalla() + " no existe.");
+        req.setFalla(fallaRepository.findFallaById(dto.getIdFalla()));
+
+        if(dto.getMessage().isBlank()) throw new NullPointerException("El mensaje debe tener contenido.");
+        req.setMessage(dto.getMessage());
+        return req;
+    }
+
+    public Request fromDto2Entity(RequestDto dto) throws NullPointerException, EntityNotFoundException {
         Request req = new Request();
         req.setId(dto.getRequestId());
 
         if(dto.getIdUser() == null) throw new NullPointerException("La solicitud debe tener una id de usuario.");
-        if(!userRepository.existsById(dto.getIdUser())) throw new EntityNotFoundException("El usuario de la solicitud no existe en la base de datos.");
+        if(!userRepository.existsById(dto.getIdUser())) throw new EntityNotFoundException("El usuario con id: " + dto.getIdUser() + " no existe.");
         req.setUser(userRepository.findUserById(dto.getIdUser()));
 
         if(dto.getIdFalla() == null) throw new NullPointerException("La solicitud debe tener una id de falla.");
-        if(!fallaRepository.existsById(dto.getIdFalla())) throw new EntityNotFoundException("La falla de la solicitud no existe en la base de datos. ");
+        if(!fallaRepository.existsById(dto.getIdFalla())) throw new EntityNotFoundException("La falla con id: " + dto.getIdFalla() + " no existe.");
         req.setFalla(fallaRepository.findFallaById(dto.getIdFalla()));
 
+        if(dto.getMessage().isBlank()) throw new NullPointerException("El mensaje debe tener contenido.");
         req.setMessage(dto.getMessage());
+
         req.setAproved(dto.getAproved());
         req.setReply(dto.getReply());
+
         return req;
     }
 }

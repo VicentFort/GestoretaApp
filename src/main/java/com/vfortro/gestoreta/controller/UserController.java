@@ -1,10 +1,8 @@
 package com.vfortro.gestoreta.controller;
 
-import com.vfortro.gestoreta.dto.ApiMessageResponse;
-import com.vfortro.gestoreta.dto.FoodNeedCreateDto;
-import com.vfortro.gestoreta.dto.UserCreateDto;
-import com.vfortro.gestoreta.dto.UserUpdateDto;
+import com.vfortro.gestoreta.dto.*;
 import com.vfortro.gestoreta.service.FoodNeedService;
+import com.vfortro.gestoreta.service.RequestService;
 import com.vfortro.gestoreta.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +28,9 @@ public class UserController {
 
     @Autowired
     private FoodNeedService foodNeedService;
+
+    @Autowired
+    private RequestService requestService;
 
     @Operation(summary = "Crea un usuario en la base de datos.")
     @ApiResponses({
@@ -55,10 +57,10 @@ public class UserController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
             @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Usuario no encontrado", value = "El usuario con id: 1 no existe.")
+                    @ExampleObject(name = "Usuario no encontrado", value = "{\\\"message\\\":\\\"El usuario con id: 1 no existe.\\\",\\\"success\\\":false}\"")
             })}),
             @ApiResponse(responseCode = "500", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Actualización fallida", value = "El usuario con id: 1 no se ha podido actualizar")
+                    @ExampleObject(name = "Actualización fallida", value = "{\"message\":\"El usuario con id: 1 no se ha podido actualizar\",\"success\":false}")
             })})
     })
     @PutMapping("/update/{userId}")
@@ -78,7 +80,7 @@ public class UserController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = UserCreateDto.class))}),
             @ApiResponse(responseCode = "404", content = {@Content(mediaType = "text/json", schema = @Schema(implementation =  ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Usuario no encontrado", value = "El usuario con id: 1 no existe.")
+                    @ExampleObject(name = "Usuario no encontrado", value = "{\"message\":\"El usuario con id: 1 no existe.\",\"success\":false}")
             })})
     })
     @GetMapping("/{userId}")
@@ -93,13 +95,41 @@ public class UserController {
     @Operation(summary = "Crea una necesidad alimentaria para un usuario.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Necesidad alimentaria creada.", value = "Necesidad alimentaria creada con id 1")
+                    @ExampleObject(name = "Necesidad alimentaria creada.", value = "{\"message\":\"Necesidad alimentaria creada con id 1\",\"success\":false}")
             })})
     })
     @PostMapping("/addFoodNeed")
     public ResponseEntity<?> addFoodNeed(@RequestBody @Valid FoodNeedCreateDto foodNeed) {
         FoodNeedCreateDto result = foodNeedService.createFoodNeed(foodNeed);
         return new ResponseEntity<>(new ApiMessageResponse("Necesidad alimentaria creada con id: " + result.getFoodNeedId(), true), HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Crea una solicitud de un usuario a una falla")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Dto incompleto.", value = "{\"message\":\"La solicitud debe tener una id de usuario.\",\"success\":false}")
+            })}),
+            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Usuario no encontrado", value = "{\"message\":\"El usuario con id: 1 no existe.\",\"success\":false}"),
+                    @ExampleObject(name = "Falla no encontrada", value = "{\"message\":\"La falla con id: 1 no existe.\",\"success\":false}")
+            })}),
+            @ApiResponse(responseCode = "500", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Conflicto usuario/falla", value = "{\"message\":\"El usuario con id: 1 ya está en una falla\",\"success\":false}")
+            })})
+    })
+    @PostMapping("/createRequest")
+    public ResponseEntity<?> createRequest(@RequestBody @Valid RequestCreateDto requestDto) {
+        try {
+            RequestDto result = requestService.createRequest(requestDto);
+            return new ResponseEntity<>(new ApiMessageResponse("Solicitud creada con id: " + result.getRequestId(), false), HttpStatus.CREATED);
+        } catch(NullPointerException nullEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(nullEx.getMessage(), false), HttpStatus.FORBIDDEN);
+        } catch(EntityNotFoundException entEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(entEx.getMessage(), false), HttpStatus.NOT_FOUND);
+        } catch(IllegalAccessException accEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 
