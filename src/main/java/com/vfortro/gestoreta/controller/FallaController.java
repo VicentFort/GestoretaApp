@@ -215,7 +215,7 @@ public class FallaController {
                     @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
             })})
     })
-    @PutMapping("/update")
+    @PutMapping("/updateRequest")
     public ResponseEntity<?> acceptRequest(@RequestBody @Valid RequestDto dto,
                                            Authentication authentication) {
         String email = authentication.getName();

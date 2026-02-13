@@ -138,4 +138,17 @@ public class UserService {
         if(!Objects.equals(user.getUserId(), readUser(email).getUserId())) throw new AccessDeniedException("Sin permiso.");
         return user;
     }
+
+    @Transactional(readOnly = true)
+    public String getFallaName(String email) {
+        User user = userRepository.findUserByEmail(email);
+        if(user.getFalla() == null) return "";
+        return user.getFalla().getName();
+    }
+
+    public Long getFallaId(String email) {
+        User user = userRepository.findUserByEmail(email);
+        if(user.getFalla() == null) return 0L;
+        return user.getFalla().getId();
+    }
 }
