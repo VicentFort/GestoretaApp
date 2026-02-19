@@ -1,6 +1,4 @@
-package com.vfortro.gestoreta.dto;
-
-import lombok.*;
+package com.vfortro.gestoreta.dto.events;
 
 import java.time.Instant;
 

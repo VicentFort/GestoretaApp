@@ -1,11 +1,8 @@
-package com.vfortro.gestoreta.dto;
+package com.vfortro.gestoreta.dto.users;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.annotations.Example;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import tools.jackson.databind.annotation.JsonSerialize;
 
 import java.time.LocalDate;
 @Data

@@ -1,14 +1,13 @@
 package com.vfortro.gestoreta.service;
 
 import com.vfortro.gestoreta.conversor.AssistConversor;
-import com.vfortro.gestoreta.dto.AssistDto;
+import com.vfortro.gestoreta.dto.assists.AssistDto;
 import com.vfortro.gestoreta.model.Assist;
 import com.vfortro.gestoreta.model.Event;
 import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.repository.AssistRepository;
 import com.vfortro.gestoreta.repository.EventRepository;
 import com.vfortro.gestoreta.repository.UserRepository;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

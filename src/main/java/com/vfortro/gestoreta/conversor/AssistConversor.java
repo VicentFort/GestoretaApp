@@ -1,6 +1,6 @@
 package com.vfortro.gestoreta.conversor;
 
-import com.vfortro.gestoreta.dto.AssistDto;
+import com.vfortro.gestoreta.dto.assists.AssistDto;
 import com.vfortro.gestoreta.model.Assist;
 import com.vfortro.gestoreta.repository.EventRepository;
 import com.vfortro.gestoreta.repository.FallaRepository;

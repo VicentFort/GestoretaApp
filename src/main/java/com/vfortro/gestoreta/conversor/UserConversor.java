@@ -1,6 +1,6 @@
 package com.vfortro.gestoreta.conversor;
 
-import com.vfortro.gestoreta.dto.UserCreateDto;
+import com.vfortro.gestoreta.dto.users.UserCreateDto;
 import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import jakarta.persistence.EntityNotFoundException;

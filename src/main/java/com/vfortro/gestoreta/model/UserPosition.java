@@ -13,11 +13,11 @@ public class UserPosition {
     @EmbeddedId
     private UserPositionId id;
 
-    @MapsId("userId")
+    @MapsId("id")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private User users;
 
-    @MapsId("positionId")
+    @MapsId("id")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Position positions;
 

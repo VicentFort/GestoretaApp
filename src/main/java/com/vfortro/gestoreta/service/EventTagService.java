@@ -1,7 +1,7 @@
 package com.vfortro.gestoreta.service;
 
 import com.vfortro.gestoreta.conversor.EventTagConversor;
-import com.vfortro.gestoreta.dto.EventTagDto;
+import com.vfortro.gestoreta.dto.events.EventTagDto;
 import com.vfortro.gestoreta.model.EventTag;
 import com.vfortro.gestoreta.repository.EventTagRepository;
 import org.springframework.beans.factory.annotation.Autowired;

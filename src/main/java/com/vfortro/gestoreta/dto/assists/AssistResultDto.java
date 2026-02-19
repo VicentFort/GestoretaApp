@@ -1,16 +1,13 @@
-package com.vfortro.gestoreta.dto;
+package com.vfortro.gestoreta.dto.assists;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class FoodNeedResultDto {
-    private String foodNeedDesc;
+public class AssistResultDto {
     private String userName;
     private String userSurname;
     private String eventTitle;

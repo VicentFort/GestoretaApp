@@ -1,4 +1,4 @@
-package com.vfortro.gestoreta.dto;
+package com.vfortro.gestoreta.dto.events;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.*;

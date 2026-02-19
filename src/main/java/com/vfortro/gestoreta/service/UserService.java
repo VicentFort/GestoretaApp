@@ -3,9 +3,9 @@ package com.vfortro.gestoreta.service;
 import java.time.LocalDate;
 
 import com.vfortro.gestoreta.conversor.UserConversor;
-import com.vfortro.gestoreta.dto.FallaInfoDto;
-import com.vfortro.gestoreta.dto.UserCreateDto;
-import com.vfortro.gestoreta.dto.UserUpdateDto;
+import com.vfortro.gestoreta.dto.fallas.FallaInfoDto;
+import com.vfortro.gestoreta.dto.users.UserCreateDto;
+import com.vfortro.gestoreta.dto.users.UserUpdateDto;
 import com.vfortro.gestoreta.model.Position;
 import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.repository.UserRepository;

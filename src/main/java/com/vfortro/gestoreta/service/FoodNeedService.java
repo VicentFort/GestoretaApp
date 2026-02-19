@@ -1,7 +1,7 @@
 package com.vfortro.gestoreta.service;
 
 import com.vfortro.gestoreta.conversor.FoodNeedConversor;
-import com.vfortro.gestoreta.dto.FoodNeedCreateDto;
+import com.vfortro.gestoreta.dto.food.FoodNeedCreateDto;
 import com.vfortro.gestoreta.model.FoodNeed;
 import com.vfortro.gestoreta.repository.FoodNeedRepository;
 import org.springframework.beans.factory.annotation.Autowired;

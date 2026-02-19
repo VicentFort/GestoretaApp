@@ -1,6 +1,6 @@
 package com.vfortro.gestoreta.controller;
 
-import com.vfortro.gestoreta.dto.LoginRequest;
+import com.vfortro.gestoreta.dto.users.LoginRequest;
 import com.vfortro.gestoreta.service.auth.JwtService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;

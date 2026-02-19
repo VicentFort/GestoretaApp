@@ -1,6 +1,6 @@
 package com.vfortro.gestoreta.conversor;
 
-import com.vfortro.gestoreta.dto.FoodNeedCreateDto;
+import com.vfortro.gestoreta.dto.food.FoodNeedCreateDto;
 import com.vfortro.gestoreta.model.FoodNeed;
 import com.vfortro.gestoreta.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;

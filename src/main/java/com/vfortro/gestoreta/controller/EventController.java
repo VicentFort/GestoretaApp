@@ -1,6 +1,12 @@
 package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.*;
+import com.vfortro.gestoreta.dto.assists.AssistDto;
+import com.vfortro.gestoreta.dto.assists.AssistResultDto;
+import com.vfortro.gestoreta.dto.events.EventCreateDto;
+import com.vfortro.gestoreta.dto.events.EventFilter;
+import com.vfortro.gestoreta.dto.events.EventUpdateDto;
+import com.vfortro.gestoreta.dto.food.FoodNeedResultDto;
 import com.vfortro.gestoreta.service.AssistService;
 import com.vfortro.gestoreta.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;

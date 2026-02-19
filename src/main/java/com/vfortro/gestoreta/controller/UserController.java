@@ -1,6 +1,12 @@
 package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.*;
+import com.vfortro.gestoreta.dto.fallas.FallaInfoDto;
+import com.vfortro.gestoreta.dto.food.FoodNeedCreateDto;
+import com.vfortro.gestoreta.dto.requests.RequestCreateDto;
+import com.vfortro.gestoreta.dto.requests.RequestDto;
+import com.vfortro.gestoreta.dto.users.UserCreateDto;
+import com.vfortro.gestoreta.dto.users.UserUpdateDto;
 import com.vfortro.gestoreta.service.FoodNeedService;
 import com.vfortro.gestoreta.service.RequestService;
 import com.vfortro.gestoreta.service.UserService;

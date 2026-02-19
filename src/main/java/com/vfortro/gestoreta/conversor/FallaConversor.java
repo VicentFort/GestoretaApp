@@ -1,6 +1,6 @@
 package com.vfortro.gestoreta.conversor;
 
-import com.vfortro.gestoreta.dto.FallaCreateDto;
+import com.vfortro.gestoreta.dto.fallas.FallaCreateDto;
 import com.vfortro.gestoreta.model.Falla;
 import org.springframework.stereotype.Service;
 

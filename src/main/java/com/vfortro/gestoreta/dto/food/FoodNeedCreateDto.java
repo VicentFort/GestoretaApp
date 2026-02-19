@@ -1,4 +1,4 @@
-package com.vfortro.gestoreta.dto;
+package com.vfortro.gestoreta.dto.food;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package com.vfortro.gestoreta.dto;
+package com.vfortro.gestoreta.dto.fallas;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

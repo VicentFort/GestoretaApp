@@ -1,10 +1,9 @@
 package com.vfortro.gestoreta.conversor;
 
-import com.vfortro.gestoreta.dto.RequestCreateDto;
-import com.vfortro.gestoreta.dto.RequestDto;
+import com.vfortro.gestoreta.dto.requests.RequestCreateDto;
+import com.vfortro.gestoreta.dto.requests.RequestDto;
 import com.vfortro.gestoreta.model.Request;
 import com.vfortro.gestoreta.repository.FallaRepository;
-import com.vfortro.gestoreta.repository.RequestRepository;
 import com.vfortro.gestoreta.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;

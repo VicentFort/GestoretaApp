@@ -1,6 +1,11 @@
 package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.*;
+import com.vfortro.gestoreta.dto.fallas.FallaCreateDto;
+import com.vfortro.gestoreta.dto.fallas.FallaInfoDto;
+import com.vfortro.gestoreta.dto.fallas.FallaUpdateDto;
+import com.vfortro.gestoreta.dto.requests.RequestDto;
+import com.vfortro.gestoreta.dto.users.UserCreateDto;
 import com.vfortro.gestoreta.service.FallaService;
 import com.vfortro.gestoreta.service.RequestService;
 import io.swagger.v3.oas.annotations.Operation;

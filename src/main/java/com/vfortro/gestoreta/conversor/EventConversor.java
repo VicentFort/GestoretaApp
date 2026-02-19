@@ -1,6 +1,6 @@
 package com.vfortro.gestoreta.conversor;
 
-import com.vfortro.gestoreta.dto.EventCreateDto;
+import com.vfortro.gestoreta.dto.events.EventCreateDto;
 import com.vfortro.gestoreta.model.Event;
 import com.vfortro.gestoreta.model.EventTag;
 import com.vfortro.gestoreta.model.Falla;

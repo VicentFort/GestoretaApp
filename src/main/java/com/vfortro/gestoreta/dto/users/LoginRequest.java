@@ -1,4 +1,4 @@
-package com.vfortro.gestoreta.dto;
+package com.vfortro.gestoreta.dto.users;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

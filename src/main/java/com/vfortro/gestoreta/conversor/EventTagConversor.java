@@ -1,6 +1,6 @@
 package com.vfortro.gestoreta.conversor;
 
-import com.vfortro.gestoreta.dto.EventTagDto;
+import com.vfortro.gestoreta.dto.events.EventTagDto;
 import com.vfortro.gestoreta.model.EventTag;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import jakarta.persistence.EntityNotFoundException;

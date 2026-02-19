@@ -24,6 +24,9 @@ public class EventTag {
     private Falla falla;
 
     @OneToMany(mappedBy = "eventTag")
+    private Set<AttendantPreference> attendantPreferences = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "eventTag")
     private Set<Event> events = new LinkedHashSet<>();
 
 
