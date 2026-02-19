@@ -72,10 +72,14 @@ public class FallaService {
     }
 
     @Transactional(readOnly = true)
-    public FallaCreateDto readFalla(Long fallaId) {
+    public FallaInfoDto readFalla(Long fallaId) {
         Falla falla = fallaRepository.findById(fallaId).orElse(null);
         if(falla == null) return null;
-        return fallaConversor.fromEntity2DTO(falla);
+        FallaInfoDto result = new FallaInfoDto();
+        result.setCreationDate(falla.getCreationDate());
+        result.setFallaId(fallaId);
+        result.setName(falla.getName());
+        return result;
     }
 
     @Transactional(readOnly = true)

@@ -40,6 +40,8 @@ public class UserConversor {
         user.setUrlPfp(dto.getUrlPfp());
         user.setBirthday(dto.getBirthday());
         user.setShowBday(dto.getShowBday());
+        user.setEmail(dto.getEmail());
+        user.setPassword(dto.getPassword());
         return user;
     }
 }

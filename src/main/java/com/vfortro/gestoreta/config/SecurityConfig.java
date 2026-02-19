@@ -45,6 +45,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // <--- ¡ESTO ES VITAL!
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/user/create").permitAll()
                         .requestMatchers("/auth/**").permitAll() // Permite el login sin token
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()

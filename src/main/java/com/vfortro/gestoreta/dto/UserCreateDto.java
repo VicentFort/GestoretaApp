@@ -20,4 +20,6 @@ public class UserCreateDto {
     private String urlPfp;
     private @NotNull LocalDate birthday;
     private @NotNull Boolean showBday;
+    private @NotNull String email;
+    private @NotNull String password;
 }

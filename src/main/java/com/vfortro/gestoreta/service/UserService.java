@@ -1,13 +1,16 @@
 package com.vfortro.gestoreta.service;
 
+import java.time.LocalDate;
+
 import com.vfortro.gestoreta.conversor.UserConversor;
+import com.vfortro.gestoreta.dto.FallaInfoDto;
 import com.vfortro.gestoreta.dto.UserCreateDto;
 import com.vfortro.gestoreta.dto.UserUpdateDto;
 import com.vfortro.gestoreta.model.Position;
 import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.repository.UserRepository;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,9 +24,12 @@ public class UserService {
 
     @Autowired
     private UserConversor userConversor;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Transactional
     public UserCreateDto createUser(UserCreateDto user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         User saved = userRepository.save(userConversor.fromDto2Entity(user));
         return userConversor.fromEntity2Dto(saved);
     }
@@ -146,9 +152,21 @@ public class UserService {
         return user.getFalla().getName();
     }
 
+    @Transactional(readOnly = true)
     public Long getFallaId(String email) {
         User user = userRepository.findUserByEmail(email);
         if(user.getFalla() == null) return 0L;
         return user.getFalla().getId();
+    }
+
+    @Transactional(readOnly = true)
+    public FallaInfoDto getFallaInfo(String email) {
+        User user =userRepository.findUserByEmail(email);
+        if(user.getFalla() == null) return new FallaInfoDto(0L, "INEXISTENTE", LocalDate.now());
+        FallaInfoDto result = new FallaInfoDto();
+        result.setFallaId(user.getFalla().getIdFalla());
+        result.setName(user.getFalla().getName());
+        result.setCreationDate(user.getFalla().getCreationDate());
+        return result;
     }
 }

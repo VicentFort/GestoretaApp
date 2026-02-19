@@ -197,10 +197,10 @@ public class UserController {
     }
 
     @GetMapping("/falla")
-    public ResponseEntity<?> getFallaName(Authentication authentication) {
+    public ResponseEntity<?> getFallaInfo(Authentication authentication) {
         String email = authentication.getName();
-        String result = userService.getFallaName(email);
-        return new ResponseEntity<>(new ApiMessageResponse(result, true), HttpStatus.OK);
+        FallaInfoDto result = userService.getFallaInfo(email);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping("/fallaId")

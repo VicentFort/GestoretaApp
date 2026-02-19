@@ -127,7 +127,7 @@ public class FallaController {
     })
     @GetMapping("/{fallaId}")
     public ResponseEntity<?> getById(@PathVariable @Valid Long fallaId) {
-        FallaCreateDto falla = fallaService.readFalla(fallaId);
+        FallaInfoDto falla = fallaService.readFalla(fallaId);
         if(Objects.isNull(falla)) {
             return new ResponseEntity<>("Falla con id: " + fallaId + " no encontrada.", HttpStatus.NOT_FOUND);
         }
