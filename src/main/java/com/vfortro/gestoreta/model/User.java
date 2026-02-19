@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -14,7 +15,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", nullable = false)
@@ -53,20 +54,22 @@ public class User {
     private String email;
 
     @OneToMany
-    @JoinColumn(name = "user_id")
     private Set<Assist> assists = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "user")
+    private Set<AttendantPreference> attendantPreferences = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "users")
+    private Set<Attendant> attendants = new LinkedHashSet<>();
+
     @OneToMany
-    @JoinColumn(name = "user_id")
     private Set<FoodNeed> foodNeeds = new LinkedHashSet<>();
 
-    @OneToMany
-    @JoinColumn(name = "user_id")
-    private Set<Request> requests = new LinkedHashSet<>();
-
-    @ManyToMany
-    @JoinTable(name = "user_positions", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "position_id")})
+    @OneToMany(mappedBy = "user")
     private Set<Position> positions = new LinkedHashSet<>();
+
+    @OneToMany
+    private Set<Request> requests = new LinkedHashSet<>();
 
 
 }

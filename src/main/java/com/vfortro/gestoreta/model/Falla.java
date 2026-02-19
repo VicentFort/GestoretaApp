@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -13,7 +14,8 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "fallas")
-public class Falla {
+public class Falla implements Serializable {
+    private static final long serialVersionUID = 6773890139169497651L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "falla_id", nullable = false)

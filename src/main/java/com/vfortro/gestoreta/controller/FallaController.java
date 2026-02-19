@@ -1,6 +1,7 @@
 package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.*;
+import com.vfortro.gestoreta.dto.events.EventTagDto;
 import com.vfortro.gestoreta.dto.fallas.FallaCreateDto;
 import com.vfortro.gestoreta.dto.fallas.FallaInfoDto;
 import com.vfortro.gestoreta.dto.fallas.FallaUpdateDto;
@@ -16,6 +17,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -234,6 +237,42 @@ public class FallaController {
             return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
         }
 
+    }
+    @Tags({
+            @Tag(name = "Eventos"),
+            @Tag(name = "Fallas")
+    })
+    @Operation(summary = "Devuelve información de todas las etiquetas de evento de una falla")
+    @GetMapping("/getEventTags")
+    public ResponseEntity<?> getEventTags(Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            List<EventTagDto> result = fallaService.getEventTags(email);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @Tags({
+            @Tag(name = "Eventos"),
+            @Tag(name = "Fallas")
+    })
+    @Operation(summary = "Crea una etiqueta de evento")
+    @PostMapping("/addEventTag")
+    public ResponseEntity<?> addEventTag(@RequestParam String name,
+                                         Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            fallaService.addEventTag(email, name);
+            return new ResponseEntity<>(new ApiMessageResponse("Nueva etiqueta creada con nombre: " + name, true), HttpStatus.CREATED);
+        } catch (AccessDeniedException accEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+        } catch (EntityNotFoundException notFoundEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(notFoundEx.getMessage(), false), HttpStatus.NOT_FOUND);
+        } catch (EntityExistsException conflictEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(conflictEx.getMessage(), false), HttpStatus.CONFLICT);
+        }
     }
 
 }

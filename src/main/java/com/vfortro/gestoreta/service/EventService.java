@@ -7,10 +7,13 @@ import com.vfortro.gestoreta.dto.events.EventCreateDto;
 import com.vfortro.gestoreta.dto.events.EventFilter;
 import com.vfortro.gestoreta.dto.events.EventUpdateDto;
 import com.vfortro.gestoreta.dto.food.FoodNeedResultDto;
+import com.vfortro.gestoreta.dto.users.UserCreateDto;
 import com.vfortro.gestoreta.model.*;
 import com.vfortro.gestoreta.repository.EventRepository;
 import com.vfortro.gestoreta.repository.EventTagRepository;
+import com.vfortro.gestoreta.repository.FallaRepository;
 import com.vfortro.gestoreta.specification.EventSpecifications;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -41,6 +44,8 @@ public class EventService {
     private EventTagRepository eventTagRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private FallaRepository fallaRepository;
 
     @Transactional(readOnly = true)
     public EventCreateDto readEvent(Long eventId) {
@@ -162,5 +167,6 @@ public class EventService {
         if(!Objects.equals(event.getFalla().getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso a esta falla.");
         return event.getAssists().size();
     }
+
 
 }

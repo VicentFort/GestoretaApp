@@ -10,27 +10,23 @@ import java.io.Serializable;
 @Getter
 @Setter
 @Entity
-@Table(name = "attendants")
-public class Attendant implements Serializable {
-    private static final long serialVersionUID = -4774281986772591204L;
+@Table(name = "attendant_preferences")
+public class AttendantPreference implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private User users;
+    @JoinColumn(name="id_user", nullable = false)
+    private User user;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private Event events;
+    @JoinColumn(name = "event_tag_id", nullable = false)
+    private EventTag eventTag;
 
-    @Column(name = "charge_description", length = Integer.MAX_VALUE)
-    private String chargeDescription;
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private User users1;
 
 
 }

@@ -1,6 +1,7 @@
 package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.*;
+import com.vfortro.gestoreta.dto.events.AttendantPreferenceInfoDto;
 import com.vfortro.gestoreta.dto.fallas.FallaInfoDto;
 import com.vfortro.gestoreta.dto.food.FoodNeedCreateDto;
 import com.vfortro.gestoreta.dto.requests.RequestCreateDto;
@@ -27,6 +28,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -202,6 +204,11 @@ public class UserController {
         }
     }
 
+    @Tags({
+            @Tag(name = "Usuarios"),
+            @Tag(name = "Fallas")
+    })
+    @Operation(summary = "Devuelve información general de la falla del usuario")
     @GetMapping("/falla")
     public ResponseEntity<?> getFallaInfo(Authentication authentication) {
         String email = authentication.getName();
@@ -209,13 +216,55 @@ public class UserController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @GetMapping("/fallaId")
-    public ResponseEntity<?> getFallaId(Authentication authentication) {
+    @Tags({
+            @Tag(name = "Usuarios"),
+            @Tag(name = "Eventos"),
+    })
+    @Operation(summary = "Añade preferencias para ser escogido para eventos con ciertas etiqueta.")
+    @PostMapping("/addAttPrefs")
+    public ResponseEntity<?> addAttPrefs(@RequestParam List<Long> tagIds,
+                                           Authentication authentication) {
         String email = authentication.getName();
-        Long result = userService.getFallaId(email);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        try {
+            userService.createAttPreferences(email, tagIds);
+            return new ResponseEntity<>(new ApiMessageResponse("Preferencias guardadas", true), HttpStatus.OK);
+        } catch (AccessDeniedException accEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+        }
+    }
+    
+    @Tags({
+            @Tag(name = "Usuarios"),
+            @Tag(name = "Eventos"),
+    })
+    @Operation(summary = "Elimina preferencias para ser escogido para eventos con ciertas etiquetas")
+    @DeleteMapping("/removeAttPrefs")
+    public ResponseEntity<?> removeAttPrefs(@RequestParam List<Long> prefIds,
+                                            Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            userService.removeAttPrefs(email, prefIds);
+            return new ResponseEntity<>(new ApiMessageResponse("Eliminadas: " + prefIds.size() + " preferencias.", true), HttpStatus.OK);
+        } catch (AccessDeniedException accEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+        }
     }
 
+    @Tags({
+            @Tag(name = "Usuarios")
+    })
+    @Operation(summary = "Obtiene info de las preferencias de evento del usuario")
+    @GetMapping("/getAttPrefs")
+    public ResponseEntity<?> getAttPrefs(Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            List<AttendantPreferenceInfoDto> result =userService.getAttPrefs(email);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (NullPointerException e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.NOT_FOUND);
+        }
+
+    }
 
 
 }

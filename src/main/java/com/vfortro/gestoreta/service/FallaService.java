@@ -1,17 +1,23 @@
 package com.vfortro.gestoreta.service;
 
+import com.vfortro.gestoreta.conversor.EventTagConversor;
 import com.vfortro.gestoreta.conversor.FallaConversor;
 import com.vfortro.gestoreta.conversor.RequestConversor;
 import com.vfortro.gestoreta.conversor.UserConversor;
+import com.vfortro.gestoreta.dto.events.EventTagDto;
 import com.vfortro.gestoreta.dto.fallas.FallaCreateDto;
 import com.vfortro.gestoreta.dto.fallas.FallaInfoDto;
 import com.vfortro.gestoreta.dto.fallas.FallaUpdateDto;
 import com.vfortro.gestoreta.dto.requests.RequestDto;
 import com.vfortro.gestoreta.dto.users.UserCreateDto;
+import com.vfortro.gestoreta.model.EventTag;
 import com.vfortro.gestoreta.model.Falla;
 import com.vfortro.gestoreta.model.Request;
 import com.vfortro.gestoreta.model.User;
+import com.vfortro.gestoreta.repository.EventTagRepository;
 import com.vfortro.gestoreta.repository.FallaRepository;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +42,10 @@ public class FallaService {
 
     @Autowired
     private RequestConversor requestConversor;
+    @Autowired
+    private EventTagConversor eventTagConversor;
+    @Autowired
+    private EventTagRepository eventTagRepository;
 
     @Transactional(readOnly = true)
     public List<FallaCreateDto> getAll() {
@@ -114,5 +124,30 @@ public class FallaService {
             reqsDto.add(requestConversor.fromEntity2Dto(req));
         }
         return reqsDto;
+    }
+
+    @Transactional
+    public void addEventTag(String email, String name) throws AccessDeniedException, EntityNotFoundException, EntityExistsException {
+        UserCreateDto userDto = userService.readUser(email);
+        if(userDto.getFallaId()== null) throw new EntityNotFoundException("El usuario no tiene una falla asociada.");
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin acceso.");
+        Falla falla = fallaRepository.findFallaById(userDto.getFallaId());
+        if(eventTagRepository.existsEventTagByNameAndFalla(name, falla)) throw new EntityExistsException("Ya existe una etiqueta: " + name + " para la falla: " + falla.getName());
+        EventTag tagSave = new EventTag();
+        tagSave.setFalla(falla);
+        tagSave.setName(name);
+        eventTagRepository.saveAndFlush(tagSave);
+    }
+    @Transactional(readOnly = true)
+    public List<EventTagDto> getEventTags(String email) throws AccessDeniedException {
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
+        UserCreateDto user = userService.readUser(email);
+        Falla falla = fallaRepository.findFallaById(user.getFallaId());
+        List<EventTagDto> tags = new ArrayList<>();
+        for(EventTag tag : falla.getEventTags()) {
+            tags.add(eventTagConversor.fromEntity2Dto(tag));
+        }
+        return tags;
+
     }
 }

@@ -11,4 +11,5 @@ import lombok.*;
 public class EventTagDto {
     private Long id;
     private @NotNull Long fallaId;
+    private String name;
 }

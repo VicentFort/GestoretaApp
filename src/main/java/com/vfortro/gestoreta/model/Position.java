@@ -8,18 +8,17 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.io.Serializable;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "positions")
-public class Position {
+public class Position implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "position_id", nullable = false)
-    private Long positionId;
+    private Long id;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -66,8 +65,10 @@ public class Position {
     @Column(name = "other_access", nullable = false)
     private Boolean otherAccess;
 
-    @ManyToMany(mappedBy = "positions")
-    private Set<User> users = new LinkedHashSet<>();
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
 
 }

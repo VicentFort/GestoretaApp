@@ -16,12 +16,14 @@ public class EventTagConversor {
         EventTagDto dto = new EventTagDto();
         dto.setId(tag.getId());
         dto.setFallaId(tag.getFalla().getId());
+        dto.setName(tag.getName());
         return dto;
     }
 
     public EventTag fromDto2Entity(EventTagDto dto) {
         EventTag tag = new EventTag();
         tag.setId(dto.getId());
+        tag.setName(dto.getName());
         if(dto.getFallaId() == null)
             throw new NullPointerException("Se debe especificar una id para la falla.");
         if(!fallaRepository.existsById(dto.getFallaId()))

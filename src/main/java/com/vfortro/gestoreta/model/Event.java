@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -14,7 +15,8 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "events")
-public class Event {
+public class Event implements Serializable {
+    private static final long serialVersionUID = -621377791437346225L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "event_id", nullable = false)

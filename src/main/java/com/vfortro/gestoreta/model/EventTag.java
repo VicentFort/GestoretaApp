@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -12,7 +13,8 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "event_tags")
-public class EventTag {
+public class EventTag implements Serializable {
+    private static final long serialVersionUID = 4663231415681494303L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "event_tag_id", nullable = false)
@@ -22,6 +24,9 @@ public class EventTag {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "falla", nullable = false)
     private Falla falla;
+
+    @Column(name = "name", length = Integer.MAX_VALUE)
+    private String name;
 
     @OneToMany(mappedBy = "eventTag")
     private Set<AttendantPreference> attendantPreferences = new LinkedHashSet<>();
