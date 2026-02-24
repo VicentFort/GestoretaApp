@@ -53,9 +53,7 @@ public class EventController {
             })})
     })
     @GetMapping("/{eventId}")
-    public ResponseEntity<?> getEventById(@PathVariable @Valid Long eventId,
-                                          Authentication authentication) {
-        String email = authentication.getName();
+    public ResponseEntity<?> getEventById(@PathVariable @Valid Long eventId) {
         EventCreateDto eventCreateDto = eventService.readEvent(eventId);
         if(!Objects.nonNull(eventCreateDto)) {
             return new ResponseEntity<>(new ApiMessageResponse("Evento no encontrado", false), HttpStatus.NOT_FOUND);

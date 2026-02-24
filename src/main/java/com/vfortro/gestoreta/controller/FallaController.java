@@ -1,12 +1,13 @@
 package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.*;
+import com.vfortro.gestoreta.dto.events.EventCreateDto;
 import com.vfortro.gestoreta.dto.events.EventTagDto;
 import com.vfortro.gestoreta.dto.fallas.FallaCreateDto;
-import com.vfortro.gestoreta.dto.fallas.FallaInfoDto;
 import com.vfortro.gestoreta.dto.fallas.FallaUpdateDto;
 import com.vfortro.gestoreta.dto.requests.RequestDto;
 import com.vfortro.gestoreta.dto.users.UserCreateDto;
+import com.vfortro.gestoreta.dto.users.UserInfoDto;
 import com.vfortro.gestoreta.service.FallaService;
 import com.vfortro.gestoreta.service.RequestService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -87,18 +88,18 @@ public class FallaController {
                     @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
             })})
     })
-    @PutMapping("/update/{idFalla}")
+    @PutMapping("/update")
     public ResponseEntity<?> updateFalla(@Valid @RequestBody FallaUpdateDto newFalla,
-                                         @PathVariable @Valid Long idFalla,
                                          Authentication authentication)
     {
         String email = authentication.getName();
-        if(Objects.isNull(fallaService.readFalla(idFalla))) return new ResponseEntity<>(new ApiMessageResponse("La falla con id: " + idFalla + " no existe.", false),HttpStatus.NOT_FOUND);
         try {
-            fallaService.updateFalla(newFalla, idFalla, email);
+            fallaService.updateFalla(newFalla, email);
             return new ResponseEntity<>(new ApiMessageResponse("Falla actaulizada.",true), HttpStatus.OK);
         } catch(AccessDeniedException accEx) {
             return new ResponseEntity<>( new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+        } catch(NullPointerException nullEx) {
+            return new ResponseEntity<>( new ApiMessageResponse(nullEx.getMessage(), false), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -124,26 +125,6 @@ public class FallaController {
 
     @Tags({
             @Tag(name = "Filtrado"),
-            @Tag(name = "Fallas")
-    })
-    @Operation(summary = "Busca una falla en la base de datos dada su id.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = FallaCreateDto.class))}),
-            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Falla no encontrada." , value = "{\"message\":\"Falla con id: 1 no econtrada.\",\"success\":false}")
-            })})
-    })
-    @GetMapping("/{fallaId}")
-    public ResponseEntity<?> getById(@PathVariable @Valid Long fallaId) {
-        FallaInfoDto falla = fallaService.readFalla(fallaId);
-        if(Objects.isNull(falla)) {
-            return new ResponseEntity<>("Falla con id: " + fallaId + " no encontrada.", HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(falla, HttpStatus.OK);
-    }
-
-    @Tags({
-            @Tag(name = "Filtrado"),
             @Tag(name = "Usuarios"),
             @Tag(name = "Fallas")
     })
@@ -158,18 +139,16 @@ public class FallaController {
                     @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
             })})
     })
-    @GetMapping("/users/{fallaId}")
-    public ResponseEntity<?> getUsers(@PathVariable @Valid Long fallaId,
-                                      Authentication authentication) {
+    @GetMapping("/users")
+    public ResponseEntity<?> getUsers(Authentication authentication) {
         String email = authentication.getName();
-        if(Objects.isNull(fallaService.readFalla(fallaId))) {
-            return new ResponseEntity<>(new ApiMessageResponse("Falla con id: " + fallaId + " no encontrada.", false), HttpStatus.NOT_FOUND);
-        }
         try {
-            List<UserCreateDto> result = fallaService.getUsers(fallaId, email);
+            List<UserInfoDto> result = fallaService.getUsers(email);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (AccessDeniedException accEx) {
-        return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(),false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(),false), HttpStatus.FORBIDDEN);
+        } catch (NullPointerException | EntityNotFoundException e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(),false), HttpStatus.NOT_FOUND);
         }
 
     }
@@ -191,15 +170,11 @@ public class FallaController {
                     @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
             })})
     })
-    @GetMapping("/requests/{fallaId}")
-    public ResponseEntity<?> getRequests(@PathVariable @Valid Long fallaId,
-                                         Authentication authentication) {
+    @GetMapping("/requests")
+    public ResponseEntity<?> getRequests(Authentication authentication) {
         String email = authentication.getName();
-        if(Objects.isNull(fallaService.readFalla(fallaId))) {
-            return new ResponseEntity<>(new ApiMessageResponse("Falla con id: " + fallaId + " no encontrada.", false), HttpStatus.NOT_FOUND);
-        }
         try {
-            List<RequestDto> result = fallaService.getRequests(fallaId,email);
+            List<RequestDto> result = fallaService.getRequests(email);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (AccessDeniedException accEx) {
             return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(),false),HttpStatus.FORBIDDEN);
@@ -272,6 +247,28 @@ public class FallaController {
             return new ResponseEntity<>(new ApiMessageResponse(notFoundEx.getMessage(), false), HttpStatus.NOT_FOUND);
         } catch (EntityExistsException conflictEx) {
             return new ResponseEntity<>(new ApiMessageResponse(conflictEx.getMessage(), false), HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping("/events")
+    public ResponseEntity<?> getEvents(Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            List<EventCreateDto> result = fallaService.getEvents(email);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (AccessDeniedException ex) {
+            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @GetMapping("/activeEvents")
+    public ResponseEntity<?> getActiveEvents(Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            List<EventCreateDto> result = fallaService.getActiveEvents(email);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (AccessDeniedException ex) {
+            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
         }
     }
 

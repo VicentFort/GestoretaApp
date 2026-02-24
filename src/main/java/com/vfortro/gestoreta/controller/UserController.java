@@ -1,12 +1,15 @@
 package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.*;
+import com.vfortro.gestoreta.dto.assists.AssistResultDto;
 import com.vfortro.gestoreta.dto.events.AttendantPreferenceInfoDto;
+import com.vfortro.gestoreta.dto.events.EventInfoDto;
 import com.vfortro.gestoreta.dto.fallas.FallaInfoDto;
 import com.vfortro.gestoreta.dto.food.FoodNeedCreateDto;
 import com.vfortro.gestoreta.dto.requests.RequestCreateDto;
 import com.vfortro.gestoreta.dto.requests.RequestDto;
 import com.vfortro.gestoreta.dto.users.UserCreateDto;
+import com.vfortro.gestoreta.dto.users.UserInfoDto;
 import com.vfortro.gestoreta.dto.users.UserUpdateDto;
 import com.vfortro.gestoreta.service.FoodNeedService;
 import com.vfortro.gestoreta.service.RequestService;
@@ -86,22 +89,20 @@ public class UserController {
                     @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
             })})
     })
-    @PutMapping("/update/{userId}")
+    @PutMapping("/update")
     public ResponseEntity<?> updateUser(@RequestBody UserUpdateDto newUser,
-                                        @PathVariable @Valid Long userId,
                                         Authentication authentication) {
         String email = authentication.getName();
-        if(Objects.isNull(userService.readUser(userId))) {
-            return new ResponseEntity<>(new ApiMessageResponse("El usuario con id: " + userId + " no existe.", false), HttpStatus.NOT_FOUND);
-        }
         try {
-            UserCreateDto result = userService.updateUser(newUser, userId, email);
+            UserInfoDto result = userService.updateUser(newUser, email);
             if(Objects.isNull(result)) {
-                return new ResponseEntity<>(new ApiMessageResponse("El usuario con id: " + userId +" no se ha podido actualizar", false), HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(new ApiMessageResponse("El usuario no se ha podido actualizar", false), HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            return new ResponseEntity<>(new ApiMessageResponse("El usuario con id: " + userId + " ha sido actualizado correctamente", true), HttpStatus.OK);
+            return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (AccessDeniedException accEx) {
             return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(),false), HttpStatus.FORBIDDEN);
+        } catch (NullPointerException e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(),false), HttpStatus.NOT_FOUND);
         }
 
     }
@@ -120,14 +121,13 @@ public class UserController {
                     @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}")
             })})
     })
-    @GetMapping("/{userId}")
-    public ResponseEntity<?> getUserById(@PathVariable @Valid Long userId,
-                                         Authentication authentication) {
+    @GetMapping("/getUserInfo")
+    public ResponseEntity<?> getUserById(Authentication authentication) {
         String email = authentication.getName();
         try {
-            UserCreateDto result = userService.readUserSecure(userId, email);
+            UserInfoDto result = userService.readUserSecure(email);
             if(Objects.isNull(result)) {
-                return new ResponseEntity<>(new ApiMessageResponse("El usuario con id: " + userId + " no existe.", false), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(new ApiMessageResponse("El usuario no existe.", false), HttpStatus.NOT_FOUND);
             }
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (AccessDeniedException accEx) {
@@ -264,6 +264,17 @@ public class UserController {
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.NOT_FOUND);
         }
 
+    }
+
+    @GetMapping("/events")
+    public ResponseEntity<?> getUserEvents(Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            List<EventInfoDto> result = userService.getEvents(email);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 

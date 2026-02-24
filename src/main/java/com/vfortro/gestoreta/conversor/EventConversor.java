@@ -1,6 +1,7 @@
 package com.vfortro.gestoreta.conversor;
 
 import com.vfortro.gestoreta.dto.events.EventCreateDto;
+import com.vfortro.gestoreta.dto.events.EventInfoDto;
 import com.vfortro.gestoreta.model.Event;
 import com.vfortro.gestoreta.model.EventTag;
 import com.vfortro.gestoreta.model.Falla;
@@ -30,6 +31,17 @@ public class EventConversor {
         dto.setFallaId(event.getFalla().getId());
         dto.setTagId(event.getEventTag().getId());
         dto.setTitle(event.getTitle());
+        return dto;
+    }
+
+    public EventInfoDto fromEntity2InfoDto(Event event) {
+        EventInfoDto dto = new EventInfoDto();
+        dto.setTitle(event.getTitle());
+        dto.setDescription(event.getDescription());
+        dto.setDate(event.getDate());
+        dto.setPrice(event.getPrice());
+        dto.setDone(event.getDone());
+        dto.setTagName(event.getEventTag().getName());
         return dto;
     }
 

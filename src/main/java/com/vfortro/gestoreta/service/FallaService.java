@@ -1,19 +1,15 @@
 package com.vfortro.gestoreta.service;
 
-import com.vfortro.gestoreta.conversor.EventTagConversor;
-import com.vfortro.gestoreta.conversor.FallaConversor;
-import com.vfortro.gestoreta.conversor.RequestConversor;
-import com.vfortro.gestoreta.conversor.UserConversor;
+import com.vfortro.gestoreta.conversor.*;
+import com.vfortro.gestoreta.dto.events.EventCreateDto;
 import com.vfortro.gestoreta.dto.events.EventTagDto;
 import com.vfortro.gestoreta.dto.fallas.FallaCreateDto;
 import com.vfortro.gestoreta.dto.fallas.FallaInfoDto;
 import com.vfortro.gestoreta.dto.fallas.FallaUpdateDto;
 import com.vfortro.gestoreta.dto.requests.RequestDto;
 import com.vfortro.gestoreta.dto.users.UserCreateDto;
-import com.vfortro.gestoreta.model.EventTag;
-import com.vfortro.gestoreta.model.Falla;
-import com.vfortro.gestoreta.model.Request;
-import com.vfortro.gestoreta.model.User;
+import com.vfortro.gestoreta.dto.users.UserInfoDto;
+import com.vfortro.gestoreta.model.*;
 import com.vfortro.gestoreta.repository.EventTagRepository;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import jakarta.persistence.EntityExistsException;
@@ -46,6 +42,8 @@ public class FallaService {
     private EventTagConversor eventTagConversor;
     @Autowired
     private EventTagRepository eventTagRepository;
+    @Autowired
+    private EventConversor eventConversor;
 
     @Transactional(readOnly = true)
     public List<FallaCreateDto> getAll() {
@@ -73,10 +71,11 @@ public class FallaService {
     }
 
     @Transactional
-    public void updateFalla(FallaUpdateDto newFalla, Long idFalla, String email) throws AccessDeniedException {
+    public void updateFalla(FallaUpdateDto newFalla, String email) throws AccessDeniedException, NullPointerException {
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
-
-        Falla updatedFalla = fallaRepository.findFallaById(idFalla);
+        UserCreateDto user = userService.readUser(email);
+        if(user.getFallaId() == null) throw new NullPointerException("El usuario no tiene falla asignada.");
+        Falla updatedFalla = fallaRepository.findFallaById(user.getFallaId());
         if(!Objects.equals(updatedFalla.getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso a esta falla.");
         if(newFalla.getName() != null) updatedFalla.setName(newFalla.getName());
         if(newFalla.getCreationDate() != null) updatedFalla.setCreationDate(newFalla.getCreationDate());
@@ -97,15 +96,17 @@ public class FallaService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserCreateDto> getUsers(Long fallaId, String email) throws AccessDeniedException {
-        if(!fallaRepository.existsById(fallaId)) return null;
-        Falla falla = fallaRepository.findFallaById(fallaId);
+    public List<UserInfoDto> getUsers(String email) throws AccessDeniedException, NullPointerException, EntityNotFoundException {
+        UserCreateDto dto = userService.readUser(email);
+        if(dto.getFallaId() == null) throw new NullPointerException("El usuario no tiene una falla asiganda.");
+        if(!fallaRepository.existsById(dto.getFallaId())) throw new EntityNotFoundException("Falla con id: " + dto.getFallaId() + " no encontrada.");
+        Falla falla = fallaRepository.findFallaById(dto.getFallaId());
         if(!Objects.equals(falla.getId(), userService.readUser(email).getUserId())) throw new AccessDeniedException("Sin permiso a esta falla.");
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         Set<User> users = falla.getUsers();
-        List<UserCreateDto> usersDto = new ArrayList<>();
+        List<UserInfoDto> usersDto = new ArrayList<>();
         for(User user : users) {
-            usersDto.add(userConversor.fromEntity2Dto(user));
+            usersDto.add(userConversor.fromEntity2InfoDto(user));
         }
         return usersDto;
 
@@ -113,14 +114,15 @@ public class FallaService {
 
 
     @Transactional(readOnly = true)
-    public List<RequestDto> getRequests(Long fallaId, String email) throws AccessDeniedException {
-        if(!fallaRepository.existsById(fallaId)) return null;
-        Falla falla = fallaRepository.findFallaById(fallaId);
-        if(!fallaId.equals(userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
+    public List<RequestDto> getRequests(String email) throws AccessDeniedException, EntityNotFoundException, NullPointerException {
+        UserCreateDto dto = userService.readUser(email);
+        if(dto.getFallaId() == null) throw new NullPointerException("El usuario no tiene falla asignada");
+        if(!fallaRepository.existsById(dto.getFallaId())) throw new EntityNotFoundException("Falla con id: " + dto.getFallaId() + " no encontrada.");
+        Falla falla = fallaRepository.findFallaById(dto.getFallaId());
+        if(!dto.getFallaId().equals(userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
-        Set<Request> reqs = falla.getRequests();
         List<RequestDto> reqsDto = new ArrayList<>();
-        for(Request req : reqs) {
+        for(Request req : falla.getRequests()) {
             reqsDto.add(requestConversor.fromEntity2Dto(req));
         }
         return reqsDto;
@@ -149,5 +151,29 @@ public class FallaService {
         }
         return tags;
 
+    }
+
+    public List<EventCreateDto> getEvents(String email) throws AccessDeniedException{
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin acceso.");
+        UserCreateDto dto = userService.readUser(email);
+        Falla falla = fallaRepository.findFallaById(dto.getFallaId());
+        List<EventCreateDto> result = new ArrayList<>();
+        for(Event event : falla.getEvents()) {
+            result.add(eventConversor.fromEntity2Dto(event));
+        }
+        return result;
+
+    }
+
+    public List<EventCreateDto> getActiveEvents(String email) throws AccessDeniedException {
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin acceso.");
+        Falla falla = fallaRepository.findFallaById(userService.readUser(email).getFallaId());
+        List<EventCreateDto> result = new ArrayList<>();
+        for(Event event : falla.getEvents()) {
+            if(!event.getDone()) {
+                result.add(eventConversor.fromEntity2Dto(event));
+            }
+        }
+        return result;
     }
 }

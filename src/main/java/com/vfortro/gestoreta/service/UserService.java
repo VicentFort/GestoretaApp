@@ -2,15 +2,15 @@ package com.vfortro.gestoreta.service;
 
 import java.time.LocalDate;
 
+import com.vfortro.gestoreta.conversor.EventConversor;
 import com.vfortro.gestoreta.conversor.UserConversor;
 import com.vfortro.gestoreta.dto.events.AttendantPreferenceInfoDto;
+import com.vfortro.gestoreta.dto.events.EventInfoDto;
 import com.vfortro.gestoreta.dto.fallas.FallaInfoDto;
 import com.vfortro.gestoreta.dto.users.UserCreateDto;
+import com.vfortro.gestoreta.dto.users.UserInfoDto;
 import com.vfortro.gestoreta.dto.users.UserUpdateDto;
-import com.vfortro.gestoreta.model.AttendantPreference;
-import com.vfortro.gestoreta.model.EventTag;
-import com.vfortro.gestoreta.model.Position;
-import com.vfortro.gestoreta.model.User;
+import com.vfortro.gestoreta.model.*;
 import com.vfortro.gestoreta.repository.AttendandPreferenceRepository;
 import com.vfortro.gestoreta.repository.EventTagRepository;
 import com.vfortro.gestoreta.repository.UserRepository;
@@ -37,6 +37,9 @@ public class UserService {
     private EventTagRepository eventTagRepository;
     @Autowired
     private AttendandPreferenceRepository attendandPreferenceRepository;
+    @Autowired
+    private EventConversor eventConversor;
+
 
     @Transactional
     public UserCreateDto createUser(UserCreateDto user) {
@@ -60,22 +63,20 @@ public class UserService {
     }
 
     @Transactional
-    public UserCreateDto updateUser(UserUpdateDto newUser, Long userId, String email) throws AccessDeniedException {
-        if(email != userRepository.findUserById(userId).getEmail()) throw new AccessDeniedException("Sin permiso.");
-        User updatedUser = userRepository.findById(userId).map(
-                user -> {
-                    if(newUser.getName() != null) user.setName(newUser.getName());
-                    if(newUser.getSurname() != null) user.setSurname(newUser.getSurname());
-                    if(newUser.getBirthday() != null) user.setBirthday(newUser.getBirthday());
-                    if(newUser.getShowBday() != null) user.setShowBday(newUser.getShowBday());
-                    if(newUser.getUrlPfp() != null) user.setUrlPfp(newUser.getUrlPfp());
-                    return userRepository.saveAndFlush(user);
-                }
-        ).orElse(null);
-        if (updatedUser != null) {
-            return userConversor.fromEntity2Dto(updatedUser);
-        }
-        return null;
+    public UserInfoDto updateUser(UserUpdateDto newUser, String email) throws AccessDeniedException, NullPointerException {
+        if(!userRepository.existsByEmail(email)) throw new NullPointerException("El usuario no existe.");
+        if(!Objects.equals(email, userRepository.findUserByEmail(email).getEmail())) throw new AccessDeniedException("Sin permiso.");
+        User updatedUser = userRepository.findUserByEmail(email);
+        System.out.println(newUser.getName());
+        if(newUser.getName() != null) updatedUser.setName(newUser.getName());
+        if(newUser.getSurname() != null) updatedUser.setSurname(newUser.getSurname());
+        if(newUser.getBirthday() != null) updatedUser.setBirthday(newUser.getBirthday());
+        if(newUser.getShowBday() != null) updatedUser.setShowBday(newUser.getShowBday());
+        if(newUser.getUrlPfp() != null) updatedUser.setUrlPfp(newUser.getUrlPfp());
+        User saved = userRepository.saveAndFlush(updatedUser);
+        System.out.println(saved.getName());
+        return userConversor.fromEntity2InfoDto(saved);
+
     }
 
     @Transactional(readOnly = true)
@@ -150,25 +151,17 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserCreateDto readUserSecure( Long userId, String email) throws AccessDeniedException {
-        UserCreateDto user = readUser(userId);
+    public UserInfoDto readUserSecure( String email) throws AccessDeniedException {
+        UserCreateDto user = readUser(email);
         if(user == null) return null;
         if(!Objects.equals(user.getUserId(), readUser(email).getUserId())) throw new AccessDeniedException("Sin permiso.");
-        return user;
-    }
-
-    @Transactional(readOnly = true)
-    public String getFallaName(String email) {
-        User user = userRepository.findUserByEmail(email);
-        if(user.getFalla() == null) return "";
-        return user.getFalla().getName();
-    }
-
-    @Transactional(readOnly = true)
-    public Long getFallaId(String email) {
-        User user = userRepository.findUserByEmail(email);
-        if(user.getFalla() == null) return 0L;
-        return user.getFalla().getId();
+        User userEnt = userRepository.findUserByEmail(email);
+        List<Long> eventIds = new ArrayList<>(); List<String> eventTitles = new ArrayList<>();
+        for(Assist assist : userEnt.getAssists()) {
+            eventIds.add(assist.getEvent().getId());
+            eventTitles.add(assist.getEvent().getTitle());
+        }
+        return userConversor.fromEntity2InfoDto(userEnt);
     }
 
     @Transactional(readOnly = true)
@@ -197,6 +190,7 @@ public class UserService {
         attendandPreferenceRepository.saveAllAndFlush(prefs);
     }
 
+    @Transactional
     public void removeAttPrefs(String email, List<Long> prefIds) throws AccessDeniedException {
         User user = userRepository.findUserByEmail(email);
         List<AttendantPreference> prefs = attendandPreferenceRepository.getAllByUser(user);
@@ -208,6 +202,7 @@ public class UserService {
         attendandPreferenceRepository.deleteAllById(prefIds);
     }
 
+    @Transactional(readOnly = true)
     public List<AttendantPreferenceInfoDto> getAttPrefs(String email) throws NullPointerException {
         List<AttendantPreferenceInfoDto> prefs = new ArrayList<>();
         User user = userRepository.findUserByEmail(email);
@@ -223,5 +218,14 @@ public class UserService {
             prefs.add(dto);
         }
         return prefs;
+    }
+
+    public List<EventInfoDto> getEvents(String email) {
+        User user = userRepository.findUserByEmail(email);
+        List<EventInfoDto> events = new ArrayList<>();
+        for(Assist assist : user.getAssists()) {
+            events.add(eventConversor.fromEntity2InfoDto(assist.getEvent()));
+        }
+        return events;
     }
 }

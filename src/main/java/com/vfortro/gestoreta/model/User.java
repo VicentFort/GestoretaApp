@@ -5,11 +5,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
@@ -53,7 +55,7 @@ public class User implements Serializable {
     @Column(name = "email", length = Integer.MAX_VALUE)
     private String email;
 
-    @OneToMany
+    @OneToMany(mappedBy = "user")
     private Set<Assist> assists = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
@@ -70,6 +72,5 @@ public class User implements Serializable {
 
     @OneToMany
     private Set<Request> requests = new LinkedHashSet<>();
-
 
 }
