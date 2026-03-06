@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-public class EventTagDto {
+public class EventTagInfoDto {
     private Long id;
     private @NotNull Long fallaId;
     private String name;

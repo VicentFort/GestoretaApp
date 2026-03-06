@@ -2,9 +2,11 @@ package com.vfortro.gestoreta.service;
 
 import com.vfortro.gestoreta.conversor.*;
 import com.vfortro.gestoreta.dto.events.EventCreateDto;
-import com.vfortro.gestoreta.dto.events.EventTagDto;
+import com.vfortro.gestoreta.dto.events.EventInfoDto;
+import com.vfortro.gestoreta.dto.events.EventTagInfoDto;
+import com.vfortro.gestoreta.dto.fallas.FallaAdminInfo;
 import com.vfortro.gestoreta.dto.fallas.FallaCreateDto;
-import com.vfortro.gestoreta.dto.fallas.FallaInfoDto;
+import com.vfortro.gestoreta.dto.fallas.FallaUserInfoDto;
 import com.vfortro.gestoreta.dto.fallas.FallaUpdateDto;
 import com.vfortro.gestoreta.dto.requests.RequestDto;
 import com.vfortro.gestoreta.dto.users.UserCreateDto;
@@ -85,10 +87,10 @@ public class FallaService {
     }
 
     @Transactional(readOnly = true)
-    public FallaInfoDto readFalla(Long fallaId) {
+    public FallaUserInfoDto readFalla(Long fallaId) {
         Falla falla = fallaRepository.findById(fallaId).orElse(null);
         if(falla == null) return null;
-        FallaInfoDto result = new FallaInfoDto();
+        FallaUserInfoDto result = new FallaUserInfoDto();
         result.setCreationDate(falla.getCreationDate());
         result.setFallaId(fallaId);
         result.setName(falla.getName());
@@ -141,11 +143,11 @@ public class FallaService {
         eventTagRepository.saveAndFlush(tagSave);
     }
     @Transactional(readOnly = true)
-    public List<EventTagDto> getEventTags(String email) throws AccessDeniedException {
+    public List<EventTagInfoDto> getEventTags(String email) throws AccessDeniedException {
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         UserCreateDto user = userService.readUser(email);
         Falla falla = fallaRepository.findFallaById(user.getFallaId());
-        List<EventTagDto> tags = new ArrayList<>();
+        List<EventTagInfoDto> tags = new ArrayList<>();
         for(EventTag tag : falla.getEventTags()) {
             tags.add(eventTagConversor.fromEntity2Dto(tag));
         }
@@ -153,13 +155,13 @@ public class FallaService {
 
     }
 
-    public List<EventCreateDto> getEvents(String email) throws AccessDeniedException{
+    public List<EventInfoDto> getEvents(String email) throws AccessDeniedException{
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin acceso.");
         UserCreateDto dto = userService.readUser(email);
         Falla falla = fallaRepository.findFallaById(dto.getFallaId());
-        List<EventCreateDto> result = new ArrayList<>();
+        List<EventInfoDto> result = new ArrayList<>();
         for(Event event : falla.getEvents()) {
-            result.add(eventConversor.fromEntity2Dto(event));
+            result.add(eventConversor.fromEntity2InfoDto(event));
         }
         return result;
 
@@ -175,5 +177,24 @@ public class FallaService {
             }
         }
         return result;
+    }
+
+    public FallaAdminInfo getFallaInfo(String email) throws AccessDeniedException {
+        UserCreateDto infoDto = userService.readUser(email);
+        if(infoDto.getFallaId()==null) throw new EntityNotFoundException("No existe la falla del usuario.");
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
+        Falla falla = fallaRepository.findFallaById(infoDto.getFallaId());
+        return fallaConversor.fromEntity2AdminInfo(falla);
+
+    }
+
+    public void editAdminAccess(Long userId, Boolean access, String email) throws AccessDeniedException {
+        if(!userService.checkAdminAccess(email) || !userService.checkOtherAccess(email)) throw new AccessDeniedException("Sense permissos.");
+        userService.editAdminAccess(userId, access);
+    }
+
+    public void deleteEventTag(Long tagId, String email) throws AccessDeniedException {
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
+        eventTagRepository.deleteById(tagId);
     }
 }

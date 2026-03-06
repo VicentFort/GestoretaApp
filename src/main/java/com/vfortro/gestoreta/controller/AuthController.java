@@ -1,10 +1,12 @@
 package com.vfortro.gestoreta.controller;
 
+import com.vfortro.gestoreta.dto.ApiMessageResponse;
 import com.vfortro.gestoreta.dto.users.LoginRequest;
 import com.vfortro.gestoreta.service.auth.JwtService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -33,13 +35,18 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(),request.password())
-        );
-        final UserDetails user = userDetailsService.loadUserByUsername(request.email());
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.email(),request.password())
+            );
+            final UserDetails user = userDetailsService.loadUserByUsername(request.email());
 
-        String token = jwtService.generateToken(user);
+            String token = jwtService.generateToken(user);
 
-        return ResponseEntity.ok(token);
+            return ResponseEntity.ok(token);
+        } catch(Exception e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 }

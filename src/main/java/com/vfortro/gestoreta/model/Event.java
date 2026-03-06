@@ -5,9 +5,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -16,7 +20,7 @@ import java.util.Set;
 @Entity
 @Table(name = "events")
 public class Event implements Serializable {
-    private static final long serialVersionUID = -621377791437346225L;
+    private static final long serialVersionUID = 3954095671962870245L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "event_id", nullable = false)
@@ -29,6 +33,7 @@ public class Event implements Serializable {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "event_tag", nullable = false)
     private EventTag eventTag;
 
@@ -54,17 +59,28 @@ public class Event implements Serializable {
 
     @NotNull
     @Column(name = "date", nullable = false)
-    private Instant date;
+    private LocalDate date;
 
     @NotNull
     @Column(name = "title", nullable = false, length = Integer.MAX_VALUE)
     private String title;
 
+
+    @Column(name = "start_hour")
+    private LocalTime startHour;
+
+    @Column(name = "end_hour")
+    private LocalTime endHour;
+
     @OneToMany(mappedBy = "event")
     private Set<Assist> assists = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "events")
+    @OneToMany(mappedBy = "event")
     private Set<Attendant> attendants = new LinkedHashSet<>();
+
+    @NotNull
+    @Column(name="created_by", nullable = false)
+    private String creatdBy;
 
 
 }

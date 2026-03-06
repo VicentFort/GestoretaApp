@@ -1,6 +1,6 @@
 package com.vfortro.gestoreta.conversor;
 
-import com.vfortro.gestoreta.dto.events.EventTagDto;
+import com.vfortro.gestoreta.dto.events.EventTagInfoDto;
 import com.vfortro.gestoreta.model.EventTag;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -12,15 +12,16 @@ public class EventTagConversor {
 
     @Autowired
     private FallaRepository fallaRepository;
-    public EventTagDto fromEntity2Dto(EventTag tag) {
-        EventTagDto dto = new EventTagDto();
+    public EventTagInfoDto fromEntity2Dto(EventTag tag) {
+        EventTagInfoDto dto = new EventTagInfoDto();
         dto.setId(tag.getId());
         dto.setFallaId(tag.getFalla().getId());
         dto.setName(tag.getName());
         return dto;
     }
 
-    public EventTag fromDto2Entity(EventTagDto dto) {
+
+    public EventTag fromDto2Entity(EventTagInfoDto dto) {
         EventTag tag = new EventTag();
         tag.setId(dto.getId());
         tag.setName(dto.getName());

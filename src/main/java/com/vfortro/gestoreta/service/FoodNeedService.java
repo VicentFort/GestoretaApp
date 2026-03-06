@@ -1,9 +1,15 @@
 package com.vfortro.gestoreta.service;
 
 import com.vfortro.gestoreta.conversor.FoodNeedConversor;
+import com.vfortro.gestoreta.conversor.UserConversor;
 import com.vfortro.gestoreta.dto.food.FoodNeedCreateDto;
+import com.vfortro.gestoreta.dto.users.UserCreateDto;
+import com.vfortro.gestoreta.dto.users.UserInfoDto;
 import com.vfortro.gestoreta.model.FoodNeed;
+import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.repository.FoodNeedRepository;
+import com.vfortro.gestoreta.repository.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +27,9 @@ public class FoodNeedService {
     private FoodNeedConversor foodNeedConversor;
 
     @Autowired
-    private UserService userService;
+    private UserConversor userConversor;
+    @Autowired
+    private UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public FoodNeedCreateDto readFoodNeed(Long foodNeedId) {
@@ -31,9 +39,18 @@ public class FoodNeedService {
     }
 
     @Transactional
-    public FoodNeedCreateDto createFoodNeed(FoodNeedCreateDto need, String email) throws AccessDeniedException {
-        if(!Objects.equals(need.getUserId(), userService.readUser(email).getUserId())) throw new AccessDeniedException("Sin permiso.");
-        FoodNeed createdNeed = foodNeedRepository.saveAndFlush(foodNeedConversor.fromDto2Entity(need));
-        return foodNeedConversor.fromEntity2Dto(createdNeed);
+    public UserInfoDto createFoodNeed(String desc, String email) throws AccessDeniedException {
+        User user = userRepository.findUserByEmail(email);
+        FoodNeed need = new FoodNeed(); need.setDescription(desc); need.setUser(user);
+        foodNeedRepository.saveAndFlush(need);
+        return userConversor.fromEntity2InfoDto(userRepository.findUserByEmail(email));
+    }
+
+    public UserInfoDto deleteFoodNeed(Long needId, String email) throws AccessDeniedException {
+        User user = userRepository.findUserByEmail(email);
+        FoodNeed need = foodNeedRepository.findFoodNeedById(needId);
+        if(!Objects.equals(user.getId(), need.getUser().getId())) throw new AccessDeniedException("Sin permiso.");
+        foodNeedRepository.deleteById(need.getId());
+        return userConversor.fromEntity2InfoDto(userRepository.findUserByEmail(email));
     }
 }

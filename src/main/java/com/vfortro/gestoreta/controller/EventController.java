@@ -83,9 +83,11 @@ public class EventController {
     public ResponseEntity<?> postEvent(@Valid @RequestBody EventCreateDto event,
                                        Authentication auth) {
         String email = auth.getName();
+        System.out.println(event.getDate());
         try {
-            eventService.createEvent(event, email);
-            return new ResponseEntity<>(new ApiMessageResponse("Evento creado.", true), HttpStatus.CREATED);
+            if(event.getEndHour().isBefore(event.getStartHour()) || event.getStartHour().isAfter(event.getEndHour())) return new ResponseEntity<>(new ApiMessageResponse("El event té horaris imprecissos.", false), HttpStatus.INTERNAL_SERVER_ERROR);
+            EventCreateDto result = eventService.createEvent(event, email);
+            return new ResponseEntity<>(result, HttpStatus.CREATED);
         } catch(EntityNotFoundException entityEx) {
             return new ResponseEntity<>(new ApiMessageResponse(entityEx.getMessage(), false), HttpStatus.NOT_FOUND);
         }  catch (AccessDeniedException accEx) {
@@ -170,6 +172,9 @@ public class EventController {
                                          @RequestBody @Valid EventUpdateDto newEvent,
                                          Authentication authentication) {
         String email = authentication.getName();
+        System.out.println(newEvent.getStartHour());
+        System.out.println(newEvent.getEndHour());
+        if(newEvent.getEndHour().isBefore(newEvent.getStartHour()) || newEvent.getStartHour().isAfter(newEvent.getEndHour())) return new ResponseEntity<>(new ApiMessageResponse("El event té horaris imprecissos.", false), HttpStatus.OK);
         if(Objects.isNull(eventService.readEvent(eventId))) {
             return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + eventId + " no existe.", false), HttpStatus.NOT_FOUND);
         }
@@ -198,12 +203,18 @@ public class EventController {
     })
     @PostMapping("/join/{eventId}")
     public ResponseEntity<?> joinEvent(@PathVariable @Valid Long eventId,
-                                       @RequestParam("userId") @Valid Long userId) {
-        if(Objects.nonNull(assistService.readAssist(userId, eventId))) {
-            return new ResponseEntity<>(new ApiMessageResponse("La asistencia del usuario con id: " + userId + " al evento con id: " +eventId + " ya existe.",false), HttpStatus.CONFLICT);
+                                       Authentication authentication) {
+        String email = authentication.getName();
+        if(Objects.nonNull(assistService.readAssist(email, eventId))) {
+            return new ResponseEntity<>(new ApiMessageResponse("La asistencia del usuario al evento con id: " +eventId + " ya existe.",false), HttpStatus.CONFLICT);
         }
-        AssistDto result = assistService.createAssist(userId, eventId);
-        return new ResponseEntity<>(new ApiMessageResponse("Asistencia creada con id: " +  result.getAssistId(), true), HttpStatus.CREATED);
+        try {
+            AssistDto result = assistService.createAssist(email, eventId);
+            return new ResponseEntity<>(new ApiMessageResponse("Asistencia creada con id: " +  result.getAssistId(), true), HttpStatus.CREATED);
+        } catch(EntityExistsException ex) {
+            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     @Tags({
@@ -219,10 +230,11 @@ public class EventController {
     })
     @DeleteMapping("/leave/{eventId}")
     public ResponseEntity<?> leaveEvent(@PathVariable @Valid Long eventId,
-                                        @RequestParam("userId") @Valid Long userId) {
-        AssistDto assist = assistService.readAssist(userId, eventId);
+                                        Authentication authentication) {
+        String email = authentication.getName();
+        AssistDto assist = assistService.readAssist(email, eventId);
         if(Objects.isNull(assist)) {
-            return new ResponseEntity<>(new ApiMessageResponse("La asistencia del usuario con id: " + userId + " al evento con id: " + eventId + " no existe.", false), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ApiMessageResponse("La asistencia del usuario con id: al evento con id: " + eventId + " no existe.", false), HttpStatus.NOT_FOUND);
         }
         assistService.deleteAssist(assist.getAssistId());
         return new ResponseEntity<>(new ApiMessageResponse("La asistencia con id: " +assist.getAssistId() + " ha sido eliminada.", true), HttpStatus.OK);

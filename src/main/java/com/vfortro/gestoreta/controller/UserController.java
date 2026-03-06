@@ -1,11 +1,9 @@
 package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.*;
-import com.vfortro.gestoreta.dto.assists.AssistResultDto;
 import com.vfortro.gestoreta.dto.events.AttendantPreferenceInfoDto;
 import com.vfortro.gestoreta.dto.events.EventInfoDto;
-import com.vfortro.gestoreta.dto.fallas.FallaInfoDto;
-import com.vfortro.gestoreta.dto.food.FoodNeedCreateDto;
+import com.vfortro.gestoreta.dto.fallas.FallaUserInfoDto;
 import com.vfortro.gestoreta.dto.requests.RequestCreateDto;
 import com.vfortro.gestoreta.dto.requests.RequestDto;
 import com.vfortro.gestoreta.dto.users.UserCreateDto;
@@ -22,6 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -68,8 +68,13 @@ public class UserController {
     })
     @PostMapping("/create")
     public ResponseEntity<?> postUser(@RequestBody @Valid UserCreateDto user) {
-        UserCreateDto result = userService.createUser(user);
-        return new ResponseEntity<>(new ApiMessageResponse("Usuario con id: " + result.getUserId() + " creado en la base de datos.", true), HttpStatus.CREATED);
+        try {
+            UserCreateDto result = userService.createUser(user);
+            return new ResponseEntity<>(new ApiMessageResponse("Usuario con id: " + result.getUserId() + " creado en la base de datos.", true), HttpStatus.CREATED);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(),false), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Tags({
@@ -95,6 +100,9 @@ public class UserController {
         String email = authentication.getName();
         try {
             UserInfoDto result = userService.updateUser(newUser, email);
+            if(newUser.getName().isBlank()) return new ResponseEntity<>(new ApiMessageResponse("Nom en blanc", false), HttpStatus.INTERNAL_SERVER_ERROR);
+
+            if(newUser.getSurname().isBlank()) return new ResponseEntity<>(new ApiMessageResponse("Cognoms en blanc", false), HttpStatus.INTERNAL_SERVER_ERROR);
             if(Objects.isNull(result)) {
                 return new ResponseEntity<>(new ApiMessageResponse("El usuario no se ha podido actualizar", false), HttpStatus.INTERNAL_SERVER_ERROR);
             }
@@ -151,12 +159,14 @@ public class UserController {
             })})
     })
     @PostMapping("/addFoodNeed")
-    public ResponseEntity<?> addFoodNeed(@RequestBody @Valid FoodNeedCreateDto foodNeed,
+    public ResponseEntity<?> addFoodNeed(@RequestBody @Valid Map<String, String> payload,
                                          Authentication authentication) {
         String email = authentication.getName();
+        String desc = payload.get("desc").toString();
+        System.out.println(desc);
         try {
-            FoodNeedCreateDto result = foodNeedService.createFoodNeed(foodNeed, email);
-            return new ResponseEntity<>(new ApiMessageResponse("Necesidad alimentaria creada con id: " + result.getFoodNeedId(), true), HttpStatus.CREATED);
+            UserInfoDto result = foodNeedService.createFoodNeed(desc, email);
+            return new ResponseEntity<>(result, HttpStatus.CREATED);
         } catch(AccessDeniedException accEx) {
             return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
         }
@@ -212,7 +222,7 @@ public class UserController {
     @GetMapping("/falla")
     public ResponseEntity<?> getFallaInfo(Authentication authentication) {
         String email = authentication.getName();
-        FallaInfoDto result = userService.getFallaInfo(email);
+        FallaUserInfoDto result = userService.getFallaInfo(email);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
@@ -222,14 +232,18 @@ public class UserController {
     })
     @Operation(summary = "Añade preferencias para ser escogido para eventos con ciertas etiqueta.")
     @PostMapping("/addAttPrefs")
-    public ResponseEntity<?> addAttPrefs(@RequestParam List<Long> tagIds,
+    public ResponseEntity<?> addAttPrefs(@RequestBody Long tagId,
                                            Authentication authentication) {
         String email = authentication.getName();
         try {
-            userService.createAttPreferences(email, tagIds);
+            userService.createAttPreferences(email, tagId);
             return new ResponseEntity<>(new ApiMessageResponse("Preferencias guardadas", true), HttpStatus.OK);
         } catch (AccessDeniedException accEx) {
             return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+        } catch(EntityExistsException ex) {
+            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.CONFLICT);
+        }catch (Exception any) {
+            return new ResponseEntity<>(new ApiMessageResponse(any.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     
@@ -239,7 +253,7 @@ public class UserController {
     })
     @Operation(summary = "Elimina preferencias para ser escogido para eventos con ciertas etiquetas")
     @DeleteMapping("/removeAttPrefs")
-    public ResponseEntity<?> removeAttPrefs(@RequestParam List<Long> prefIds,
+    public ResponseEntity<?> removeAttPrefs(@RequestBody List<Long> prefIds,
                                             Authentication authentication) {
         String email = authentication.getName();
         try {
@@ -274,8 +288,19 @@ public class UserController {
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+
         }
     }
-
+    @DeleteMapping("/deleteNeed")
+    public ResponseEntity<?> deleteFoodNeed(@RequestParam(name="needId") @Valid Long needId,
+                                            Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            UserInfoDto result = foodNeedService.deleteFoodNeed(needId, email);
+            return new ResponseEntity<>(result,HttpStatus.OK);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
+        }
+    }
 
 }

@@ -1,7 +1,7 @@
 package com.vfortro.gestoreta.service;
 
 import com.vfortro.gestoreta.conversor.EventTagConversor;
-import com.vfortro.gestoreta.dto.events.EventTagDto;
+import com.vfortro.gestoreta.dto.events.EventTagInfoDto;
 import com.vfortro.gestoreta.model.EventTag;
 import com.vfortro.gestoreta.repository.EventTagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ public class EventTagService {
     private EventTagConversor eventTagConversor;
 
     @Transactional(readOnly = true)
-    public EventTagDto readEventTag(Long tagId) {
+    public EventTagInfoDto readEventTag(Long tagId) {
         EventTag tag = eventTagRepository.findById(tagId).orElse(null);
         if(tag == null) return null;
         return eventTagConversor.fromEntity2Dto(tag);

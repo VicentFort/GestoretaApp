@@ -7,13 +7,9 @@ import com.vfortro.gestoreta.dto.events.EventCreateDto;
 import com.vfortro.gestoreta.dto.events.EventFilter;
 import com.vfortro.gestoreta.dto.events.EventUpdateDto;
 import com.vfortro.gestoreta.dto.food.FoodNeedResultDto;
-import com.vfortro.gestoreta.dto.users.UserCreateDto;
 import com.vfortro.gestoreta.model.*;
-import com.vfortro.gestoreta.repository.EventRepository;
-import com.vfortro.gestoreta.repository.EventTagRepository;
-import com.vfortro.gestoreta.repository.FallaRepository;
+import com.vfortro.gestoreta.repository.*;
 import com.vfortro.gestoreta.specification.EventSpecifications;
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -46,6 +42,9 @@ public class EventService {
     private UserService userService;
     @Autowired
     private FallaRepository fallaRepository;
+    @Autowired
+    private AttendantRepository attendantRepository;
+
 
     @Transactional(readOnly = true)
     public EventCreateDto readEvent(Long eventId) {
@@ -71,7 +70,20 @@ public class EventService {
         }
         if(!Objects.equals(event.getFallaId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
-        return eventConversor.fromEntity2Dto(eventRepository.save(eventConversor.fromDto2Entity(event)));
+        Event saved = eventRepository.save(eventConversor.fromDto2Entity(event));
+        if(event.getAttendants() != null && !event.getAttendants().isEmpty()) {
+            for (Long userId : event.getAttendants()) {
+                Attendant attendant = new Attendant();
+                attendant.setEvent(saved);
+                attendant.setFalla(saved.getFalla());
+                User user = userService.readUserAsEntity(userId);
+                attendant.setUsers(user);
+
+                attendantRepository.saveAndFlush(attendant);
+            }
+
+        }
+        return eventConversor.fromEntity2Dto(saved);
     }
     @Transactional(readOnly = true)
     public List<EventCreateDto> findByFilters(Long fallaId, EventFilter filters) {
@@ -114,8 +126,10 @@ public class EventService {
         if(newEvent.getTagId() != null && eventTagRepository.existsById(newEvent.getTagId())) {
             updatedEvent.setEventTag(eventTagRepository.findTagById(newEvent.getTagId()));
         }
-        if(newEvent.getUpdatePrice() != null && newEvent.getUpdatePrice()) updatedEvent.setPrice(newEvent.getPrice());
-        if(newEvent.getUpdateMaxPeople() != null && newEvent.getUpdateMaxPeople()) updatedEvent.setMaxPeople(newEvent.getMaxPeople());
+        if(newEvent.getPrice() != null) updatedEvent.setPrice(newEvent.getPrice());
+        if(newEvent.getMaxPeople() != null) updatedEvent.setMaxPeople(newEvent.getMaxPeople());
+        if(newEvent.getStartHour() != null) updatedEvent.setStartHour(newEvent.getStartHour());
+        if(newEvent.getEndHour() != null) updatedEvent.setEndHour(newEvent.getEndHour());
         return eventConversor.fromEntity2Dto(eventRepository.saveAndFlush(updatedEvent));
 
     }

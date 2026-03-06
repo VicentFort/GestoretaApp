@@ -6,14 +6,16 @@ import com.vfortro.gestoreta.conversor.EventConversor;
 import com.vfortro.gestoreta.conversor.UserConversor;
 import com.vfortro.gestoreta.dto.events.AttendantPreferenceInfoDto;
 import com.vfortro.gestoreta.dto.events.EventInfoDto;
-import com.vfortro.gestoreta.dto.fallas.FallaInfoDto;
+import com.vfortro.gestoreta.dto.fallas.FallaUserInfoDto;
 import com.vfortro.gestoreta.dto.users.UserCreateDto;
 import com.vfortro.gestoreta.dto.users.UserInfoDto;
 import com.vfortro.gestoreta.dto.users.UserUpdateDto;
 import com.vfortro.gestoreta.model.*;
 import com.vfortro.gestoreta.repository.AttendandPreferenceRepository;
 import com.vfortro.gestoreta.repository.EventTagRepository;
+import com.vfortro.gestoreta.repository.PositionRepository;
 import com.vfortro.gestoreta.repository.UserRepository;
+import jakarta.persistence.EntityExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,18 +41,36 @@ public class UserService {
     private AttendandPreferenceRepository attendandPreferenceRepository;
     @Autowired
     private EventConversor eventConversor;
+    @Autowired
+    private PositionRepository positionRepository;
 
 
     @Transactional
     public UserCreateDto createUser(UserCreateDto user) {
+        if(userRepository.existsByEmail(user.getEmail()) || user.getEmail().isEmpty()) throw new EntityExistsException("Ja existeix un usuari amb email: " + user.getEmail());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User saved = userRepository.save(userConversor.fromDto2Entity(user));
+        if(user.getAdminAccess()!= null) {
+            Position createPos = new Position();
+            createPos.setAdminAccess(true);
+            createPos.setUser(saved);
+            createPos.setName("Càrrec genèric");
+            createPos.setFalla(saved.getFalla());
+            createPos.setAdminAccess(user.getAdminAccess());
+            createPos.setArtsAccess(false);
+            createPos.setBankAccess(false);
+            createPos.setHouseholdAccess(false);
+            createPos.setLotteryAccess(false);
+            createPos.setOtherAccess(false);
+            createPos.setPyrotechnicsAccess(false);
+            positionRepository.saveAndFlush(createPos);
+        }
         return userConversor.fromEntity2Dto(saved);
     }
 
     @Transactional(readOnly = true)
     public UserCreateDto readUser(String email) {
-        User user = (User) userRepository.findByEmail(email).orElse(null);
+        User user = userRepository.findUserByEmail(email);
         if(user == null) return null;
         return userConversor.fromEntity2Dto(user);
     }
@@ -74,8 +94,34 @@ public class UserService {
         if(newUser.getShowBday() != null) updatedUser.setShowBday(newUser.getShowBday());
         if(newUser.getUrlPfp() != null) updatedUser.setUrlPfp(newUser.getUrlPfp());
         User saved = userRepository.saveAndFlush(updatedUser);
-        System.out.println(saved.getName());
         return userConversor.fromEntity2InfoDto(saved);
+
+    }
+
+    @Transactional
+    public void editAdminAccess(Long userId, Boolean adminAccess) {
+        Position pos = positionRepository.findByUserId(userId);
+        if(pos!=null) {
+            pos.setAdminAccess(adminAccess);
+            positionRepository.saveAndFlush(pos);
+        } else {
+            Position createPos = new Position();
+            User user = userRepository.findUserById(userId);
+            createPos.setAdminAccess(true);
+            createPos.setUser(user);
+            createPos.setName("Càrrec genèric");
+            createPos.setFalla(user.getFalla());
+            createPos.setAdminAccess(adminAccess);
+            createPos.setArtsAccess(false);
+            createPos.setBankAccess(false);
+            createPos.setHouseholdAccess(false);
+            createPos.setLotteryAccess(false);
+            createPos.setOtherAccess(false);
+            createPos.setPyrotechnicsAccess(false);
+            positionRepository.saveAndFlush(createPos);
+        }
+
+
 
     }
 
@@ -165,29 +211,32 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public FallaInfoDto getFallaInfo(String email) {
+    public FallaUserInfoDto getFallaInfo(String email) {
         User user =userRepository.findUserByEmail(email);
-        if(user.getFalla() == null) return new FallaInfoDto(0L, "INEXISTENTE", LocalDate.now());
-        FallaInfoDto result = new FallaInfoDto();
+        if(user.getFalla() == null) return null;
+        FallaUserInfoDto result = new FallaUserInfoDto();
         result.setFallaId(user.getFalla().getId());
         result.setName(user.getFalla().getName());
         result.setCreationDate(user.getFalla().getCreationDate());
         return result;
     }
 
+    @Transactional(readOnly = true)
+    public User readUserAsEntity(Long userId) {
+        return userRepository.findUserById(userId);
+    }
     @Transactional
-    public void createAttPreferences(String email, List<Long> tagIds) throws AccessDeniedException {
+    public void createAttPreferences(String email, Long tagId) throws AccessDeniedException {
         User user = userRepository.findUserByEmail(email);
-        List<AttendantPreference> prefs = new ArrayList<>();
-        for(Long tagId: tagIds) {
             EventTag tag = eventTagRepository.findTagById(tagId);
             if(!Objects.equals(user.getFalla().getId(), tag.getFalla().getId())) throw new AccessDeniedException("Sin acceso a esta falla.");
+            if(tag.getAttendantPreferences().stream().anyMatch(attendantPreference -> {
+            return Objects.equals(attendantPreference.getUser().getId(), readUser(email).getUserId()) && Objects.equals(attendantPreference.getEventTag().getId(), tagId);
+            })) throw new EntityExistsException("L'usuari ja té preferència per esta etiqueta");
             AttendantPreference pref = new AttendantPreference();
             pref.setUser(user);
             pref.setEventTag(tag);
-            prefs.add(pref);
-        }
-        attendandPreferenceRepository.saveAllAndFlush(prefs);
+            attendandPreferenceRepository.saveAndFlush(pref);
     }
 
     @Transactional

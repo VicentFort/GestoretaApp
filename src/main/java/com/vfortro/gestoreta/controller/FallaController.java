@@ -2,11 +2,12 @@ package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.*;
 import com.vfortro.gestoreta.dto.events.EventCreateDto;
-import com.vfortro.gestoreta.dto.events.EventTagDto;
+import com.vfortro.gestoreta.dto.events.EventInfoDto;
+import com.vfortro.gestoreta.dto.events.EventTagInfoDto;
+import com.vfortro.gestoreta.dto.fallas.FallaAdminInfo;
 import com.vfortro.gestoreta.dto.fallas.FallaCreateDto;
 import com.vfortro.gestoreta.dto.fallas.FallaUpdateDto;
 import com.vfortro.gestoreta.dto.requests.RequestDto;
-import com.vfortro.gestoreta.dto.users.UserCreateDto;
 import com.vfortro.gestoreta.dto.users.UserInfoDto;
 import com.vfortro.gestoreta.service.FallaService;
 import com.vfortro.gestoreta.service.RequestService;
@@ -222,7 +223,7 @@ public class FallaController {
     public ResponseEntity<?> getEventTags(Authentication authentication) {
         String email = authentication.getName();
         try {
-            List<EventTagDto> result = fallaService.getEventTags(email);
+            List<EventTagInfoDto> result = fallaService.getEventTags(email);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (AccessDeniedException e) {
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
@@ -235,11 +236,12 @@ public class FallaController {
     })
     @Operation(summary = "Crea una etiqueta de evento")
     @PostMapping("/addEventTag")
-    public ResponseEntity<?> addEventTag(@RequestParam String name,
+    public ResponseEntity<?> addEventTag(@RequestBody String name,
                                          Authentication authentication) {
         String email = authentication.getName();
+        String nameSolved = name.replace("=", "");
         try {
-            fallaService.addEventTag(email, name);
+            fallaService.addEventTag(email, nameSolved);
             return new ResponseEntity<>(new ApiMessageResponse("Nueva etiqueta creada con nombre: " + name, true), HttpStatus.CREATED);
         } catch (AccessDeniedException accEx) {
             return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
@@ -254,7 +256,7 @@ public class FallaController {
     public ResponseEntity<?> getEvents(Authentication authentication) {
         String email = authentication.getName();
         try {
-            List<EventCreateDto> result = fallaService.getEvents(email);
+            List<EventInfoDto> result = fallaService.getEvents(email);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (AccessDeniedException ex) {
             return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
@@ -269,6 +271,45 @@ public class FallaController {
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (AccessDeniedException ex) {
             return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<?> getFallaInfo(Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            FallaAdminInfo result = fallaService.getFallaInfo(email);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.NOT_FOUND);
+        }
+
+    }
+    @PostMapping("/editAdminAccess/{userId}")
+    public ResponseEntity<?> editAdminAccess(Authentication authentication,
+                                              @RequestBody Boolean access,
+                                             @PathVariable Long userId) {
+        String email = authentication.getName();
+        try {
+            fallaService.editAdminAccess(userId,access, email);
+            return new ResponseEntity<>("Canvis fets", HttpStatus.OK);
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(),false), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/deleteEventTag")
+    public ResponseEntity<?> deleteEventTag(@RequestBody Long tagId,
+                                            Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            fallaService.deleteEventTag(tagId, email);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(),false), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

@@ -8,6 +8,8 @@ import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.repository.AssistRepository;
 import com.vfortro.gestoreta.repository.EventRepository;
 import com.vfortro.gestoreta.repository.UserRepository;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,26 +27,29 @@ public class AssistService {
 
     @Autowired
     private AssistConversor assistConversor;
+    @Autowired
+    private UserService userService;
 
     @Transactional(readOnly = true)
-    public AssistDto readAssist(Long userId, Long eventId) {
-        Assist assist = assistRepository.findByUserIdAndEventId(userId, eventId).orElse(null);
+    public AssistDto readAssist(String email, Long eventId) {
+        Assist assist = assistRepository.findByUserEmailAndEventId(email, eventId);
         if(assist == null) return null;
         return assistConversor.formEntity2Dto(assist);
     }
 
     @Transactional
-    public void createAssist(AssistDto assist) {
-        assistRepository.save(assistConversor.fromDto2Entity(assist));
+    public AssistDto createAssist(AssistDto assist) throws EntityExistsException {
+        Assist saved = assistRepository.save(assistConversor.fromDto2Entity(assist));
+        return assistConversor.formEntity2Dto(saved);
     }
 
     @Transactional
-    public AssistDto createAssist(Long userId, Long eventId) {
-        User user = userRepository.findUserById(userId);
-        Event event = eventRepository.findEventById(eventId);
-        Assist toSave = new Assist();
-        toSave.setUser(user); toSave.setEvent(event);
-        return assistConversor.formEntity2Dto(assistRepository.save(toSave));
+    public AssistDto createAssist(String email, Long eventId) {
+        AssistDto dto = new AssistDto();
+        dto.setUserId(userService.readUser(email).getUserId());
+        dto.setEventId(eventId);
+        Assist saved = assistRepository.save(assistConversor.fromDto2Entity(dto));
+        return assistConversor.formEntity2Dto(saved);
     }
 
     @Transactional

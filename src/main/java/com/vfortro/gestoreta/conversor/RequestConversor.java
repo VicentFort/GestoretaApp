@@ -2,6 +2,7 @@ package com.vfortro.gestoreta.conversor;
 
 import com.vfortro.gestoreta.dto.requests.RequestCreateDto;
 import com.vfortro.gestoreta.dto.requests.RequestDto;
+import com.vfortro.gestoreta.dto.requests.RequestInfoDto;
 import com.vfortro.gestoreta.model.Request;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import com.vfortro.gestoreta.repository.UserRepository;
@@ -26,6 +27,17 @@ public class RequestConversor {
         dto.setMessage(request.getMessage());
         dto.setAproved(request.getAproved());
         dto.setReply(request.getReply());
+        return dto;
+    }
+
+    public RequestInfoDto fromEntity2InfoDto(Request req) {
+        RequestInfoDto dto = new RequestInfoDto();
+        dto.setUsername(req.getUser().getName());
+        dto.setFallaName(req.getFalla().getName());
+        dto.setReply(req.getReply());
+        dto.setRequestId(req.getId());
+        dto.setMessage(req.getMessage());
+        dto.setAproved(req.getAproved());
         return dto;
     }
 

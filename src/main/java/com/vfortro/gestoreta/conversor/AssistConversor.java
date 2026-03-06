@@ -2,9 +2,11 @@ package com.vfortro.gestoreta.conversor;
 
 import com.vfortro.gestoreta.dto.assists.AssistDto;
 import com.vfortro.gestoreta.model.Assist;
+import com.vfortro.gestoreta.repository.AssistRepository;
 import com.vfortro.gestoreta.repository.EventRepository;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import com.vfortro.gestoreta.repository.UserRepository;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,8 @@ public class AssistConversor {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AssistRepository assistRepository;
 
     public AssistDto formEntity2Dto(Assist assist) {
         AssistDto dto = new AssistDto();
@@ -41,6 +45,7 @@ public class AssistConversor {
         if(!eventRepository.existsById(dto.getEventId())) throw new EntityNotFoundException("El evento asignado a la asistencia no existe en la base de datos.");
         assist.setEvent(eventRepository.findEventById(dto.getEventId()));
 
+        if(assistRepository.existsByUserIdAndEventId(assist.getUser().getId(), assist.getEvent().getId())) throw new EntityExistsException("La asisntencia ya existe");
         assist.setPaid(dto.getPaid());
         return assist;
     }

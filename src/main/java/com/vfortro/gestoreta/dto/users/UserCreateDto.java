@@ -22,4 +22,5 @@ public class UserCreateDto {
     private @NotNull Boolean showBday;
     private @NotNull String email;
     private @NotNull String password;
+    private Boolean adminAccess;
 }

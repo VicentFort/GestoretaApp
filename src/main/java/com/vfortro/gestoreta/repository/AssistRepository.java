@@ -8,4 +8,8 @@ import java.util.Optional;
 public interface AssistRepository extends JpaRepository<Assist,Long> {
 
     Optional<Assist> findByUserIdAndEventId(Long userId, Long eventId);
+
+    boolean existsByUserIdAndEventId(Long userId, Long eventId);
+
+    Assist findByUserEmailAndEventId(String userEmail, Long eventId);
 }

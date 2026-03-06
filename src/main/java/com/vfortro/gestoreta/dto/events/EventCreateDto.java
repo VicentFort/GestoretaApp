@@ -1,9 +1,13 @@
 package com.vfortro.gestoreta.dto.events;
 
+import com.vfortro.gestoreta.dto.assists.AttendantCreateDto;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
@@ -17,9 +21,11 @@ public class EventCreateDto {
     private Float price;
     private @NotNull String description;
     private Integer maxPeople;
-    private @NotNull Instant date;
+    private @NotNull LocalDate date;
     private @NotNull Long fallaId;
     private @NotNull Long tagId;
-
-
+    private LocalTime startHour;
+    private LocalTime endHour;
+    private List<Long> attendants;
+    private @NotNull String createdBy;
 }

@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -24,11 +26,9 @@ public class EventUpdateDto {
     @Schema(example = "75", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private Integer maxPeople;
     @Schema(example = "2026-03-19T12:00:00.000Z", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
-    private Instant date;
+    private LocalDate date;
     @Schema(example = "1", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private Long tagId;
-    @Schema(example = "true", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
-    private @NotNull Boolean updatePrice;
-    @Schema(example = "true", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
-    private @NotNull Boolean updateMaxPeople;
+    private LocalTime startHour;
+    private LocalTime endHour;
 }
