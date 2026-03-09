@@ -26,7 +26,7 @@ public class OpenAPIConfiguration {
         pcLocal.setDescription("Gestoreta APP Máquina privada");
 
         Server publicServer = new Server();
-        publicServer.setUrl("http://37.135.29.68:8080");
+        publicServer.setUrl("http://gestoretaapp-production.up.railway.app:8080");
 
         Contact myContact = new Contact();
         myContact.setName("Vicent Fort Tronch");
