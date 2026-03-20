@@ -23,4 +23,6 @@ public class EventInfoUserDto {
     private LocalTime startHour;
     private LocalTime endHour;
     private String createdBy;
+    private LocalDate endDate;
+    private Boolean open;
 }

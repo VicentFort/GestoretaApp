@@ -42,6 +42,9 @@ public class EventConversor {
         dto.setStartHour(event.getStartHour());
         dto.setEndHour(event.getEndHour());
         dto.setCreatedBy(event.getCreatdBy());
+        dto.setCreatedAt(event.getCreatedAt());
+        dto.setEndDate(event.getEndDate());
+        dto.setOpen(event.getOpen());
         if(event.getAttendants()!= null && event.getAttendants().isEmpty()) {
             List<Long> atts = new ArrayList<>();
             for(Attendant att : event.getAttendants()) {
@@ -67,6 +70,9 @@ public class EventConversor {
         dto.setStartHour(event.getStartHour());
         dto.setEndHour(event.getEndHour());
         dto.setCreatedBy(event.getCreatdBy());
+        dto.setCreatedAt(event.getCreatedAt());
+        dto.setEndDate(event.getEndDate());
+        dto.setOpen(event.getOpen());
         List<FoodNeedResultDto> needs = new ArrayList<>();
         List<String> uNames = new ArrayList<>();
         List<Long> uIds = new ArrayList<>();
@@ -110,6 +116,9 @@ public class EventConversor {
         event.setStartHour(dto.getStartHour());
         event.setEndHour(dto.getEndHour());
         event.setCreatdBy(dto.getCreatedBy());
+        event.setCreatedAt(dto.getCreatedAt());
+        event.setEndDate(dto.getEndDate());
+        event.setOpen(dto.getOpen());
         if(dto.getTagId() == null) throw new NullPointerException("El evento debe tener una id de etiqueta de evento");
         if(!tagRepository.existsById(dto.getTagId())) throw new EntityNotFoundException("La etiqueta asignada al evento no existe en la base de datos.");
         EventTag tag = tagRepository.findById(dto.getTagId()).orElse(null);
@@ -136,6 +145,8 @@ public class EventConversor {
         dto.setStartHour(event.getStartHour());
         dto.setEndHour(event.getEndHour());
         dto.setCreatedBy(event.getCreatdBy());
+        dto.setEndDate(event.getEndDate());
+        dto.setOpen(event.getOpen());
         return dto;
     }
 }

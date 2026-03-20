@@ -11,6 +11,7 @@ import lombok.Setter;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -34,6 +35,9 @@ public class EventInfoDto {
     private LocalTime startHour;
     private LocalTime endHour;
     private String createdBy;
+    private LocalDateTime createdAt;
+    private LocalDate endDate;
+    private Boolean open;
 
 
 }

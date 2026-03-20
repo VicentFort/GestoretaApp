@@ -31,4 +31,6 @@ public class EventUpdateDto {
     private Long tagId;
     private LocalTime startHour;
     private LocalTime endHour;
+    private LocalDate endDate;
+    private Boolean open;
 }

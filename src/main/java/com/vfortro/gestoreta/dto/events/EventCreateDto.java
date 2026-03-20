@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -28,4 +29,7 @@ public class EventCreateDto {
     private LocalTime endHour;
     private List<Long> attendants;
     private @NotNull String createdBy;
+    private LocalDateTime createdAt;
+    private LocalDate endDate;
+    private Boolean open;
 }

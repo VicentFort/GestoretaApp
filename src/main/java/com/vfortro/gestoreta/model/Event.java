@@ -11,6 +11,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -82,5 +83,19 @@ public class Event implements Serializable {
     @Column(name="created_by", nullable = false)
     private String creatdBy;
 
+    @NotNull
+    @Column(name="created_at", nullable = false)
+    @ColumnDefault("now()")
+    private LocalDateTime createdAt;
+
+    @NotNull
+    @Column(name="end_date", nullable= false)
+    @ColumnDefault("now()")
+    private LocalDate endDate;
+
+    @NotNull
+    @Column(name="open", nullable = false)
+    @ColumnDefault("false")
+    private Boolean open;
 
 }
