@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Getter
@@ -72,5 +73,17 @@ public class User implements Serializable {
 
     @OneToMany
     private Set<Request> requests = new LinkedHashSet<>();
+
+    @Column(name="nickname")
+    private String nickname;
+
+    @NotNull
+    @Column(name="creation_date", nullable = false)
+    @ColumnDefault("now()")
+    private LocalDateTime creationDate;
+
+    @Column(name="join_date")
+    @ColumnDefault("now()")
+    private LocalDate joinDate;
 
 }

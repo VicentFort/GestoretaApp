@@ -18,6 +18,7 @@ public class UserInfoFallaDto {
     private LocalDate birthday;
     private Boolean showBday;
     private Boolean adminAccess;
+    private LocalDate joinDate;
     private List<AttPrefInfoDto> prefs;
     private List<FoodNeedCreateDto> foodNeeds;
 }

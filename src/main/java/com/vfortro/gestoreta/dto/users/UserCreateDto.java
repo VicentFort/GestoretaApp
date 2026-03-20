@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,7 +17,9 @@ public class UserCreateDto {
     private Long userId;
     private @NotNull String name;
     private @NotNull String surname;
+    private LocalDateTime creationDate;
     private Long fallaId;
+    private LocalDate joinDate;
     private String urlPfp;
     private @NotNull LocalDate birthday;
     private @NotNull Boolean showBday;

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -20,10 +21,12 @@ public class UserInfoDto {
     private Long id;
     private String name;
     private String surname;
+    private LocalDateTime creationDate;
     private LocalDate birthday;
     private Boolean showBday;
     private Boolean adminAccess;
     private FallaUserInfoDto fallaInfo;
+    private LocalDate joinDate;
     private List<EventInfoUserDto> events;
     private List<EventInfoUserDto> attEvents;
     private List<FoodNeedCreateDto> foodNeeds;

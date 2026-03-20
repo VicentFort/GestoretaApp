@@ -35,6 +35,7 @@ public class UserConversor {
     public UserCreateDto fromEntity2Dto(User user) {
         UserCreateDto dto = new UserCreateDto();
         dto.setUserId(user.getId());
+        dto.setCreationDate(user.getCreationDate());
         dto.setName(user.getName());
         dto.setSurname(user.getSurname());
         if (Objects.nonNull(user.getFalla())) dto.setFallaId(user.getFalla().getId());
@@ -51,6 +52,7 @@ public class UserConversor {
         dto.setSurname(user.getSurname());
         dto.setBirthday(user.getBirthday());
         dto.setShowBday(user.getShowBday());
+        dto.setJoinDate(user.getJoinDate());
         dto.setAdminAccess(user.getPositions().stream().anyMatch(Position::getAdminAccess));
         List<FoodNeedCreateDto> needs = new ArrayList<>();
         List<AttPrefInfoDto> prefs = new ArrayList<>();
@@ -81,6 +83,7 @@ public class UserConversor {
         dto.setSurname(user.getSurname());
         dto.setBirthday(user.getBirthday());
         dto.setShowBday(user.getShowBday());
+        dto.setJoinDate(user.getJoinDate());
         dto.setAdminAccess(user.getPositions().stream().anyMatch(Position::getAdminAccess));
         if (user.getFalla() != null) dto.setFallaInfo(fromEntity2UserInfo(user.getFalla()));
         List<EventInfoUserDto> events = new ArrayList<>();
@@ -119,6 +122,9 @@ public class UserConversor {
         if (dto.getFallaId() != null && !fallaRepository.existsById(dto.getFallaId()))
             throw new EntityNotFoundException("La falla asociada al usuario no existe en la base de datos.");
         user.setFalla(fallaRepository.findFallaById(dto.getFallaId()));
+
+        if (dto.getJoinDate() != null)
+            user.setJoinDate(dto.getJoinDate());
 
         user.setUrlPfp(dto.getUrlPfp());
         user.setBirthday(dto.getBirthday());
