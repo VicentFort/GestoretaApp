@@ -93,6 +93,7 @@ public class UserService {
         if(newUser.getBirthday() != null) updatedUser.setBirthday(newUser.getBirthday());
         if(newUser.getShowBday() != null) updatedUser.setShowBday(newUser.getShowBday());
         if(newUser.getUrlPfp() != null) updatedUser.setUrlPfp(newUser.getUrlPfp());
+        if(newUser.getNickname() != null) updatedUser.setNickname(newUser.getNickname());
         User saved = userRepository.saveAndFlush(updatedUser);
         return userConversor.fromEntity2InfoDto(saved);
 

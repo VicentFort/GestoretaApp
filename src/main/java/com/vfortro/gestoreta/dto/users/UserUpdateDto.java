@@ -19,6 +19,7 @@ public class UserUpdateDto {
     private Boolean showBday;
     @Schema(example = "", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String urlPfp;
+    private String nickname;
 }
 
 

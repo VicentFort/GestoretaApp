@@ -15,6 +15,7 @@ public class UserInfoFallaDto {
     private Long id;
     private String name;
     private String surname;
+    private String nickname;
     private LocalDate birthday;
     private Boolean showBday;
     private Boolean adminAccess;

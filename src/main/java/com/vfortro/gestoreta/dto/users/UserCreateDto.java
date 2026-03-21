@@ -17,6 +17,7 @@ public class UserCreateDto {
     private Long userId;
     private @NotNull String name;
     private @NotNull String surname;
+    private String nickname;
     private LocalDateTime creationDate;
     private Long fallaId;
     private LocalDate joinDate;
@@ -26,4 +27,5 @@ public class UserCreateDto {
     private @NotNull String email;
     private @NotNull String password;
     private Boolean adminAccess;
+
 }

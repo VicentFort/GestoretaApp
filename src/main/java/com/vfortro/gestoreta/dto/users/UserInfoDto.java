@@ -21,6 +21,7 @@ public class UserInfoDto {
     private Long id;
     private String name;
     private String surname;
+    private String nickname;
     private LocalDateTime creationDate;
     private LocalDate birthday;
     private Boolean showBday;
