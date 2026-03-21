@@ -205,6 +205,9 @@ public class FallaService {
         if(infoDto.getFallaId()==null) throw new EntityNotFoundException("No existe la falla del usuario.");
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         Falla falla = fallaRepository.findFallaById(infoDto.getFallaId());
+        for(Event e : falla.getEvents()) {
+            checkOpenEvent(e);
+        }
         return fallaConversor.fromEntity2AdminInfo(falla);
 
     }

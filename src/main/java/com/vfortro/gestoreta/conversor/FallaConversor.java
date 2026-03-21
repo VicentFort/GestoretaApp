@@ -11,10 +11,14 @@ import com.vfortro.gestoreta.dto.requests.RequestInfoDto;
 import com.vfortro.gestoreta.dto.users.UserInfoDto;
 import com.vfortro.gestoreta.dto.users.UserInfoFallaDto;
 import com.vfortro.gestoreta.model.*;
+import com.vfortro.gestoreta.repository.EventRepository;
 import com.vfortro.gestoreta.service.FallaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,13 +29,16 @@ public class FallaConversor {
     private final EventTagConversor eventTagConversor;
     private final RequestConversor requestConversor;
     @Autowired
-    private FallaService fallaService;
+    private EventRepository eventRepository;
+
+
     public FallaConversor(EventConversor eventConversor, UserConversor userConversor, EventTagConversor eventTagConversor, RequestConversor requestConversor) {
         this.eventConversor = eventConversor;
         this.userConversor = userConversor;
         this.eventTagConversor = eventTagConversor;
         this.requestConversor = requestConversor;
     }
+
 
     public Falla fromDto2Entity(FallaCreateDto dto) {
         Falla falla = new Falla();
@@ -63,7 +70,7 @@ public class FallaConversor {
         dto.setFallaId(falla.getId());
 
         for(Event event: falla.getEvents()) {
-            events.add(eventConversor.fromEntity2InfoDto(fallaService.checkOpenEvent(event)));
+            events.add(eventConversor.fromEntity2InfoDto(event));
         }
         dto.setEvents(events);
 
