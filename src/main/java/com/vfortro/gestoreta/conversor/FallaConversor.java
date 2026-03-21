@@ -11,6 +11,8 @@ import com.vfortro.gestoreta.dto.requests.RequestInfoDto;
 import com.vfortro.gestoreta.dto.users.UserInfoDto;
 import com.vfortro.gestoreta.dto.users.UserInfoFallaDto;
 import com.vfortro.gestoreta.model.*;
+import com.vfortro.gestoreta.service.FallaService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,7 +24,8 @@ public class FallaConversor {
     private final UserConversor userConversor;
     private final EventTagConversor eventTagConversor;
     private final RequestConversor requestConversor;
-
+    @Autowired
+    private FallaService fallaService;
     public FallaConversor(EventConversor eventConversor, UserConversor userConversor, EventTagConversor eventTagConversor, RequestConversor requestConversor) {
         this.eventConversor = eventConversor;
         this.userConversor = userConversor;
@@ -60,7 +63,7 @@ public class FallaConversor {
         dto.setFallaId(falla.getId());
 
         for(Event event: falla.getEvents()) {
-            events.add(eventConversor.fromEntity2InfoDto(event));
+            events.add(eventConversor.fromEntity2InfoDto(fallaService.checkOpenEvent(event)));
         }
         dto.setEvents(events);
 

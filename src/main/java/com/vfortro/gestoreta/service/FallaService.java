@@ -12,6 +12,7 @@ import com.vfortro.gestoreta.dto.requests.RequestDto;
 import com.vfortro.gestoreta.dto.users.UserCreateDto;
 import com.vfortro.gestoreta.dto.users.UserInfoDto;
 import com.vfortro.gestoreta.model.*;
+import com.vfortro.gestoreta.repository.EventRepository;
 import com.vfortro.gestoreta.repository.EventTagRepository;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import jakarta.persistence.EntityExistsException;
@@ -21,6 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 
 @Service
@@ -46,6 +49,8 @@ public class FallaService {
     private EventTagRepository eventTagRepository;
     @Autowired
     private EventConversor eventConversor;
+    @Autowired
+    private EventRepository eventRepository;
 
     @Transactional(readOnly = true)
     public List<FallaCreateDto> getAll() {
@@ -155,16 +160,30 @@ public class FallaService {
 
     }
 
+    @Transactional
     public List<EventInfoDto> getEvents(String email) throws AccessDeniedException{
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin acceso.");
         UserCreateDto dto = userService.readUser(email);
         Falla falla = fallaRepository.findFallaById(dto.getFallaId());
         List<EventInfoDto> result = new ArrayList<>();
         for(Event event : falla.getEvents()) {
-            result.add(eventConversor.fromEntity2InfoDto(event));
+            Event openEvent = checkOpenEvent(event);
+            result.add(eventConversor.fromEntity2InfoDto(openEvent));
         }
         return result;
 
+    }
+
+    @Transactional
+    public Event checkOpenEvent(Event event) {
+        if(event.getEndDate().isBefore(LocalDate.now())) {
+            return event;
+        }
+        if(event.getEndHour().isBefore(LocalTime.now())) {
+            return event;
+        }
+        event.setOpen(false);
+        return eventRepository.saveAndFlush(event);
     }
 
     public List<EventCreateDto> getActiveEvents(String email) throws AccessDeniedException {
@@ -172,8 +191,9 @@ public class FallaService {
         Falla falla = fallaRepository.findFallaById(userService.readUser(email).getFallaId());
         List<EventCreateDto> result = new ArrayList<>();
         for(Event event : falla.getEvents()) {
-            if(!event.getDone()) {
-                result.add(eventConversor.fromEntity2Dto(event));
+            Event openEvent = checkOpenEvent(event);
+            if(!openEvent.getDone()) {
+                result.add(eventConversor.fromEntity2Dto(openEvent));
             }
         }
         return result;
