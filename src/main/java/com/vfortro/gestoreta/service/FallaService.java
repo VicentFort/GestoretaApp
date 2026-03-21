@@ -183,6 +183,7 @@ public class FallaService {
             return event;
         }
         event.setOpen(false);
+        event.setDone(false);
         return eventRepository.saveAndFlush(event);
     }
 
