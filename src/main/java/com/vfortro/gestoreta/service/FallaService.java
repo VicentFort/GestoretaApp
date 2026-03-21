@@ -176,15 +176,15 @@ public class FallaService {
 
     @Transactional
     public Event checkOpenEvent(Event event) {
-        if(event.getEndDate().isBefore(LocalDate.now())) {
-            return event;
+        System.out.println("ACTUAL: " + LocalDate.now());
+        System.out.println("EVENTO: " + event.getEndDate());
+        if(event.getEndDate().isAfter(LocalDate.now()) && event.getEndHour().isAfter(LocalTime.now())) {
+            event.setOpen(false);
+            event.setDone(true);
+            return eventRepository.saveAndFlush(event);
         }
-        if(event.getEndHour().isBefore(LocalTime.now())) {
-            return event;
-        }
-        event.setOpen(false);
-        event.setDone(true);
-        return eventRepository.saveAndFlush(event);
+        return event;
+
     }
 
     public List<EventCreateDto> getActiveEvents(String email) throws AccessDeniedException {
@@ -206,7 +206,8 @@ public class FallaService {
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         Falla falla = fallaRepository.findFallaById(infoDto.getFallaId());
         for(Event e : falla.getEvents()) {
-            checkOpenEvent(e);
+            Event event = checkOpenEvent(e);
+            System.out.println(event.getDone());
         }
         return fallaConversor.fromEntity2AdminInfo(falla);
 
