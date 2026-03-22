@@ -83,7 +83,6 @@ public class User implements Serializable {
     private LocalDateTime creationDate;
 
     @Column(name="join_date")
-    @ColumnDefault("now()")
     private LocalDate joinDate;
 
 }
