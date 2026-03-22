@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -49,7 +50,9 @@ public class UserService {
     public UserCreateDto createUser(UserCreateDto user) {
         if(userRepository.existsByEmail(user.getEmail()) || user.getEmail().isEmpty()) throw new EntityExistsException("Ja existeix un usuari amb email: " + user.getEmail());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        User saved = userRepository.save(userConversor.fromDto2Entity(user));
+        User toSave = userConversor.fromDto2Entity(user);
+        toSave.setCreationDate(LocalDateTime.now());
+        User saved = userRepository.save(toSave);
         if(user.getAdminAccess()!= null) {
             Position createPos = new Position();
             createPos.setAdminAccess(true);

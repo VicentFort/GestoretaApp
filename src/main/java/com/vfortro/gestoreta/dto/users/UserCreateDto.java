@@ -18,7 +18,6 @@ public class UserCreateDto {
     private @NotNull String name;
     private @NotNull String surname;
     private String nickname;
-    private LocalDateTime creationDate;
     private Long fallaId;
     private LocalDate joinDate;
     private String urlPfp;
