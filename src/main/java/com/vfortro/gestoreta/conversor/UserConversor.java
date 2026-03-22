@@ -35,7 +35,6 @@ public class UserConversor {
     public UserCreateDto fromEntity2Dto(User user) {
         UserCreateDto dto = new UserCreateDto();
         dto.setUserId(user.getId());
-        dto.setCreationDate(user.getCreationDate());
         dto.setName(user.getName());
         dto.setSurname(user.getSurname());
         if (Objects.nonNull(user.getFalla())) dto.setFallaId(user.getFalla().getId());
