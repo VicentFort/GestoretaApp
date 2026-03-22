@@ -51,7 +51,6 @@ public class UserService {
         if(userRepository.existsByEmail(user.getEmail()) || user.getEmail().isEmpty()) throw new EntityExistsException("Ja existeix un usuari amb email: " + user.getEmail());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User toSave = userConversor.fromDto2Entity(user);
-        toSave.setCreationDate(LocalDateTime.now());
         User saved = userRepository.save(toSave);
         if(user.getAdminAccess()!= null) {
             Position createPos = new Position();

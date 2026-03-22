@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -70,7 +71,8 @@ public class EventService {
         }
         if(!Objects.equals(event.getFallaId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
-        Event saved = eventRepository.save(eventConversor.fromDto2Entity(event));
+        Event toSave = eventConversor.fromDto2Entity(event);
+        Event saved = eventRepository.save(toSave);
         if(event.getAttendants() != null && !event.getAttendants().isEmpty()) {
             for (Long userId : event.getAttendants()) {
                 Attendant attendant = new Attendant();
