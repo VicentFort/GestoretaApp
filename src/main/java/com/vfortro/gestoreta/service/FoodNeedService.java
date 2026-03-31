@@ -6,6 +6,7 @@ import com.vfortro.gestoreta.dto.food.FoodNeedCreateDto;
 import com.vfortro.gestoreta.dto.users.UserCreateDto;
 import com.vfortro.gestoreta.dto.users.UserInfoDto;
 import com.vfortro.gestoreta.model.FoodNeed;
+import com.vfortro.gestoreta.model.FoodNeedType;
 import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.repository.FoodNeedRepository;
 import com.vfortro.gestoreta.repository.UserRepository;
@@ -41,7 +42,9 @@ public class FoodNeedService {
     @Transactional
     public UserInfoDto createFoodNeed(String desc, String email) throws AccessDeniedException {
         User user = userRepository.findUserByEmail(email);
-        FoodNeed need = new FoodNeed(); need.setDescription(desc); need.setUser(user);
+        FoodNeed need = new FoodNeed();
+        need.setDescription(FoodNeedType.fromString(desc));
+        need.setUser(user);
         foodNeedRepository.saveAndFlush(need);
         return userConversor.fromEntity2InfoDto(userRepository.findUserByEmail(email));
     }

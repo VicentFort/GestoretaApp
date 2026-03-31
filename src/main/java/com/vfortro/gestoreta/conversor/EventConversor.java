@@ -83,7 +83,7 @@ public class EventConversor {
             if(!user.getFoodNeeds().isEmpty()) {
                 for(FoodNeed need : user.getFoodNeeds()) {
                     FoodNeedResultDto aux = new FoodNeedResultDto();
-                    aux.setFoodNeedDesc(need.getDescription());
+                    aux.setFoodNeedDesc(need.getDescription().getValue());
                     aux.setUserName(user.getName());
                     aux.setUserSurname(user.getSurname());
                     aux.setEventTitle(event.getTitle());

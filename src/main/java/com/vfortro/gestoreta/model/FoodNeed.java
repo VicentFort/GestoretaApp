@@ -10,7 +10,9 @@ import java.io.Serializable;
 @Getter
 @Setter
 @Entity
-@Table(name = "food_needs")
+@Table(name = "food_needs", uniqueConstraints = {
+        @UniqueConstraint(name = "food_needs_users_unique", columnNames = {"user_id", "description"})
+})
 public class FoodNeed implements Serializable {
     private static final long serialVersionUID = 5378625060144798745L;
     @Id
@@ -19,8 +21,9 @@ public class FoodNeed implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(name = "description", nullable = false, length = Integer.MAX_VALUE)
-    private String description;
+    //@Convert(converter = FoodNeedTypeConverter.class)
+    @Column(name = "description", nullable = false, length = Integer.MAX_VALUE, columnDefinition = "food_need_type")
+    private FoodNeedType description;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

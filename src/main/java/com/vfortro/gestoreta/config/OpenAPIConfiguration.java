@@ -28,6 +28,9 @@ public class OpenAPIConfiguration {
         Server publicServer = new Server();
         publicServer.setUrl("http://gestoretaapp-production.up.railway.app:8080");
 
+        Server localPublicServer = new Server();
+        publicServer.setUrl("http://37.135.29.68:8080");
+
         Contact myContact = new Contact();
         myContact.setName("Vicent Fort Tronch");
 
@@ -47,6 +50,6 @@ public class OpenAPIConfiguration {
                                         .name("Authorization")))
                 // Aplicamos la seguridad de forma global a todos los endpoints
                 .addSecurityItem(new SecurityRequirement().addList("BearerAuth"))
-                .servers(List.of(publicServer, localhost));
+                .servers(List.of(localhost, localPublicServer, publicServer));
     }
 }

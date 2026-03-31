@@ -163,7 +163,6 @@ public class UserController {
                                          Authentication authentication) {
         String email = authentication.getName();
         String desc = payload.get("desc").toString();
-        System.out.println(desc);
         try {
             UserInfoDto result = foodNeedService.createFoodNeed(desc, email);
             return new ResponseEntity<>(result, HttpStatus.CREATED);

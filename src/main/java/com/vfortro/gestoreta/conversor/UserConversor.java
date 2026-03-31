@@ -61,7 +61,7 @@ public class UserConversor {
             FoodNeedCreateDto dtoN = new FoodNeedCreateDto();
             if (need.getUser().getId() != null) dtoN.setUserId(need.getUser().getId());
             if (need.getId() != null) dtoN.setFoodNeedId(need.getId());
-            if (need.getDescription() != null) dtoN.setDescription(need.getDescription());
+            if (need.getDescription() != null) dtoN.setDescription(need.getDescription().getValue());
             needs.add(dtoN);
         }
         dto.setFoodNeeds(needs);
