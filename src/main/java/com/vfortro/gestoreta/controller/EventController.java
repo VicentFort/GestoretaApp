@@ -83,7 +83,6 @@ public class EventController {
     public ResponseEntity<?> postEvent(@Valid @RequestBody EventCreateDto event,
                                        Authentication auth) {
         String email = auth.getName();
-        System.out.println(event.getDate());
         try {
             if(event.getEndHour().isBefore(event.getStartHour()) || event.getStartHour().isAfter(event.getEndHour())) return new ResponseEntity<>(new ApiMessageResponse("El event té horaris imprecissos.", false), HttpStatus.INTERNAL_SERVER_ERROR);
             EventCreateDto result = eventService.createEvent(event, email);
@@ -172,8 +171,6 @@ public class EventController {
                                          @RequestBody @Valid EventUpdateDto newEvent,
                                          Authentication authentication) {
         String email = authentication.getName();
-        System.out.println(newEvent.getStartHour());
-        System.out.println(newEvent.getEndHour());
         if(newEvent.getEndHour().isBefore(newEvent.getStartHour()) || newEvent.getStartHour().isAfter(newEvent.getEndHour())) return new ResponseEntity<>(new ApiMessageResponse("El event té horaris imprecissos.", false), HttpStatus.OK);
         if(Objects.isNull(eventService.readEvent(eventId))) {
             return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + eventId + " no existe.", false), HttpStatus.NOT_FOUND);

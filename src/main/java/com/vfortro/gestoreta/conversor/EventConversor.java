@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class EventConversor {
         dto.setPrice(event.getPrice());
         dto.setDescription(event.getDescription());
         dto.setMaxPeople(event.getMaxPeople());
-        dto.setDate(event.getDate());
+        dto.setDate(event.getDate().toLocalDate());
         dto.setFallaId(event.getFalla().getId());
         dto.setTagId(event.getEventTag().getId());
         dto.setTitle(event.getTitle());
@@ -43,7 +44,7 @@ public class EventConversor {
         dto.setEndHour(event.getEndHour());
         dto.setCreatedBy(event.getCreatdBy());
         dto.setCreatedAt(event.getCreatedAt());
-        dto.setEndDate(event.getEndDate());
+        dto.setEndDate(event.getEndDate().toLocalDate());
         dto.setOpen(event.getOpen());
         if(event.getAttendants()!= null && event.getAttendants().isEmpty()) {
             List<Long> atts = new ArrayList<>();
@@ -62,7 +63,7 @@ public class EventConversor {
         dto.setTitle(event.getTitle());
         dto.setPublicField(event.getPublicField());
         dto.setDescription(event.getDescription());
-        dto.setDate(event.getDate());
+        dto.setDate(event.getDate().toLocalDate());
         dto.setPrice(event.getPrice());
         dto.setDone(event.getDone());
         dto.setTagName(event.getEventTag().getName());
@@ -71,8 +72,9 @@ public class EventConversor {
         dto.setEndHour(event.getEndHour());
         dto.setCreatedBy(event.getCreatdBy());
         dto.setCreatedAt(event.getCreatedAt());
-        dto.setEndDate(event.getEndDate());
+        dto.setEndDate(event.getEndDate().toLocalDate());
         dto.setOpen(event.getOpen());
+        dto.setCheckNeeds(event.getCheckNeeds());
         List<FoodNeedResultDto> needs = new ArrayList<>();
         List<String> uNames = new ArrayList<>();
         List<Long> uIds = new ArrayList<>();
@@ -111,14 +113,15 @@ public class EventConversor {
         event.setPrice(dto.getPrice());
         event.setDescription(dto.getDescription());
         event.setMaxPeople(dto.getMaxPeople());
-        event.setDate(dto.getDate());
+        event.setDate(LocalDateTime.of(dto.getDate(),dto.getStartHour()));
         event.setTitle(dto.getTitle());
         event.setStartHour(dto.getStartHour());
         event.setEndHour(dto.getEndHour());
         event.setCreatdBy(dto.getCreatedBy());
         event.setCreatedAt(dto.getCreatedAt());
-        event.setEndDate(dto.getEndDate());
+        event.setEndDate(LocalDateTime.of(dto.getEndDate(),dto.getEndHour()));
         event.setOpen(dto.getOpen());
+        event.setCheckNeeds(dto.getCheckNeeds());
         if(dto.getTagId() == null) throw new NullPointerException("El evento debe tener una id de etiqueta de evento");
         if(!tagRepository.existsById(dto.getTagId())) throw new EntityNotFoundException("La etiqueta asignada al evento no existe en la base de datos.");
         EventTag tag = tagRepository.findById(dto.getTagId()).orElse(null);
@@ -138,14 +141,14 @@ public class EventConversor {
         dto.setId(event.getId());
         dto.setTitle(event.getTitle());
         dto.setDescription(event.getDescription());
-        dto.setDate(event.getDate());
+        dto.setDate(event.getDate().toLocalDate());
         dto.setPrice(event.getPrice());
         dto.setDone(event.getDone());
         dto.setTagName(event.getEventTag().getName());
         dto.setStartHour(event.getStartHour());
         dto.setEndHour(event.getEndHour());
         dto.setCreatedBy(event.getCreatdBy());
-        dto.setEndDate(event.getEndDate());
+        dto.setEndDate(event.getEndDate().toLocalDate());
         dto.setOpen(event.getOpen());
         return dto;
     }

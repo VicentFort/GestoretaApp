@@ -33,4 +33,5 @@ public class EventUpdateDto {
     private LocalTime endHour;
     private LocalDate endDate;
     private Boolean open;
+    private Boolean checkNeeds;
 }

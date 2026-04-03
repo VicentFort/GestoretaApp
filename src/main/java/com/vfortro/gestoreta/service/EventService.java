@@ -72,7 +72,8 @@ public class EventService {
         if(!Objects.equals(event.getFallaId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         Event toSave = eventConversor.fromDto2Entity(event);
-        Event saved = eventRepository.save(toSave);
+        Event saved = eventRepository.saveAndFlush(toSave);
+
         if(event.getAttendants() != null && !event.getAttendants().isEmpty()) {
             for (Long userId : event.getAttendants()) {
                 Attendant attendant = new Attendant();
@@ -110,7 +111,7 @@ public class EventService {
         Event event = eventRepository.findEventById(eventId);
         if(!Objects.equals(event.getFalla().getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
-        eventRepository.deleteById(eventId);
+        eventRepository.delete(event);
     }
 
     @Transactional
@@ -124,7 +125,7 @@ public class EventService {
         if(newEvent.getPublicField() != null) updatedEvent.setPublicField(newEvent.getPublicField());
         if(newEvent.getTitle() != null) updatedEvent.setTitle(newEvent.getTitle());
         if(newEvent.getDescription() != null) updatedEvent.setDescription(newEvent.getDescription());
-        if(newEvent.getDate() != null) updatedEvent.setDate(newEvent.getDate());
+        if(newEvent.getDate() != null) updatedEvent.setDate(LocalDateTime.of(newEvent.getDate(),newEvent.getStartHour()));
         if(newEvent.getTagId() != null && eventTagRepository.existsById(newEvent.getTagId())) {
             updatedEvent.setEventTag(eventTagRepository.findTagById(newEvent.getTagId()));
         }
@@ -132,6 +133,7 @@ public class EventService {
         if(newEvent.getMaxPeople() != null) updatedEvent.setMaxPeople(newEvent.getMaxPeople());
         if(newEvent.getStartHour() != null) updatedEvent.setStartHour(newEvent.getStartHour());
         if(newEvent.getEndHour() != null) updatedEvent.setEndHour(newEvent.getEndHour());
+        if(newEvent.getEndDate() != null && newEvent.getEndHour() != null) updatedEvent.setEndDate(LocalDateTime.of(newEvent.getEndDate(),newEvent.getEndHour()));
         return eventConversor.fromEntity2Dto(eventRepository.saveAndFlush(updatedEvent));
 
     }

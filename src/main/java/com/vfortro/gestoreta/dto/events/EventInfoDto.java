@@ -38,6 +38,6 @@ public class EventInfoDto {
     private LocalDateTime createdAt;
     private LocalDate endDate;
     private Boolean open;
-
+    private Boolean checkNeeds;
 
 }
