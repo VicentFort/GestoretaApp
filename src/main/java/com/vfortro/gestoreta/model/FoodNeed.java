@@ -1,5 +1,6 @@
 package com.vfortro.gestoreta.model;
 
+import com.vfortro.gestoreta.model.enums.FoodNeedType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

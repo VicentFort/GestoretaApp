@@ -1,7 +1,4 @@
-package com.vfortro.gestoreta.model;
-
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
+package com.vfortro.gestoreta.model.enums;
 
 public enum FoodNeedType {
 

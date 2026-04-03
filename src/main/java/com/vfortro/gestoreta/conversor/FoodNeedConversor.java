@@ -2,7 +2,7 @@ package com.vfortro.gestoreta.conversor;
 
 import com.vfortro.gestoreta.dto.food.FoodNeedCreateDto;
 import com.vfortro.gestoreta.model.FoodNeed;
-import com.vfortro.gestoreta.model.FoodNeedType;
+import com.vfortro.gestoreta.model.enums.FoodNeedType;
 import com.vfortro.gestoreta.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;

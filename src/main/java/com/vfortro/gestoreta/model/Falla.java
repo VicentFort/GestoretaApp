@@ -1,5 +1,7 @@
 package com.vfortro.gestoreta.model;
 
+import com.vfortro.gestoreta.model.inventory.Loan;
+import com.vfortro.gestoreta.model.inventory.Store;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -51,5 +53,10 @@ public class Falla implements Serializable {
     @OneToMany(mappedBy = "falla")
     private Set<User> users = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "falla")
+    private Set<Store> stores = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "falla")
+    private Set<Loan> loans =  new LinkedHashSet<>();
 
 }
