@@ -39,7 +39,7 @@ public class AssistService {
 
     @Transactional
     public AssistDto createAssist(AssistDto assist) throws EntityExistsException {
-        Assist saved = assistRepository.save(assistConversor.fromDto2Entity(assist));
+        Assist saved = assistRepository.saveAndFlush(assistConversor.fromDto2Entity(assist));
         return assistConversor.formEntity2Dto(saved);
     }
 
@@ -48,7 +48,7 @@ public class AssistService {
         AssistDto dto = new AssistDto();
         dto.setUserId(userService.readUser(email).getUserId());
         dto.setEventId(eventId);
-        Assist saved = assistRepository.save(assistConversor.fromDto2Entity(dto));
+        Assist saved = assistRepository.saveAndFlush(assistConversor.fromDto2Entity(dto));
         return assistConversor.formEntity2Dto(saved);
     }
 

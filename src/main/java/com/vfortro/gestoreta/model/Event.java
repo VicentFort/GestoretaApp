@@ -60,7 +60,7 @@ public class Event implements Serializable {
 
     @NotNull
     @Column(name = "date", nullable = false)
-    private LocalDate date;
+    private LocalDateTime date;
 
     @NotNull
     @Column(name = "title", nullable = false, length = Integer.MAX_VALUE)
@@ -76,7 +76,7 @@ public class Event implements Serializable {
     @OneToMany(mappedBy = "event")
     private Set<Assist> assists = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "event")
+    @OneToMany(mappedBy = "event", cascade =  CascadeType.ALL)
     private Set<Attendant> attendants = new LinkedHashSet<>();
 
     @NotNull
@@ -91,11 +91,17 @@ public class Event implements Serializable {
     @NotNull
     @Column(name="end_date", nullable= false)
     @ColumnDefault("now()")
-    private LocalDate endDate;
+    private LocalDateTime endDate;
 
     @NotNull
     @Column(name="open", nullable = false)
     @ColumnDefault("false")
     private Boolean open;
+
+
+    @NotNull
+    @Column(name="check_needs", nullable = false)
+    @ColumnDefault("false")
+    private Boolean checkNeeds;
 
 }
