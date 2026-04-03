@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.checkerframework.checker.units.qual.C;
 
 import java.io.Serializable;
 import java.util.LinkedHashSet;
@@ -30,8 +31,9 @@ public class InventoryItem implements Serializable {
     private String description;
 
     @NotNull
-    @Column(name="quantity", nullable = false, columnDefinition = "item_category")
+    @Column(name="category", nullable = false, columnDefinition = "item_category")
     private ItemCategory itemCategory;
+    
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

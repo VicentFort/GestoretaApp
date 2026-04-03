@@ -19,7 +19,7 @@ public class StoreConversor {
 
     public StoreInfoDto fromEntity2Dto(Store store){
         StoreInfoDto dto = new StoreInfoDto();
-        dto.setId(store.getSotreId());
+        dto.setId(store.getStoreId());
         dto.setName(store.getName());
         dto.setLocation(store.getLocation());
         List<StockInfoDto> stocks = new ArrayList<>();

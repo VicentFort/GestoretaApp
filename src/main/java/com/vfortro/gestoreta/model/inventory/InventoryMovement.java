@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @Table(name = "inventory_movements")
 public class InventoryMovement {
     @Id
+    @Column(name="movement_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long movementId;
 
@@ -31,6 +32,14 @@ public class InventoryMovement {
     @NotNull
     @Column(name = "type", nullable = false, columnDefinition = "movement_type")
     private MovementType type;
+
+    @NotNull
+    @Column(name = "message", nullable = false)
+    private String message;
+
+    @NotNull
+    @Column(name = "created_by", nullable = false)
+    private String createdBy;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
