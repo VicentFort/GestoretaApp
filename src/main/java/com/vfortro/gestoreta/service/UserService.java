@@ -52,7 +52,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User toSave = userConversor.fromDto2Entity(user);
         toSave.setCreationDate(LocalDateTime.now());
-        User saved = userRepository.save(toSave);
+        User saved = userRepository.saveAndFlush(toSave);
         if(user.getAdminAccess()!= null) {
             Position createPos = new Position();
             createPos.setAdminAccess(true);
@@ -90,7 +90,6 @@ public class UserService {
         if(!userRepository.existsByEmail(email)) throw new NullPointerException("El usuario no existe.");
         if(!Objects.equals(email, userRepository.findUserByEmail(email).getEmail())) throw new AccessDeniedException("Sin permiso.");
         User updatedUser = userRepository.findUserByEmail(email);
-        System.out.println(newUser.getName());
         if(newUser.getName() != null) updatedUser.setName(newUser.getName());
         if(newUser.getSurname() != null) updatedUser.setSurname(newUser.getSurname());
         if(newUser.getBirthday() != null) updatedUser.setBirthday(newUser.getBirthday());

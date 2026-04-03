@@ -34,8 +34,6 @@ public enum FoodNeedType {
     public static FoodNeedType fromString(String text) {
         for (FoodNeedType b : FoodNeedType.values()) {
             if (b.value.equalsIgnoreCase(text)) {
-                System.out.println(text);
-                System.out.println(b.value);
                 return b;
             }
         }

@@ -296,7 +296,6 @@ public class FallaController {
             fallaService.editAdminAccess(userId,access, email);
             return new ResponseEntity<>("Canvis fets", HttpStatus.OK);
         } catch(Exception e) {
-            System.out.println(e.getMessage());
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(),false), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -73,7 +74,7 @@ public class FallaService {
 
     @Transactional
     public FallaCreateDto createFalla(FallaCreateDto falla) {
-        Falla saved = fallaRepository.save(fallaConversor.fromDto2Entity(falla));
+        Falla saved = fallaRepository.saveAndFlush(fallaConversor.fromDto2Entity(falla));
         return fallaConversor.fromEntity2DTO(saved);
     }
 
@@ -87,7 +88,7 @@ public class FallaService {
         if(newFalla.getName() != null) updatedFalla.setName(newFalla.getName());
         if(newFalla.getCreationDate() != null) updatedFalla.setCreationDate(newFalla.getCreationDate());
         if(newFalla.getShieldUrl() != null) updatedFalla.setShieldUrl(newFalla.getShieldUrl());
-        fallaRepository.save(updatedFalla);
+        fallaRepository.saveAndFlush(updatedFalla);
 
     }
 
@@ -176,9 +177,7 @@ public class FallaService {
 
     @Transactional
     public Event checkOpenEvent(Event event) {
-        System.out.println("ACTUAL: " + LocalDate.now());
-        System.out.println("EVENTO: " + event.getEndDate());
-        if(event.getEndDate().isAfter(LocalDate.now()) && event.getEndHour().isAfter(LocalTime.now())) {
+        if(event.getEndDate().isAfter(LocalDateTime.now()) && event.getEndHour().isAfter(LocalTime.now())) {
             event.setOpen(false);
             event.setDone(true);
             return eventRepository.saveAndFlush(event);
@@ -205,10 +204,6 @@ public class FallaService {
         if(infoDto.getFallaId()==null) throw new EntityNotFoundException("No existe la falla del usuario.");
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         Falla falla = fallaRepository.findFallaById(infoDto.getFallaId());
-        for(Event e : falla.getEvents()) {
-            Event event = checkOpenEvent(e);
-            System.out.println(event.getDone());
-        }
         return fallaConversor.fromEntity2AdminInfo(falla);
 
     }
