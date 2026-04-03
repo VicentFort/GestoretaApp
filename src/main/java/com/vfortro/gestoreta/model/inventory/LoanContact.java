@@ -1,5 +1,6 @@
 package com.vfortro.gestoreta.model.inventory;
 
+import com.vfortro.gestoreta.model.Falla;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -33,6 +34,11 @@ public class LoanContact {
     @NotNull
     @Column(name = "dni_cif", nullable = false)
     private String dniCif;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "falla_id", nullable = false)
+    private Falla falla;
 
     @OneToMany(mappedBy = "contact")
     private Set<Loan> loans = new LinkedHashSet<>();
