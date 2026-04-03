@@ -35,4 +35,7 @@ public class Store implements Serializable {
 
     @OneToMany(mappedBy = "store")
     private Set<Stock> stocks = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "store")
+    private Set<InventoryMovement> movements = new LinkedHashSet<>();
 }

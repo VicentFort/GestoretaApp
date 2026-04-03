@@ -58,4 +58,7 @@ public class Loan {
 
     @OneToMany(mappedBy = "loan")
     private Set<LoanNotification> notifications = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "loan")
+    private Set<InventoryMovement> movements = new LinkedHashSet<>();
 }
