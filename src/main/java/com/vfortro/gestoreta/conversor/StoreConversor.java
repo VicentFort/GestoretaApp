@@ -1,7 +1,9 @@
 package com.vfortro.gestoreta.conversor;
 
 import com.vfortro.gestoreta.dto.inventory.stocks.StockInfoDto;
+import com.vfortro.gestoreta.dto.inventory.stores.StoreCreateDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreInfoDto;
+import com.vfortro.gestoreta.model.Falla;
 import com.vfortro.gestoreta.model.inventory.Stock;
 import com.vfortro.gestoreta.model.inventory.Store;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,4 +29,13 @@ public class StoreConversor {
         dto.setStocks(stocks);
         return dto;
     }
+
+    public Store fromDto2Entity(StoreCreateDto dto, Falla falla){
+        Store store = new Store();
+        store.setName(dto.getName());
+        store.setLocation(dto.getLocation());
+        store.setFalla(falla);
+        return store;
+    }
 }
+

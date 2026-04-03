@@ -18,4 +18,6 @@ public class StockConversor {
         dto.setItem(inventoryItemConversor.fromEntity2Dto(stock.getInventoryItem()));
         return dto;
     }
+
+
 }
