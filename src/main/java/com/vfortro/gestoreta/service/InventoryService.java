@@ -4,11 +4,13 @@ import com.vfortro.gestoreta.conversor.InventoryItemConversor;
 import com.vfortro.gestoreta.conversor.StoreConversor;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemCreateDto;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDto;
+import com.vfortro.gestoreta.dto.inventory.items.InventoryItemUpdateDto;
 import com.vfortro.gestoreta.dto.inventory.loans.ReturnLoanDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementResultDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreCreateDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreInfoDto;
+import com.vfortro.gestoreta.dto.inventory.stores.StoreUpdateDto;
 import com.vfortro.gestoreta.dto.users.UserCreateDto;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
 import com.vfortro.gestoreta.model.Falla;
@@ -179,5 +181,44 @@ public class InventoryService {
         loan.setRealReturnDate(LocalDateTime.now());
         loan.setState(LoanState.RETURNED);
         loanRepository.save(loan);
+    }
+
+    @Transactional
+    public void deleteStore(Long storeId, String email) throws AccessDeniedException {
+        if(!userService.checkAdminAccess(email)) {throw new AccessDeniedException("Sense permís!");}
+        if(!storeRepository.existsById(storeId)) {throw new  EntityNotFoundException("No existeix el magatzem");}
+        storeRepository.deleteById(storeId);
+    }
+
+    @Transactional
+    public void updateStore(StoreUpdateDto updatedStore, String email) throws AccessDeniedException, EntityNotFoundException {
+        if(!userService.checkAdminAccess(email)) {throw new AccessDeniedException("Sense permís!");}
+        Store storeToUpdate = storeRepository.findById(updatedStore.getStoreId()).orElseThrow(() -> new EntityNotFoundException("No existeix el magatzem"));
+
+        if(updatedStore.getName() != null) storeToUpdate.setName(updatedStore.getName());
+        if(updatedStore.getLocation() != null) storeToUpdate.setLocation(updatedStore.getLocation());
+
+        storeRepository.saveAndFlush(storeToUpdate);
+
+    }
+
+    @Transactional
+    public void deleteItem(Long itemId, String email) throws AccessDeniedException, EntityNotFoundException {
+        if(!userService.checkAdminAccess(email)) {throw new AccessDeniedException("Sense permís!");}
+        if(!inventoryItemRepository.existsById(itemId)) {throw new EntityNotFoundException("No existeix el item");}
+        inventoryItemRepository.deleteById(itemId);
+    }
+
+
+    public void updateItem(InventoryItemUpdateDto updatedItem, String email) throws AccessDeniedException, EntityNotFoundException {
+        if(!userService.checkAdminAccess(email)) { throw new AccessDeniedException("Sense permís!");}
+        InventoryItem itemToUpdate = inventoryItemRepository.findById(updatedItem.getItemId()).orElseThrow(() -> new EntityNotFoundException("No existeix el item"));
+
+        if(updatedItem.getName() != null) itemToUpdate.setName(updatedItem.getName());
+        if(updatedItem.getDescription() != null) itemToUpdate.setDescription(updatedItem.getDescription());
+        if(updatedItem.getItemCategory() != null) itemToUpdate.setItemCategory(updatedItem.getItemCategory());
+
+        inventoryItemRepository.saveAndFlush(itemToUpdate);
+
     }
 }

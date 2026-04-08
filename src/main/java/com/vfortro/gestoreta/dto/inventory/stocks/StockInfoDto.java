@@ -16,5 +16,5 @@ import java.util.List;
 public class StockInfoDto {
     private Long id;
     private Long amount;
-    private InventoryItemInfoDto item;
+    private Long itemId;
 }

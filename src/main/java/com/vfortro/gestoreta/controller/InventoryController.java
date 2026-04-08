@@ -3,24 +3,24 @@ package com.vfortro.gestoreta.controller;
 import com.vfortro.gestoreta.dto.ApiMessageResponse;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemCreateDto;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDto;
+import com.vfortro.gestoreta.dto.inventory.items.InventoryItemUpdateDto;
 import com.vfortro.gestoreta.dto.inventory.loans.ReturnLoanDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementResultDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreCreateDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreInfoDto;
+import com.vfortro.gestoreta.dto.inventory.stores.StoreUpdateDto;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
 import com.vfortro.gestoreta.service.InventoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
 import java.util.Objects;
@@ -96,5 +96,64 @@ public class InventoryController {
             return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
         }
     }
+
+    @DeleteMapping("/deleteStore")
+    public ResponseEntity<?> deleteStore(@RequestBody Long storeId,
+                                         Authentication auth) {
+        String email = auth.getName();
+        try {
+            inventoryService.deleteStore(storeId, email);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch(AccessDeniedException ex) {
+            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
+        } catch(EntityNotFoundException ex) {
+            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/updateStore")
+    public ResponseEntity<?> updateStore(@RequestBody StoreUpdateDto updatedStore,
+                                         Authentication auth) {
+        String email = auth.getName();
+        try {
+            inventoryService.updateStore(updatedStore, email);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (AccessDeniedException ex) {
+            return new  ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
+        } catch(EntityNotFoundException ex) {
+            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/deleteItem")
+    public ResponseEntity<?> deleteItem(@RequestBody Long itemId,
+                                        Authentication auth) {
+        String email = auth.getName();
+        try {
+            inventoryService.deleteItem(itemId, email);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch(AccessDeniedException ex) {
+            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
+        } catch(EntityNotFoundException ex) {
+            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/updateItem")
+    public ResponseEntity<?> updateItem(@RequestBody InventoryItemUpdateDto updatedItem,
+                                        Authentication auth) {
+        String email = auth.getName();
+        try {
+            System.out.println(updatedItem.getItemCategory());
+            inventoryService.updateItem(updatedItem, email);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (AccessDeniedException ex) {
+            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
+        } catch(EntityNotFoundException ex) {
+            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.NOT_FOUND);
+        }
+    }
+
+
 
 }

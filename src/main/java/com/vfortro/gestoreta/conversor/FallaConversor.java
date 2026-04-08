@@ -10,14 +10,13 @@ import com.vfortro.gestoreta.dto.fallas.FallaUserInfoDto;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDto;
 import com.vfortro.gestoreta.dto.inventory.loans.LoanInfoDto;
 import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactInfoDto;
+import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementInfoDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreInfoDto;
 import com.vfortro.gestoreta.dto.requests.RequestInfoDto;
 import com.vfortro.gestoreta.dto.users.UserInfoDto;
 import com.vfortro.gestoreta.dto.users.UserInfoFallaDto;
 import com.vfortro.gestoreta.model.*;
-import com.vfortro.gestoreta.model.inventory.Loan;
-import com.vfortro.gestoreta.model.inventory.LoanContact;
-import com.vfortro.gestoreta.model.inventory.Store;
+import com.vfortro.gestoreta.model.inventory.*;
 import com.vfortro.gestoreta.repository.EventRepository;
 import com.vfortro.gestoreta.service.FallaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +41,10 @@ public class FallaConversor {
     private LoanContactConversor loanContactConversor;
 
     @Autowired
-    private LoanConversor loanConversor;
+    private InventoryItemConversor inventoryItemConversor;
+
+    @Autowired
+    private InventoryMovementConversor inventoryMovementConversor;
 
 
     public FallaConversor(EventConversor eventConversor, UserConversor userConversor, EventTagConversor eventTagConversor, RequestConversor requestConversor) {
@@ -79,8 +81,9 @@ public class FallaConversor {
         List<RequestInfoDto> requests = new ArrayList<>();
         List<AttendantPrefInfoDto> prefs = new ArrayList<>();
         List<StoreInfoDto> stores = new ArrayList<>();
+        List<InventoryItemInfoDto> inventoryItems = new ArrayList<>();
         List<LoanContactInfoDto> contacts = new ArrayList<>();
-        List<LoanInfoDto> loans = new ArrayList<>();
+        List<InventoryMovementInfoDto> inventoryMovements = new ArrayList<>();
         FallaAdminInfo dto = new FallaAdminInfo();
         dto.setName(falla.getName());
         dto.setFallaId(falla.getId());
@@ -110,15 +113,20 @@ public class FallaConversor {
         }
         dto.setStores(stores);
 
+        for(InventoryItem item: falla.getItems()) {
+            inventoryItems.add(inventoryItemConversor.fromEntity2Dto(item));
+        }
+        dto.setInventoryItems(inventoryItems);
+
         for(LoanContact contact : falla.getContacts()) {
             contacts.add(loanContactConversor.fromEntity2Dto(contact));
         }
         dto.setContacts(contacts);
 
-        for(Loan loan : falla.getLoans()) {
-            loans.add(loanConversor.fromEntity2Dto(loan));
+        for(InventoryMovement movement : falla.getMovements()) {
+            inventoryMovements.add(inventoryMovementConversor.fromEntity2Dto(movement));
         }
-        dto.setLoans(loans);
+        dto.setInventoryMovements(inventoryMovements);
         return dto;
 
     }

@@ -6,6 +6,7 @@ import com.vfortro.gestoreta.dto.events.EventTagInfoDto;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDto;
 import com.vfortro.gestoreta.dto.inventory.loans.LoanInfoDto;
 import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactInfoDto;
+import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementInfoDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreInfoDto;
 import com.vfortro.gestoreta.dto.requests.RequestInfoDto;
 import com.vfortro.gestoreta.dto.users.UserInfoFallaDto;
@@ -29,7 +30,8 @@ public class FallaAdminInfo {
     private List<RequestInfoDto> requests;
     private List<AttendantPrefInfoDto> attendants;
     private List<StoreInfoDto> stores;
+    private List<InventoryItemInfoDto> inventoryItems;
     private List<LoanContactInfoDto> contacts;
-    private List<LoanInfoDto> loans;
+    private List<InventoryMovementInfoDto> inventoryMovements;
 
 }
