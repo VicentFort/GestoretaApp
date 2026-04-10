@@ -16,5 +16,6 @@ public class StoreInfoDto {
     private Long id;
     private String name;
     private String location;
+    private Boolean enabled;
     private List<StockInfoDto> stocks;
 }

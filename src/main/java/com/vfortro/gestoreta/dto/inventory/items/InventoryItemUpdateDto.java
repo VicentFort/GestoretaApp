@@ -13,4 +13,5 @@ public class InventoryItemUpdateDto {
     private String name;
     private String description;
     private ItemCategory itemCategory;
+    private Boolean enabled;
 }

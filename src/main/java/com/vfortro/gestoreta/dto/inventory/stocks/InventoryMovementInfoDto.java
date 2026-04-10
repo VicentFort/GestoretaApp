@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 public class InventoryMovementInfoDto {
+    private Long id;
     private Long itemId;
     private String itemName;
     private Long storeId;

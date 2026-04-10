@@ -1,11 +1,14 @@
 package com.vfortro.gestoreta.service;
 
 import com.vfortro.gestoreta.conversor.InventoryItemConversor;
+import com.vfortro.gestoreta.conversor.LoanContactConversor;
 import com.vfortro.gestoreta.conversor.StoreConversor;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemCreateDto;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDto;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemUpdateDto;
 import com.vfortro.gestoreta.dto.inventory.loans.ReturnLoanDto;
+import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactCreateDto;
+import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactInfoDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementResultDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreCreateDto;
@@ -58,6 +61,10 @@ public class InventoryService {
     private InventoryItemConversor inventoryItemConversor;
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private LoanContactConversor contactConversor;;
+
 
 
     @Transactional
@@ -112,7 +119,7 @@ public class InventoryService {
         mov.setAmount(dto.getAmount());
         mov.setType(dto.getType());
         mov.setMessage(dto.getMessage());
-        mov.setCreatedBy(user.getUserId()+" " +user.getSurname());
+        mov.setCreatedBy(user.getName()+" " +user.getSurname());
         mov.setLoan(newLoan);
         mov.setFalla(stock.getStore().getFalla());
         mov.setDate(LocalDateTime.now());
@@ -174,7 +181,7 @@ public class InventoryService {
         mov.setAmount(dto.getAmount());
         mov.setType(MovementType.INCOMING);
         mov.setMessage("Retorn del préstec: " + dto.getMessage());
-        mov.setCreatedBy(user.getUserId()+" " +user.getSurname());
+        mov.setCreatedBy(user.getName()+" " +user.getSurname());
         mov.setLoan(loan);
         movementRepository.saveAndFlush(mov);
 
@@ -197,6 +204,8 @@ public class InventoryService {
 
         if(updatedStore.getName() != null) storeToUpdate.setName(updatedStore.getName());
         if(updatedStore.getLocation() != null) storeToUpdate.setLocation(updatedStore.getLocation());
+        if(updatedStore.getEnabled() != null) storeToUpdate.setEnabled(updatedStore.getEnabled());
+
 
         storeRepository.saveAndFlush(storeToUpdate);
 
@@ -217,8 +226,18 @@ public class InventoryService {
         if(updatedItem.getName() != null) itemToUpdate.setName(updatedItem.getName());
         if(updatedItem.getDescription() != null) itemToUpdate.setDescription(updatedItem.getDescription());
         if(updatedItem.getItemCategory() != null) itemToUpdate.setItemCategory(updatedItem.getItemCategory());
+        if(updatedItem.getEnabled() != null) itemToUpdate.setEnabled(updatedItem.getEnabled());
 
         inventoryItemRepository.saveAndFlush(itemToUpdate);
 
+    }
+
+    @Transactional
+    public LoanContactInfoDto createContact(LoanContactCreateDto contact, String email) throws AccessDeniedException {
+        if(!userService.checkAdminAccess(email)) { throw new AccessDeniedException("Sense permís");}
+        Falla falla = fallaRepository.findFallaById(userService.readUser(email).getFallaId());
+        LoanContact toCreate = contactConversor.fromDto2Entity(contact, falla);
+        LoanContact saved = contactRepository.saveAndFlush(toCreate);
+        return contactConversor.fromEntity2Dto(saved);
     }
 }

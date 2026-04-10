@@ -15,6 +15,7 @@ public class InventoryMovementConversor {
 
     public InventoryMovementInfoDto fromEntity2Dto(InventoryMovement movement) {
         InventoryMovementInfoDto dto = new InventoryMovementInfoDto();
+        dto.setId(movement.getMovementId());
         dto.setItemId(movement.getItem().getItemId());
         dto.setItemName(movement.getItem().getName());
         dto.setStoreId(movement.getStore().getStoreId());

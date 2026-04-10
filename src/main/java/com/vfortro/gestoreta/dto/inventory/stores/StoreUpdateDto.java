@@ -13,4 +13,5 @@ public class StoreUpdateDto {
     private Long storeId;
     private String name;
     private String location;
+    private Boolean enabled;
 }

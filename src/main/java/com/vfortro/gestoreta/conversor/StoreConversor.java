@@ -22,6 +22,7 @@ public class StoreConversor {
         dto.setId(store.getStoreId());
         dto.setName(store.getName());
         dto.setLocation(store.getLocation());
+        dto.setEnabled(store.getEnabled());
         List<StockInfoDto> stocks = new ArrayList<>();
         for(Stock stock : store.getStocks()){
             stocks.add(stockConversor.fromEntity2Dto(stock));
@@ -35,6 +36,7 @@ public class StoreConversor {
         store.setName(dto.getName());
         store.setLocation(dto.getLocation());
         store.setFalla(falla);
+        store.setEnabled(true);
         return store;
     }
 }

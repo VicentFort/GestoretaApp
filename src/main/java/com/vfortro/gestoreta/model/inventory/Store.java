@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.io.Serializable;
 import java.util.LinkedHashSet;
@@ -13,7 +14,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "store")
+@Table(name = "stores")
 public class Store implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +28,10 @@ public class Store implements Serializable {
     @NotNull
     @Column(name = "location", nullable = false)
     private String location;
+
+    @NotNull
+    @Column(name="enabled", nullable = false)
+    private Boolean enabled;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

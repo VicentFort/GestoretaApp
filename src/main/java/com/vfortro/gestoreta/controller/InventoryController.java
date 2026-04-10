@@ -5,6 +5,7 @@ import com.vfortro.gestoreta.dto.inventory.items.InventoryItemCreateDto;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDto;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemUpdateDto;
 import com.vfortro.gestoreta.dto.inventory.loans.ReturnLoanDto;
+import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactCreateDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementResultDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreCreateDto;
@@ -97,19 +98,6 @@ public class InventoryController {
         }
     }
 
-    @DeleteMapping("/deleteStore")
-    public ResponseEntity<?> deleteStore(@RequestBody Long storeId,
-                                         Authentication auth) {
-        String email = auth.getName();
-        try {
-            inventoryService.deleteStore(storeId, email);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch(AccessDeniedException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
-        } catch(EntityNotFoundException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.NOT_FOUND);
-        }
-    }
 
     @PutMapping("/updateStore")
     public ResponseEntity<?> updateStore(@RequestBody StoreUpdateDto updatedStore,
@@ -125,26 +113,12 @@ public class InventoryController {
         }
     }
 
-    @DeleteMapping("/deleteItem")
-    public ResponseEntity<?> deleteItem(@RequestBody Long itemId,
-                                        Authentication auth) {
-        String email = auth.getName();
-        try {
-            inventoryService.deleteItem(itemId, email);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch(AccessDeniedException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
-        } catch(EntityNotFoundException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.NOT_FOUND);
-        }
-    }
 
     @PutMapping("/updateItem")
     public ResponseEntity<?> updateItem(@RequestBody InventoryItemUpdateDto updatedItem,
                                         Authentication auth) {
         String email = auth.getName();
         try {
-            System.out.println(updatedItem.getItemCategory());
             inventoryService.updateItem(updatedItem, email);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (AccessDeniedException ex) {
@@ -154,6 +128,17 @@ public class InventoryController {
         }
     }
 
+    @PostMapping("/createContact")
+    public ResponseEntity<?> createContact(@RequestBody LoanContactCreateDto contact,
+                                           Authentication auth) {
+        String email = auth.getName();
+        try {
+            inventoryService.createContact(contact,email);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (AccessDeniedException e) {
+            return new  ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
+        }
+    }
 
 
 }

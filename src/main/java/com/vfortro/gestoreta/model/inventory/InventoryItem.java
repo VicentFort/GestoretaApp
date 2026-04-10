@@ -15,7 +15,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "inventory_item")
+@Table(name = "inventory_items")
 public class InventoryItem implements Serializable {
     @Id
     @Column(name = "item_id", nullable = false)
@@ -33,6 +33,10 @@ public class InventoryItem implements Serializable {
     @NotNull
     @Column(name="category", nullable = false, columnDefinition = "item_category")
     private ItemCategory itemCategory;
+
+    @NotNull
+    @Column(name="enabled", nullable = false)
+    private Boolean enabled;
     
 
     @NotNull

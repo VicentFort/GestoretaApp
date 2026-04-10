@@ -6,7 +6,7 @@ public enum ItemCategory {
     OFFICE("Oficina"),
     ARTS_AND_CRAFTS("Arts plàstiques"),
     DRINKS("Beguda"),
-    INFRASTRUCTURE("Infraestructra"),
+    INFRASTRUCTURE("Infraestructura"),
     ELECTRONICS("Electrònica / Informàtica"),
     OTHERS("Altres");
 
