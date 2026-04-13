@@ -13,10 +13,16 @@ public class LoanConversor {
         dto.setId(loan.getLoanId());
         dto.setAmount(loan.getAmount());
         dto.setItemId(loan.getItem().getItemId());
+        dto.setItemName(loan.getItem().getName());
         dto.setAcquisitionDate(loan.getAcquisitionDate());
         dto.setIdealReturnDate(loan.getIdealReturnDate());
         if(loan.getRealReturnDate() != null) dto.setRealReturnDate(loan.getRealReturnDate());
         dto.setState(loan.getState().getValue());
+        dto.setContactId(loan.getContact().getContactId());
+        dto.setContactName(loan.getContact().getName());
+        dto.setContactPhone(loan.getContact().getPhone());
+        dto.setContactEmail(loan.getContact().getEmail());
+        dto.setContactDniCif(loan.getContact().getDniCif());
         return dto;
     }
 }

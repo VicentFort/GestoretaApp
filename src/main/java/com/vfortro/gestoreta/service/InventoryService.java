@@ -9,6 +9,7 @@ import com.vfortro.gestoreta.dto.inventory.items.InventoryItemUpdateDto;
 import com.vfortro.gestoreta.dto.inventory.loans.ReturnLoanDto;
 import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactCreateDto;
 import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactInfoDto;
+import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactUpdateDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementResultDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreCreateDto;
@@ -179,8 +180,10 @@ public class InventoryService {
         mov.setItem(loan.getItem());
         mov.setStore(stock.getStore());
         mov.setAmount(dto.getAmount());
+        mov.setFalla(stock.getStore().getFalla());
+        mov.setDate(LocalDateTime.now());
         mov.setType(MovementType.INCOMING);
-        mov.setMessage("Retorn del préstec: " + dto.getMessage());
+        mov.setMessage("Retorn del prèstec: " + dto.getMessage());
         mov.setCreatedBy(user.getName()+" " +user.getSurname());
         mov.setLoan(loan);
         movementRepository.saveAndFlush(mov);
@@ -239,5 +242,18 @@ public class InventoryService {
         LoanContact toCreate = contactConversor.fromDto2Entity(contact, falla);
         LoanContact saved = contactRepository.saveAndFlush(toCreate);
         return contactConversor.fromEntity2Dto(saved);
+    }
+
+    @Transactional
+    public void updateContact(LoanContactUpdateDto contact, String email) throws AccessDeniedException, EntityNotFoundException {
+        if(!userService.checkAdminAccess(email)) { throw new AccessDeniedException("Sense permís"); }
+        LoanContact toUpdate = contactRepository.findById(contact.getId()).orElseThrow(() -> new EntityNotFoundException("No existeix el contacte"));
+
+        if(contact.getName() != null) toUpdate.setName(contact.getName());
+        if(contact.getEmail() != null) toUpdate.setEmail(contact.getEmail());
+        if(contact.getPhone() != null) toUpdate.setPhone(contact.getPhone());
+        if(contact.getDniCif() != null) toUpdate.setDniCif(contact.getDniCif());
+
+        contactRepository.saveAndFlush(toUpdate);
     }
 }

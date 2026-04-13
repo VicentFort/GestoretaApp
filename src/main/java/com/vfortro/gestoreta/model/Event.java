@@ -76,7 +76,7 @@ public class Event implements Serializable {
     @OneToMany(mappedBy = "event")
     private Set<Assist> assists = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "event", cascade =  CascadeType.ALL)
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Attendant> attendants = new LinkedHashSet<>();
 
     @NotNull

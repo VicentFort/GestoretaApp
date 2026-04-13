@@ -22,6 +22,5 @@ public class CheckEventDate {
     public void actualizarEstados() {
         // SQL: UPDATE entidad SET done = true, open = false WHERE end_date < NOW() AND done = false
         eventRepository.closeEndedEvents();
-        System.out.println("Eventos actualizados");
     }
 }

@@ -6,6 +6,7 @@ import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDto;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemUpdateDto;
 import com.vfortro.gestoreta.dto.inventory.loans.ReturnLoanDto;
 import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactCreateDto;
+import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactUpdateDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementResultDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreCreateDto;
@@ -137,6 +138,20 @@ public class InventoryController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (AccessDeniedException e) {
             return new  ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @PutMapping("/updateContact")
+    public ResponseEntity<?> updateContact(@RequestBody LoanContactUpdateDto contact,
+                                           Authentication auth) {
+        String email = auth.getName();
+        try {
+            inventoryService.updateContact(contact,email);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch(AccessDeniedException ex) {
+            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
+        } catch(EntityNotFoundException ex) {
+            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.NOT_FOUND);
         }
     }
 

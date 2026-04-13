@@ -6,6 +6,7 @@ import com.vfortro.gestoreta.dto.events.EventCreateDto;
 import com.vfortro.gestoreta.dto.events.EventInfoDto;
 import com.vfortro.gestoreta.dto.events.EventInfoUserDto;
 import com.vfortro.gestoreta.dto.food.FoodNeedResultDto;
+import com.vfortro.gestoreta.dto.users.UserEventInfoDto;
 import com.vfortro.gestoreta.model.*;
 import com.vfortro.gestoreta.repository.EventTagRepository;
 import com.vfortro.gestoreta.repository.FallaRepository;
@@ -49,7 +50,7 @@ public class EventConversor {
         if(event.getAttendants()!= null && event.getAttendants().isEmpty()) {
             List<Long> atts = new ArrayList<>();
             for(Attendant att : event.getAttendants()) {
-                atts.add(att.getUsers().getId());
+                atts.add(att.getUser().getId());
             }
             dto.setAttendants(atts);
         }
@@ -76,8 +77,6 @@ public class EventConversor {
         dto.setOpen(event.getOpen());
         dto.setCheckNeeds(event.getCheckNeeds());
         List<FoodNeedResultDto> needs = new ArrayList<>();
-        List<String> uNames = new ArrayList<>();
-        List<Long> uIds = new ArrayList<>();
         List<AssistDto> assists = new ArrayList<>();
         for(Assist assist : event.getAssists()) {
             assists.add(assistConversor.formEntity2Dto(assist));
@@ -95,12 +94,15 @@ public class EventConversor {
         }
         dto.setAssists(assists);
         dto.setFoodNeeds(needs);
+        List<UserEventInfoDto> attendants = new ArrayList<>();
         for(Attendant att : event.getAttendants()) {
-            uNames.add(att.getUsers().getName());
-            uIds.add(att.getUsers().getId());
+            UserEventInfoDto attendantDto = new UserEventInfoDto();
+            attendantDto.setId(att.getUser().getId());
+            attendantDto.setName(att.getUser().getName());
+            attendantDto.setSurname(att.getUser().getSurname());
+            attendants.add(attendantDto);
         }
-        dto.setAttendantNames(uNames);
-        dto.setAttendantIds(uIds);
+        dto.setAttendants(attendants);
         return dto;
     }
 

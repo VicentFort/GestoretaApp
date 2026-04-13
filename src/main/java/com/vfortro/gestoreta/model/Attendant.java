@@ -23,11 +23,11 @@ public class Attendant implements Serializable {
     @NotNull
     @JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private User users;
+    private User user;
 
     @NotNull
     @JoinColumn(name = "event_id")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Event event;
 
     @NotNull

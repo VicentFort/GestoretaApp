@@ -19,5 +19,10 @@ public class LoanInfoDto {
     private LocalDateTime realReturnDate;
     private String state;
     private Long contactId;
+    private String contactName;
+    private String contactEmail;
+    private String contactPhone;
+    private String contactDniCif;
     private Long itemId;
+    private String itemName;
 }

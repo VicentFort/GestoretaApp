@@ -2,12 +2,11 @@ package com.vfortro.gestoreta.dto.events;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -34,4 +33,5 @@ public class EventUpdateDto {
     private LocalDate endDate;
     private Boolean open;
     private Boolean checkNeeds;
+    private List<Long> attendantIds;
 }

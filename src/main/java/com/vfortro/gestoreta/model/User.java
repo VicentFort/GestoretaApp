@@ -62,7 +62,7 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user")
     private Set<AttendantPreference> attendantPreferences = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "users")
+    @OneToMany(mappedBy = "user")
     private Set<Attendant> attendants = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")

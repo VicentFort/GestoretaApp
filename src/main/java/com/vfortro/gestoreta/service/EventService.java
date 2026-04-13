@@ -20,9 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class EventService {
@@ -45,6 +43,8 @@ public class EventService {
     private FallaRepository fallaRepository;
     @Autowired
     private AttendantRepository attendantRepository;
+    @Autowired
+    private UserRepository userRepository;
 
 
     @Transactional(readOnly = true)
@@ -80,7 +80,7 @@ public class EventService {
                 attendant.setEvent(saved);
                 attendant.setFalla(saved.getFalla());
                 User user = userService.readUserAsEntity(userId);
-                attendant.setUsers(user);
+                attendant.setUser(user);
 
                 attendantRepository.saveAndFlush(attendant);
             }
@@ -134,6 +134,29 @@ public class EventService {
         if(newEvent.getStartHour() != null) updatedEvent.setStartHour(newEvent.getStartHour());
         if(newEvent.getEndHour() != null) updatedEvent.setEndHour(newEvent.getEndHour());
         if(newEvent.getEndDate() != null && newEvent.getEndHour() != null) updatedEvent.setEndDate(LocalDateTime.of(newEvent.getEndDate(),newEvent.getEndHour()));
+
+
+        if(newEvent.getAttendantIds() != null) {
+            updatedEvent.getAttendants().clear();
+            for (Long userId : newEvent.getAttendantIds()) {
+                // Buscamos el usuario
+                User user = userRepository.findUserById(userId);
+                if(attendantRepository.existsByUser_IdAndEvent_Id(userId, eventId)) {
+                    break;
+                }
+                if (user != null) {
+                    Attendant attendant = new Attendant();
+                    attendant.setUser(user); // Asegúrate de si es setUser o setUsers según tu entidad
+                    attendant.setEvent(updatedEvent);
+                    attendant.setFalla(updatedEvent.getFalla());
+
+                    // Añadimos a la colección del evento (CascadeType.ALL se encarga del resto)
+                    updatedEvent.getAttendants().add(attendant);
+                }
+            }
+
+        }
+
         return eventConversor.fromEntity2Dto(eventRepository.saveAndFlush(updatedEvent));
 
     }
@@ -184,6 +207,11 @@ public class EventService {
         Event event = eventRepository.findEventById(eventId);
         if(!Objects.equals(event.getFalla().getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso a esta falla.");
         return event.getAssists().size();
+    }
+
+    @Transactional
+    public void deleteAttendantsByEventId(Long eventId) {
+        attendantRepository.deleteAllByEvent_Id(eventId);
     }
 
 

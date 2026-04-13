@@ -3,6 +3,7 @@ package com.vfortro.gestoreta.dto.events;
 import com.vfortro.gestoreta.dto.assists.AssistDto;
 import com.vfortro.gestoreta.dto.assists.AttendantCreateDto;
 import com.vfortro.gestoreta.dto.food.FoodNeedResultDto;
+import com.vfortro.gestoreta.dto.users.UserEventInfoDto;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,8 +31,7 @@ public class EventInfoDto {
     private Long tagId;
     private List<FoodNeedResultDto> foodNeeds;
     private List<AssistDto> assists;
-    private List<Long> attendantIds;
-    private List<String> attendantNames;
+    private List<UserEventInfoDto> attendants;
     private LocalTime startHour;
     private LocalTime endHour;
     private String createdBy;
