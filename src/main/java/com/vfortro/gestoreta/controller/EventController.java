@@ -166,19 +166,18 @@ public class EventController {
                     @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
             })})
     })
-    @PutMapping("/update/{eventId}")
-    public ResponseEntity<?> updateEvent(@PathVariable @Valid Long eventId,
-                                         @RequestBody @Valid EventUpdateDto newEvent,
+    @PutMapping("/update")
+    public ResponseEntity<?> updateEvent(@RequestBody @Valid EventUpdateDto newEvent,
                                          Authentication authentication) {
         String email = authentication.getName();
         if(newEvent.getEndHour().isBefore(newEvent.getStartHour()) || newEvent.getStartHour().isAfter(newEvent.getEndHour())) return new ResponseEntity<>(new ApiMessageResponse("El event té horaris imprecissos.", false), HttpStatus.OK);
-        if(Objects.isNull(eventService.readEvent(eventId))) {
-            return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + eventId + " no existe.", false), HttpStatus.NOT_FOUND);
+        if(Objects.isNull(eventService.readEvent(newEvent.getEventId()))) {
+            return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + newEvent.getEventId() + " no existe.", false), HttpStatus.NOT_FOUND);
         }
         try {
-            EventCreateDto result = eventService.updateEvent(newEvent, eventId, email);
+            EventCreateDto result = eventService.updateEvent(newEvent, email);
             if(Objects.isNull(result)) {
-                return new ResponseEntity<>(new ApiMessageResponse("El evento con id:" + eventId + " no se ha podido actualizar", false), HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(new ApiMessageResponse("El evento con id:" + newEvent.getEventId() + " no se ha podido actualizar", false), HttpStatus.INTERNAL_SERVER_ERROR);
             }
             return new ResponseEntity<>("Evento actualizado.", HttpStatus.OK);
         } catch (AccessDeniedException e) {

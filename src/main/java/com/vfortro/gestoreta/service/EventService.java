@@ -115,9 +115,9 @@ public class EventService {
     }
 
     @Transactional
-    public EventCreateDto updateEvent(EventUpdateDto newEvent, Long eventId, String email) throws AccessDeniedException {
+    public EventCreateDto updateEvent(EventUpdateDto newEvent, String email) throws AccessDeniedException {
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
-        Event updatedEvent = eventRepository.findEventById(eventId);
+        Event updatedEvent = eventRepository.findEventById(newEvent.getEventId());
         if(!Objects.equals(updatedEvent.getFalla().getId(), userService.readUser(email).getFallaId())) {
            throw new AccessDeniedException("Sin permiso para esta falla.");
         }
@@ -141,7 +141,7 @@ public class EventService {
             for (Long userId : newEvent.getAttendantIds()) {
                 // Buscamos el usuario
                 User user = userRepository.findUserById(userId);
-                if(attendantRepository.existsByUser_IdAndEvent_Id(userId, eventId)) {
+                if(attendantRepository.existsByUser_IdAndEvent_Id(userId, newEvent.getEventId())) {
                     break;
                 }
                 if (user != null) {

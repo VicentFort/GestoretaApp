@@ -12,6 +12,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(description = "Dto enviado para actualizar un evento.")
 public class EventUpdateDto {
+    private Long eventId;
     @Schema(example = "Event guay.", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String title;
     @Schema(example = "true", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
