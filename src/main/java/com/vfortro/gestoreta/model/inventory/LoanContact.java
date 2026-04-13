@@ -12,7 +12,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "loan_contact")
+@Table(name = "loan_contacts")
 public class LoanContact {
     @Id
     @Column(name="contact_id", nullable=false)
