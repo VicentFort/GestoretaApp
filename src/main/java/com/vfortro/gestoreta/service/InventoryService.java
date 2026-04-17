@@ -1,6 +1,7 @@
 package com.vfortro.gestoreta.service;
 
 import com.vfortro.gestoreta.conversor.InventoryItemConversor;
+import com.vfortro.gestoreta.conversor.InventoryMovementConversor;
 import com.vfortro.gestoreta.conversor.LoanContactConversor;
 import com.vfortro.gestoreta.conversor.StoreConversor;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemCreateDto;
@@ -11,6 +12,7 @@ import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactCreateDto;
 import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactInfoDto;
 import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactUpdateDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementDto;
+import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementInfoDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementResultDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreCreateDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreInfoDto;
@@ -64,7 +66,10 @@ public class InventoryService {
     private UserService userService;
 
     @Autowired
-    private LoanContactConversor contactConversor;;
+    private LoanContactConversor contactConversor;
+
+    @Autowired
+    private InventoryMovementConversor movementConversor;
 
 
 
@@ -87,7 +92,7 @@ public class InventoryService {
     }
 
     @Transactional
-    public InventoryMovementResultDto processMovement(InventoryMovementDto dto, String email) throws AccessDeniedException, InsufficientStockException {
+    public InventoryMovementInfoDto processMovement(InventoryMovementDto dto, String email) throws AccessDeniedException, InsufficientStockException {
         if(!userService.checkAdminAccess(email)) { throw new AccessDeniedException("Sense permís"); }
         UserCreateDto user = userService.readUser(email);
         Stock stock = stockRepository.findByStoreStoreIdAndInventoryItemItemId(dto.getStoreId(), dto.getItemId())
@@ -125,17 +130,10 @@ public class InventoryService {
         mov.setFalla(stock.getStore().getFalla());
         mov.setDate(LocalDateTime.now());
 
-        movementRepository.saveAndFlush(mov);
+        InventoryMovement saved = movementRepository.saveAndFlush(mov);
         stockRepository.saveAndFlush(stock);
-        InventoryMovementResultDto resultDto = new InventoryMovementResultDto();
-        resultDto.setIncomingAmount(dto.getAmount());
-        resultDto.setFinalAmount(stock.getAmount());
-        resultDto.setItemId(stock.getInventoryItem().getItemId());
-        resultDto.setItemName(stock.getInventoryItem().getName());
-        resultDto.setStoreId(stock.getStore().getStoreId());
-        resultDto.setStoreName(stock.getStore().getName());
-        resultDto.setMessage(resultDto.toString());
-        return resultDto;
+        InventoryMovementInfoDto infoDto = movementConversor.fromEntity2Dto(saved);
+        return infoDto;
     }
 
     @Transactional

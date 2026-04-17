@@ -8,6 +8,7 @@ import com.vfortro.gestoreta.dto.inventory.loans.ReturnLoanDto;
 import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactCreateDto;
 import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactUpdateDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementDto;
+import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementInfoDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementResultDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreCreateDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreInfoDto;
@@ -77,7 +78,7 @@ public class InventoryController {
                                               Authentication auth) {
         String email = auth.getName();
         try {
-            InventoryMovementResultDto result = inventoryService.processMovement(movement, email);
+            InventoryMovementInfoDto result = inventoryService.processMovement(movement, email);
             return new ResponseEntity<>(result,HttpStatus.OK);
         } catch(AccessDeniedException ex) {
             return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
