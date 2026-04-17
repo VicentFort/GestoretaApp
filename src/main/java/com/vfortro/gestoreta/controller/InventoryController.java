@@ -4,6 +4,7 @@ import com.vfortro.gestoreta.dto.ApiMessageResponse;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemCreateDto;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDto;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemUpdateDto;
+import com.vfortro.gestoreta.dto.inventory.loans.LoanInfoDto;
 import com.vfortro.gestoreta.dto.inventory.loans.ReturnLoanDto;
 import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactCreateDto;
 import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactUpdateDto;
@@ -79,7 +80,7 @@ public class InventoryController {
         String email = auth.getName();
         try {
             InventoryMovementInfoDto result = inventoryService.processMovement(movement, email);
-            return new ResponseEntity<>(result,HttpStatus.OK);
+            return new ResponseEntity<>(result, HttpStatus.OK);
         } catch(AccessDeniedException ex) {
             return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
         } catch(InsufficientStockException ex) {
@@ -93,10 +94,12 @@ public class InventoryController {
                                         Authentication auth) {
         String email = auth.getName();
         try {
-            inventoryService.returnLoan(returnDto, email);
-            return new ResponseEntity<>(HttpStatus.OK);
+            LoanInfoDto result = inventoryService.returnLoan(returnDto, email);
+            return new ResponseEntity<>(result, HttpStatus.OK);
         } catch(AccessDeniedException ex) {
             return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
+        } catch(IllegalStateException ex) {
+            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

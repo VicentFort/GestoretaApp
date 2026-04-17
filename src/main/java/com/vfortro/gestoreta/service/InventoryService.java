@@ -1,12 +1,10 @@
 package com.vfortro.gestoreta.service;
 
-import com.vfortro.gestoreta.conversor.InventoryItemConversor;
-import com.vfortro.gestoreta.conversor.InventoryMovementConversor;
-import com.vfortro.gestoreta.conversor.LoanContactConversor;
-import com.vfortro.gestoreta.conversor.StoreConversor;
+import com.vfortro.gestoreta.conversor.*;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemCreateDto;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDto;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemUpdateDto;
+import com.vfortro.gestoreta.dto.inventory.loans.LoanInfoDto;
 import com.vfortro.gestoreta.dto.inventory.loans.ReturnLoanDto;
 import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactCreateDto;
 import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactInfoDto;
@@ -70,6 +68,9 @@ public class InventoryService {
 
     @Autowired
     private InventoryMovementConversor movementConversor;
+
+    @Autowired
+    private LoanConversor loanConversor;
 
 
 
@@ -152,7 +153,7 @@ public class InventoryService {
     }
 
     @Transactional
-    public void returnLoan(ReturnLoanDto dto, String email) throws AccessDeniedException {
+    public LoanInfoDto returnLoan(ReturnLoanDto dto, String email) throws AccessDeniedException, IllegalStateException {
         if(!userService.checkAdminAccess(email)) {
             throw new AccessDeniedException("Sense permís!");
         }
@@ -188,7 +189,9 @@ public class InventoryService {
 
         loan.setRealReturnDate(LocalDateTime.now());
         loan.setState(LoanState.RETURNED);
-        loanRepository.save(loan);
+        Loan saved = loanRepository.save(loan);
+
+        return loanConversor.fromEntity2Dto(saved);
     }
 
     @Transactional
