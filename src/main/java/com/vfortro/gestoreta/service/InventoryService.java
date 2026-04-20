@@ -132,7 +132,12 @@ public class InventoryService {
         mov.setDate(LocalDateTime.now());
 
         InventoryMovement saved = movementRepository.saveAndFlush(mov);
-        stockRepository.saveAndFlush(stock);
+        if(stock.getAmount()>0L) {
+            stockRepository.saveAndFlush(stock);
+        } else {
+            stockRepository.deleteById(stock.getStockId());
+        }
+
         InventoryMovementInfoDto infoDto = movementConversor.fromEntity2Dto(saved);
         return infoDto;
     }
