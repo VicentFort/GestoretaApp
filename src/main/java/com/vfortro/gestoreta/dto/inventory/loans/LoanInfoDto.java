@@ -25,4 +25,5 @@ public class LoanInfoDto {
     private String contactDniCif;
     private Long itemId;
     private String itemName;
+    private Boolean hasDelayedNotifications;
 }

@@ -2,6 +2,7 @@ package com.vfortro.gestoreta.conversor;
 
 import com.vfortro.gestoreta.dto.inventory.loans.LoanInfoDto;
 import com.vfortro.gestoreta.model.enums.LoanState;
+import com.vfortro.gestoreta.model.enums.NotificationType;
 import com.vfortro.gestoreta.model.inventory.Loan;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,10 @@ public class LoanConversor {
         dto.setContactPhone(loan.getContact().getPhone());
         dto.setContactEmail(loan.getContact().getEmail());
         dto.setContactDniCif(loan.getContact().getDniCif());
+        if(loan.getState() == LoanState.DELAYED && loan.getNotifications().stream().noneMatch(n -> n.getType() == NotificationType.DELAY)) {
+            dto.setHasDelayedNotifications(true);
+        }
+        dto.setHasDelayedNotifications(false);
         return dto;
     }
 }

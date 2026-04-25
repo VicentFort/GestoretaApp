@@ -11,7 +11,6 @@ import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactInfoDto;
 import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactUpdateDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementDto;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementInfoDto;
-import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementResultDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreCreateDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreInfoDto;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreUpdateDto;
@@ -20,6 +19,7 @@ import com.vfortro.gestoreta.exceptions.InsufficientStockException;
 import com.vfortro.gestoreta.model.Falla;
 import com.vfortro.gestoreta.model.enums.LoanState;
 import com.vfortro.gestoreta.model.enums.MovementType;
+import com.vfortro.gestoreta.model.enums.NotificationType;
 import com.vfortro.gestoreta.model.inventory.*;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import com.vfortro.gestoreta.repository.inventory.*;
@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Service
 public class InventoryService {
@@ -71,6 +70,9 @@ public class InventoryService {
 
     @Autowired
     private LoanConversor loanConversor;
+
+    @Autowired
+    private LoanNotificationRepository notificationRepository;
 
 
 
@@ -153,8 +155,22 @@ public class InventoryService {
         loan.setItem(item);
         LoanContact contact = contactRepository.findById(dto.getContactId()).orElseThrow(() -> new EntityNotFoundException("No existeix el contacte"));
         loan.setContact(contact);
-        return loanRepository.save(loan);
+        Loan saved = loanRepository.save(loan);
+        registerLoanNotification(saved, NotificationType.CONFIRMATION);
+        return saved;
 
+    }
+
+    @Transactional
+    public LoanNotification registerLoanNotification(Loan loan, NotificationType type) throws EntityNotFoundException {
+        LoanNotification notification = new LoanNotification();
+        notification.setLoan(loan);
+        notification.setContact(loan.getContact());
+        notification.setDate(LocalDateTime.now());
+        notification.setType(type);
+        notification.setSuccessful(true);
+        LoanNotification saved = notificationRepository.save(notification);
+        return saved;
     }
 
     @Transactional
