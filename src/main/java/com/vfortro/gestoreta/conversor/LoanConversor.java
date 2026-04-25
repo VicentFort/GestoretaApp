@@ -25,9 +25,9 @@ public class LoanConversor {
         dto.setContactEmail(loan.getContact().getEmail());
         dto.setContactDniCif(loan.getContact().getDniCif());
         if(loan.getState() == LoanState.DELAYED && loan.getNotifications().stream().noneMatch(n -> n.getType() == NotificationType.DELAY)) {
-            dto.setHasDelayedNotifications(true);
+            dto.setHasDelayedNotifications(false);
         }
-        dto.setHasDelayedNotifications(false);
+        dto.setHasDelayedNotifications(true);
         return dto;
     }
 }
