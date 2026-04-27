@@ -2,6 +2,7 @@ package com.vfortro.gestoreta.model.inventory;
 
 import com.vfortro.gestoreta.model.Falla;
 import com.vfortro.gestoreta.model.enums.ItemCategory;
+import com.vfortro.gestoreta.model.payments.Coupon;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -52,5 +53,8 @@ public class InventoryItem implements Serializable {
 
     @OneToMany(mappedBy = "item")
     private Set<InventoryMovement> movements = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "item")
+    private Set<Coupon> coupons = new LinkedHashSet<>();
 
 }

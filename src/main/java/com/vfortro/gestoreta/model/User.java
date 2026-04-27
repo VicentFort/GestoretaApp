@@ -1,5 +1,8 @@
 package com.vfortro.gestoreta.model;
 
+import com.vfortro.gestoreta.model.payments.CouponStock;
+import com.vfortro.gestoreta.model.payments.PaymentLog;
+import com.vfortro.gestoreta.model.payments.Purchase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -73,6 +76,18 @@ public class User implements Serializable {
 
     @OneToMany
     private Set<Request> requests = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "user")
+    private Set<CouponStock> stocks = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "user")
+    private Set<Purchase> purchases = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "user")
+    private Set<PaymentLog> paymentLogs = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "manager")
+    private Set<PaymentLog> managerLogs = new LinkedHashSet<>();
 
     @Column(name="nickname")
     private String nickname;
