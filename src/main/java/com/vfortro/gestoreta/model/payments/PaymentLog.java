@@ -3,6 +3,7 @@ package com.vfortro.gestoreta.model.payments;
 import com.vfortro.gestoreta.model.Falla;
 import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.model.enums.PaymentLogType;
+import com.vfortro.gestoreta.model.inventory.InventoryItem;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -22,7 +23,7 @@ public class PaymentLog implements Serializable {
     private Long logId;
 
     @Column(name = "price")
-    private Float price;
+    private Double price;
 
     @NotNull()
     @Column(name = "date", nullable = false)
@@ -56,5 +57,9 @@ public class PaymentLog implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "purchase_id")
     private Purchase purchase;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id")
+    private InventoryItem item;
 
 }

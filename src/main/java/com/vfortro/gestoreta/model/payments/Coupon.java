@@ -24,7 +24,11 @@ public class Coupon implements Serializable {
 
     @NotNull
     @Column(name = "price", nullable = false)
-    private Float price;
+    private Double price;
+
+    @NotNull
+    @Column(name = "name", nullable = false)
+    private String name;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -40,7 +44,7 @@ public class Coupon implements Serializable {
     private Set<CouponStock> stocks = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "coupon")
-    private Set<PurchaseDetails> purchaseDetails = new LinkedHashSet<>();
+    private Set<PurchaseDetail> purchaseDetails = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "coupon")
     private Set<PaymentLog> paymentLogs = new LinkedHashSet<>();

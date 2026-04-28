@@ -16,6 +16,7 @@ import com.vfortro.gestoreta.repository.EventTagRepository;
 import com.vfortro.gestoreta.repository.PositionRepository;
 import com.vfortro.gestoreta.repository.UserRepository;
 import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -226,7 +227,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public User readUserAsEntity(Long userId) {
-        return userRepository.findUserById(userId);
+        return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("No existeix el usuari amb id: " + userId));
     }
     @Transactional
     public void createAttPreferences(String email, Long tagId) throws AccessDeniedException {
@@ -272,6 +273,7 @@ public class UserService {
         return prefs;
     }
 
+    @Transactional(readOnly = true)
     public List<EventInfoDto> getEvents(String email) {
         User user = userRepository.findUserByEmail(email);
         List<EventInfoDto> events = new ArrayList<>();
@@ -279,5 +281,11 @@ public class UserService {
             events.add(eventConversor.fromEntity2InfoDto(assist.getEvent()));
         }
         return events;
+    }
+
+    @Transactional(readOnly = true)
+    public User readUserAsEntity(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("No existeix el user amb email: " +email));
+        return user;
     }
 }

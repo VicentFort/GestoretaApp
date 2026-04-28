@@ -22,7 +22,7 @@ public class Purchase {
 
     @NotNull
     @Column(name = "total_price", nullable = false)
-    private Float totalPrice;
+    private Double totalPrice;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -34,8 +34,8 @@ public class Purchase {
     @JoinColumn(name = "falla_id", nullable = false)
     private Falla falla;
 
-    @OneToMany(mappedBy = "purchase")
-    private Set<PurchaseDetails> details = new LinkedHashSet<>();
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL)
+    private Set<PurchaseDetail> details = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "purchase")
     private Set<PaymentLog> paymentLogs = new LinkedHashSet<>();
