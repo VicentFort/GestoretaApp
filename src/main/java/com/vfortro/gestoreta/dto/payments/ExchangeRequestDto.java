@@ -8,15 +8,16 @@ import lombok.Setter;
 
 import java.util.List;
 
-@Setter
 @Getter
+@Setter
 @NoArgsConstructor
 @Data
-public class PurchaseRequestDto {
+public class ExchangeRequestDto {
     @NotNull
     private List<CouponRequestDto> coupons;
     @NotNull
     private Long userId;
     @NotNull
-    private Double totalPrice;
+    private Long storeId;
+
 }
