@@ -34,7 +34,7 @@ public enum PaymentLogType {
 
     public static PaymentLogType fromValue(String value) {
         for(PaymentLogType type: PaymentLogType.values()) {
-            if(type.value.equals(value)) {
+            if(type.value.equalsIgnoreCase(value)) {
                 return type;
             }
         }

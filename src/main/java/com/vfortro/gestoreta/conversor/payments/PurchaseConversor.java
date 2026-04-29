@@ -4,11 +4,15 @@ import com.vfortro.gestoreta.dto.payments.CouponRequestDto;
 import com.vfortro.gestoreta.dto.payments.PurchaseRequestDto;
 import com.vfortro.gestoreta.model.Falla;
 import com.vfortro.gestoreta.model.payments.Purchase;
+import com.vfortro.gestoreta.model.payments.PurchaseDetail;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import com.vfortro.gestoreta.repository.UserRepository;
 import com.vfortro.gestoreta.repository.payments.CouponRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 @Component
 public class PurchaseConversor {
@@ -24,6 +28,7 @@ public class PurchaseConversor {
         purchase.setUser(userRepository.findUserById(dto.getUserId()));
         purchase.setFalla(falla);
         purchase.setTotalPrice(dto.getTotalPrice());
+        purchase.setDetails(new LinkedHashSet<>());
         return purchase;
     }
 }

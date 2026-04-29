@@ -78,16 +78,11 @@ public class PaymentService {
             //3.0 Encontrar el cupon en la base de datos y crear un detalle de compra de se cupon.
             Coupon coupon = couponRepository.findById(dto.getCouponId()).orElseThrow(() -> new EntityNotFoundException("No existeix el ticket amb id: " + dto.getCouponId()));
             PurchaseDetail detail = detailConversor.fromDto2Entity(dto, toSave, coupon);
-            PurchaseDetail savedDetail = detailRepository.save(detail);
-
+            toSave.getDetails().add(detail);
             totalSum += coupon.getPrice()  * dto.getAmount();
-
 
             //3.1 Preparar el mensaje de log para el PaymentLog y el registro de inventario.
             String logMessage = dto.getAmount() + " tiquets venuts de: " + coupon.getName() + " amb id: " + coupon.getCouponId() + " per part de: " + manager.getName() + " " + manager.getSurname();
-
-
-
 
             //3.2 Actualizar el stock de tickets.
             CouponStock stock = stockRepository.findByCouponCouponIdAndUserId(coupon.getCouponId(), user.getId())
@@ -96,6 +91,7 @@ public class PaymentService {
                         newStock.setCoupon(coupon);
                         newStock.setUser(user);
                         newStock.setAmount(0L);
+                        newStock.setFalla(manager.getFalla());
                         return newStock;
                     });
             stock.setAmount(stock.getAmount() + dto.getAmount());
@@ -134,7 +130,7 @@ public class PaymentService {
     }
 
     @Transactional
-    public void exchangeCoupon(ExchangeRequestDto request, String email) throws AccessDeniedException {
+    public void exchangeCoupon(ExchangeRequestDto request, String email) throws AccessDeniedException, EntityNotFoundException, InsufficientStockException {
         //1. Validación de permisos de usuario.
         User manager = userService.readUserAsEntity(email);
         if(manager.getFalla()==null) {
@@ -150,7 +146,7 @@ public class PaymentService {
             //2.0 Encontrar el cupon en la base de datos y crear un detalle de compra de se cupon.
             Coupon coupon = couponRepository.findById(dto.getCouponId()).orElseThrow(() -> new EntityNotFoundException("No existeix el ticket amb id: " + dto.getCouponId()));
 
-            String logMessage = dto.getAmount() + " tickets bescanviats de: " + coupon.getName() + " amb id: " + coupon.getCouponId() + " .Gestionat per: " + manager.getName() + " " + manager.getSurname();
+            String logMessage = dto.getAmount() + " tickets bescanviats de: " + coupon.getName() + " amb id: " + coupon.getCouponId() + ". Gestionat per: " + manager.getName() + " " + manager.getSurname();
 
             //2.1 Gestión del stock de cupones del usuario
             CouponStock stock = stockRepository.findByCouponCouponIdAndUserId(coupon.getCouponId(), user.getId()).orElseThrow(() -> new InsufficientStockException("El usuari no te stock de tiquets"));

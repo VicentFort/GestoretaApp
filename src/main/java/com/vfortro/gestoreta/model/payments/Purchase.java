@@ -34,7 +34,7 @@ public class Purchase {
     @JoinColumn(name = "falla_id", nullable = false)
     private Falla falla;
 
-    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PurchaseDetail> details = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "purchase")
