@@ -7,6 +7,7 @@ import com.vfortro.gestoreta.conversor.payments.PurchaseDetailConversor;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementDto;
 import com.vfortro.gestoreta.dto.payments.CouponRequestDto;
 import com.vfortro.gestoreta.dto.payments.ExchangeRequestDto;
+import com.vfortro.gestoreta.dto.payments.GenericPaymentRequestDto;
 import com.vfortro.gestoreta.dto.payments.PurchaseRequestDto;
 import com.vfortro.gestoreta.dto.payments.coupons.CouponCreateDto;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
@@ -17,6 +18,7 @@ import com.vfortro.gestoreta.model.enums.PaymentLogType;
 import com.vfortro.gestoreta.model.inventory.InventoryItem;
 import com.vfortro.gestoreta.model.payments.*;
 import com.vfortro.gestoreta.repository.FallaRepository;
+import com.vfortro.gestoreta.repository.UserRepository;
 import com.vfortro.gestoreta.repository.payments.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +43,14 @@ public class PaymentService {
     private PurchaseRepository purchaseRepository;
     @Autowired
     private FallaRepository fallaRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private UserService userService;
     @Autowired
     private InventoryService inventoryService;
+
 
 
     @Autowired
@@ -131,7 +136,7 @@ public class PaymentService {
 
     @Transactional
     public void exchangeCoupon(ExchangeRequestDto request, String email) throws AccessDeniedException, EntityNotFoundException, InsufficientStockException {
-        //1. Validación de permisos de usuario.
+        //1.0 Validación de permisos de usuario.
         User manager = userService.readUserAsEntity(email);
         if(manager.getFalla()==null) {
             throw new EntityNotFoundException("El usuari no te falla");
@@ -139,6 +144,7 @@ public class PaymentService {
         if(!userService.checkAdminAccess(email)) {
             throw new AccessDeniedException("Sense permís!");
         }
+
         //1.1 Obtenemos el usuario que ha hecho la compra.
         User user = userService.readUserAsEntity(request.getUserId());
 
@@ -180,6 +186,59 @@ public class PaymentService {
             log.setMessage(logMessage);
             logRepository.save(log);
         }
+
+    }
+
+    @Transactional
+    public void processPayment(GenericPaymentRequestDto request, String email) throws AccessDeniedException, IllegalArgumentException, EntityNotFoundException {
+        //1. Validación de permisos del manager.
+        User manager = userService.readUserAsEntity(email);
+        if(manager.getFalla()==null) {
+            throw new EntityNotFoundException("El usuari no te falla");
+        }
+        if(!userService.checkAdminAccess(email)) {
+            throw new AccessDeniedException("Sense permís!");
+        }
+        //2. El tipo ha de existir.
+        if(request.getType() == null) {
+            throw new IllegalArgumentException("El tipus ha de especificar-se");
+        }
+
+
+        //3. Cas de venda de cupons
+        if(request.getType() == PaymentLogType.COUPON_SOLD) {
+            if(request.getCoupons() == null || request.getCoupons().isEmpty()) {
+                throw new IllegalArgumentException("No existeixen tickets per a realitzar aquesta venda de tickets");
+            }
+            if(request.getUserId() == null) {
+                throw new IllegalArgumentException("No s'ha especificat usuari per a la venda de tickets");
+            }
+            PurchaseRequestDto purchaseRequest = new PurchaseRequestDto();
+            purchaseRequest.setUserId(request.getUserId());
+            purchaseRequest.setCoupons(request.getCoupons());
+            purchaseRequest.setTotalPrice(request.getPrice());
+            sellCoupons(purchaseRequest, email);
+        }
+
+        if(request.getType() == PaymentLogType.COUPON_EXCHANGED) {
+            if(request.getCoupons() == null || request.getCoupons().isEmpty()) {
+                throw new IllegalArgumentException("No existeixen tickets per a realitzar auqest bescanvi de tickets");
+            }
+            if(request.getUserId() == null) {
+                throw new IllegalArgumentException("No s'ha especificat usuari per a bescanviar els tickets");
+            }
+            if(request.getStoreId() == null) {
+                throw new IllegalArgumentException("No s'ha especificat magatzem d'on traure els productes");
+            }
+            ExchangeRequestDto exchangeRequest = new ExchangeRequestDto();
+            exchangeRequest.setUserId(request.getUserId());
+            exchangeRequest.setCoupons(request.getCoupons());
+            exchangeRequest.setStoreId(request.getStoreId());
+            exchangeCoupon(exchangeRequest, email);
+        }
+
+
+
 
     }
 }
