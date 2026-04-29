@@ -21,7 +21,8 @@ public enum PaymentLogType {
     SUBSCRIBER_EXPENSE("Gasto d.abonats"),
     DONATION("Donació"),
     OTHER_EXPENSES("Altre gasto"),
-    OTHER_PAYMENTS("Altre pagament");
+    OTHER_PAYMENTS("Altre pagament"),
+    EVENT_PAYMENT("Pagament d.event");
 
     private final String value;
 
