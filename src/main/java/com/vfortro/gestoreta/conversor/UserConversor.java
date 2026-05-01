@@ -1,14 +1,13 @@
 package com.vfortro.gestoreta.conversor;
 
-import com.vfortro.gestoreta.dto.assists.AttPrefInfoDto;
-import com.vfortro.gestoreta.dto.events.EventInfoDto;
-import com.vfortro.gestoreta.dto.events.EventInfoUserDto;
-import com.vfortro.gestoreta.dto.events.EventTagInfoDto;
-import com.vfortro.gestoreta.dto.fallas.FallaUserInfoDto;
-import com.vfortro.gestoreta.dto.food.FoodNeedCreateDto;
-import com.vfortro.gestoreta.dto.users.UserCreateDto;
-import com.vfortro.gestoreta.dto.users.UserInfoDto;
-import com.vfortro.gestoreta.dto.users.UserInfoFallaDto;
+import com.vfortro.gestoreta.dto.attendants.AttPrefInfoDTO;
+import com.vfortro.gestoreta.dto.events.EventInfoUserDTO;
+import com.vfortro.gestoreta.dto.events.EventTagAdminInfoDTO;
+import com.vfortro.gestoreta.dto.fallas.info.FallaUserInfoDTO;
+import com.vfortro.gestoreta.dto.food.FoodNeedCreateDTO;
+import com.vfortro.gestoreta.dto.users.UserCreateDTO;
+import com.vfortro.gestoreta.dto.users.info.UserInfoDTO;
+import com.vfortro.gestoreta.dto.users.info.UserInfoFallaDTO;
 import com.vfortro.gestoreta.model.*;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -32,8 +31,8 @@ public class UserConversor {
     private EventTagConversor eventTagConversor;
 
 
-    public UserCreateDto fromEntity2Dto(User user) {
-        UserCreateDto dto = new UserCreateDto();
+    public UserCreateDTO fromEntity2Dto(User user) {
+        UserCreateDTO dto = new UserCreateDTO();
         dto.setUserId(user.getId());
         dto.setName(user.getName());
         dto.setSurname(user.getSurname());
@@ -45,8 +44,8 @@ public class UserConversor {
         return dto;
     }
 
-    public UserInfoFallaDto fromEntity2InfoFallaDto(User user) {
-        UserInfoFallaDto dto = new UserInfoFallaDto();
+    public UserInfoFallaDTO fromEntity2InfoFallaDto(User user) {
+        UserInfoFallaDTO dto = new UserInfoFallaDTO();
         dto.setId(user.getId());
         dto.setName(user.getName());
         dto.setSurname(user.getSurname());
@@ -55,10 +54,10 @@ public class UserConversor {
         dto.setJoinDate(user.getJoinDate());
         dto.setNickname(user.getNickname());
         dto.setAdminAccess(user.getPositions().stream().anyMatch(Position::getAdminAccess));
-        List<FoodNeedCreateDto> needs = new ArrayList<>();
-        List<AttPrefInfoDto> prefs = new ArrayList<>();
+        List<FoodNeedCreateDTO> needs = new ArrayList<>();
+        List<AttPrefInfoDTO> prefs = new ArrayList<>();
         for (FoodNeed need : user.getFoodNeeds()) {
-            FoodNeedCreateDto dtoN = new FoodNeedCreateDto();
+            FoodNeedCreateDTO dtoN = new FoodNeedCreateDTO();
             if (need.getUser().getId() != null) dtoN.setUserId(need.getUser().getId());
             if (need.getId() != null) dtoN.setFoodNeedId(need.getId());
             if (need.getDescription() != null) dtoN.setDescription(need.getDescription().getValue());
@@ -66,7 +65,7 @@ public class UserConversor {
         }
         dto.setFoodNeeds(needs);
         for(AttendantPreference pref: user.getAttendantPreferences()) {
-            AttPrefInfoDto prefDto = new AttPrefInfoDto();
+            AttPrefInfoDTO prefDto = new AttPrefInfoDTO();
             prefDto.setPrefId(pref.getId());
             prefDto.setTagName(pref.getEventTag().getName());
             prefDto.setTagId(pref.getEventTag().getId());
@@ -77,8 +76,8 @@ public class UserConversor {
         return dto;
     }
 
-    public UserInfoDto fromEntity2InfoDto(User user) {
-        UserInfoDto dto = new UserInfoDto();
+    public UserInfoDTO fromEntity2InfoDto(User user) {
+        UserInfoDTO dto = new UserInfoDTO();
         dto.setId(user.getId());
         dto.setName(user.getName());
         dto.setSurname(user.getSurname());
@@ -88,10 +87,10 @@ public class UserConversor {
         dto.setNickname(user.getNickname());
         dto.setAdminAccess(user.getPositions().stream().anyMatch(Position::getAdminAccess));
         if (user.getFalla() != null) dto.setFallaInfo(fromEntity2UserInfo(user.getFalla()));
-        List<EventInfoUserDto> events = new ArrayList<>();
-        List<FoodNeedCreateDto> needs = new ArrayList<>();
-        List<AttPrefInfoDto> tagNamePrefs = new ArrayList<>();
-        List<EventInfoUserDto> attEvents = new ArrayList<>();
+        List<EventInfoUserDTO> events = new ArrayList<>();
+        List<FoodNeedCreateDTO> needs = new ArrayList<>();
+        List<AttPrefInfoDTO> tagNamePrefs = new ArrayList<>();
+        List<EventInfoUserDTO> attEvents = new ArrayList<>();
         for (Assist a : user.getAssists()) {
             events.add(eventConversor.fromEntity2InfoUserDto(a.getEvent()));
         }
@@ -99,7 +98,7 @@ public class UserConversor {
             needs.add(foodNeedConversor.fromEntity2Dto(need));
         }
         for (AttendantPreference pref : user.getAttendantPreferences()) {
-            AttPrefInfoDto att = new AttPrefInfoDto();
+            AttPrefInfoDTO att = new AttPrefInfoDTO();
             att.setPrefId(pref.getId());
             att.setTagName(pref.getEventTag().getName());
             att.setTagId(pref.getEventTag().getId());
@@ -115,7 +114,7 @@ public class UserConversor {
         return dto;
     }
 
-    public User fromDto2Entity(UserCreateDto dto) {
+    public User fromDto2Entity(UserCreateDTO dto) {
         User user = new User();
         user.setId(dto.getUserId());
         user.setName(dto.getName());
@@ -136,13 +135,13 @@ public class UserConversor {
         return user;
     }
 
-    public FallaUserInfoDto fromEntity2UserInfo(Falla falla) {
-        FallaUserInfoDto dto = new FallaUserInfoDto();
+    public FallaUserInfoDTO fromEntity2UserInfo(Falla falla) {
+        FallaUserInfoDTO dto = new FallaUserInfoDTO();
         dto.setFallaId(falla.getId());
         dto.setCreationDate(falla.getCreationDate());
         dto.setName(falla.getName());
-        List<EventInfoUserDto> events = new ArrayList<>();
-        List<EventTagInfoDto> tags = new ArrayList<>();
+        List<EventInfoUserDTO> events = new ArrayList<>();
+        List<EventTagAdminInfoDTO> tags = new ArrayList<>();
         for (Event e : falla.getEvents()) {
             events.add(eventConversor.fromEntity2InfoUserDto(e));
         }

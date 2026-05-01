@@ -1,17 +1,15 @@
 package com.vfortro.gestoreta.conversor;
 
-import com.vfortro.gestoreta.dto.assists.AssistDto;
-import com.vfortro.gestoreta.dto.assists.AttendantCreateDto;
-import com.vfortro.gestoreta.dto.events.EventCreateDto;
-import com.vfortro.gestoreta.dto.events.EventInfoDto;
-import com.vfortro.gestoreta.dto.events.EventInfoUserDto;
-import com.vfortro.gestoreta.dto.food.FoodNeedResultDto;
-import com.vfortro.gestoreta.dto.users.UserEventInfoDto;
+import com.vfortro.gestoreta.dto.assists.AssistDTO;
+import com.vfortro.gestoreta.dto.events.EventCreateDTO;
+import com.vfortro.gestoreta.dto.events.EventInfoDTO;
+import com.vfortro.gestoreta.dto.events.EventInfoUserDTO;
+import com.vfortro.gestoreta.dto.food.info.FoodNeedInfoDTO;
+import com.vfortro.gestoreta.dto.attendants.AttendantEventInfoDTO;
 import com.vfortro.gestoreta.model.*;
 import com.vfortro.gestoreta.repository.EventTagRepository;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,8 +27,8 @@ public class EventConversor {
     @Autowired
     private AssistConversor assistConversor;
 
-    public EventCreateDto fromEntity2Dto(Event event) {
-        EventCreateDto dto = new EventCreateDto();
+    public EventCreateDTO fromEntity2Dto(Event event) {
+        EventCreateDTO dto = new EventCreateDTO();
         dto.setId(event.getId());
         dto.setPublicField(event.getPublicField());
         dto.setDone(event.getDone());
@@ -58,8 +56,8 @@ public class EventConversor {
         return dto;
     }
 
-    public EventInfoDto fromEntity2InfoDto(Event event) {
-        EventInfoDto dto = new EventInfoDto();
+    public EventInfoDTO fromEntity2InfoDto(Event event) {
+        EventInfoDTO dto = new EventInfoDTO();
         dto.setId(event.getId());
         dto.setTitle(event.getTitle());
         dto.setPublicField(event.getPublicField());
@@ -76,14 +74,14 @@ public class EventConversor {
         dto.setEndDate(event.getEndDate().toLocalDate());
         dto.setOpen(event.getOpen());
         dto.setCheckNeeds(event.getCheckNeeds());
-        List<FoodNeedResultDto> needs = new ArrayList<>();
-        List<AssistDto> assists = new ArrayList<>();
+        List<FoodNeedInfoDTO> needs = new ArrayList<>();
+        List<AssistDTO> assists = new ArrayList<>();
         for(Assist assist : event.getAssists()) {
             assists.add(assistConversor.formEntity2Dto(assist));
             User user = assist.getUser();
             if(!user.getFoodNeeds().isEmpty()) {
                 for(FoodNeed need : user.getFoodNeeds()) {
-                    FoodNeedResultDto aux = new FoodNeedResultDto();
+                    FoodNeedInfoDTO aux = new FoodNeedInfoDTO();
                     aux.setFoodNeedDesc(need.getDescription().getValue());
                     aux.setUserName(user.getName());
                     aux.setUserSurname(user.getSurname());
@@ -94,9 +92,9 @@ public class EventConversor {
         }
         dto.setAssists(assists);
         dto.setFoodNeeds(needs);
-        List<UserEventInfoDto> attendants = new ArrayList<>();
+        List<AttendantEventInfoDTO> attendants = new ArrayList<>();
         for(Attendant att : event.getAttendants()) {
-            UserEventInfoDto attendantDto = new UserEventInfoDto();
+            AttendantEventInfoDTO attendantDto = new AttendantEventInfoDTO();
             attendantDto.setId(att.getUser().getId());
             attendantDto.setName(att.getUser().getName());
             attendantDto.setSurname(att.getUser().getSurname());
@@ -106,7 +104,7 @@ public class EventConversor {
         return dto;
     }
 
-    public Event fromDto2Entity(EventCreateDto dto) {
+    public Event fromDto2Entity(EventCreateDTO dto) {
         Event event = new Event();
         event.setId(dto.getId());
         event.setPublicField(dto.getPublicField());
@@ -138,8 +136,8 @@ public class EventConversor {
         return event;
     }
 
-    public EventInfoUserDto fromEntity2InfoUserDto(Event event) {
-        EventInfoUserDto dto = new EventInfoUserDto();
+    public EventInfoUserDTO fromEntity2InfoUserDto(Event event) {
+        EventInfoUserDTO dto = new EventInfoUserDTO();
         dto.setId(event.getId());
         dto.setTitle(event.getTitle());
         dto.setDescription(event.getDescription());

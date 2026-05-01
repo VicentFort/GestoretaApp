@@ -1,16 +1,12 @@
 package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.*;
-import com.vfortro.gestoreta.dto.events.EventCreateDto;
-import com.vfortro.gestoreta.dto.events.EventInfoDto;
-import com.vfortro.gestoreta.dto.events.EventTagInfoDto;
-import com.vfortro.gestoreta.dto.fallas.FallaAdminInfo;
-import com.vfortro.gestoreta.dto.fallas.FallaCreateDto;
-import com.vfortro.gestoreta.dto.fallas.FallaUpdateDto;
-import com.vfortro.gestoreta.dto.requests.RequestDto;
-import com.vfortro.gestoreta.dto.users.UserInfoDto;
+import com.vfortro.gestoreta.dto.fallas.info.FallaAdminInfoDTO;
+import com.vfortro.gestoreta.dto.fallas.FallaCreateDTO;
+import com.vfortro.gestoreta.dto.fallas.FallaUpdateDTO;
+import com.vfortro.gestoreta.dto.requests.RequestUpdateDTO;
 import com.vfortro.gestoreta.service.FallaService;
-import com.vfortro.gestoreta.service.RequestService;
+import com.vfortro.gestoreta.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -29,7 +25,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
-import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -40,22 +35,8 @@ public class FallaController {
     private FallaService fallaService;
 
     @Autowired
-    private RequestService requestService;
+    private UserService userService;
 
-    @Tags({
-            @Tag(name = "Filtrado"),
-            @Tag(name = "Fallas")
-    })
-    @Operation(summary = "Obtiene todas las fallas de la BD.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json",
-                    schema = @Schema(implementation = FallaCreateDto.class))})
-    })
-    @GetMapping("/getAll")
-    public ResponseEntity<List<FallaCreateDto>> getAll() {
-        List<FallaCreateDto> body = fallaService.getAll();
-        return new ResponseEntity<>(body,HttpStatus.OK);
-    }
 
     @Tags({
             @Tag(name = "Creación"),
@@ -68,8 +49,8 @@ public class FallaController {
             })}),
     })
     @PostMapping("/create")
-    public ResponseEntity<String> postFalla(@Valid @RequestBody FallaCreateDto falla) {
-        FallaCreateDto result = fallaService.createFalla(falla);
+    public ResponseEntity<String> postFalla(@Valid @RequestBody FallaCreateDTO falla) {
+        FallaCreateDTO result = fallaService.createFalla(falla);
         return new ResponseEntity<>("Falla creada con id: " + result.getFallaId(), HttpStatus.CREATED);
 
     }
@@ -90,7 +71,7 @@ public class FallaController {
             })})
     })
     @PutMapping("/update")
-    public ResponseEntity<?> updateFalla(@Valid @RequestBody FallaUpdateDto newFalla,
+    public ResponseEntity<?> updateFalla(@Valid @RequestBody FallaUpdateDTO newFalla,
                                          Authentication authentication)
     {
         String email = authentication.getName();
@@ -102,85 +83,6 @@ public class FallaController {
         } catch(NullPointerException nullEx) {
             return new ResponseEntity<>( new ApiMessageResponse(nullEx.getMessage(), false), HttpStatus.NOT_FOUND);
         }
-    }
-
-    @Tags({
-            @Tag(name = "Filtrado"),
-            @Tag(name = "Fallas")
-    })
-    @Operation(summary = "Busca una falla en la base de datos dado su nombre.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = FallaCreateDto.class))}),
-            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Falla no encontrada." , value = "{\"message\":\"Falla con nombre: FALLA GRAN no econtrada.\",\"success\":false}")
-            })})
-    })
-    @GetMapping("/getByName")
-    public ResponseEntity<?> getByName(@RequestParam("fallaName") @Valid String fallaName) {
-        FallaCreateDto falla = fallaService.readFalla(fallaName);
-        if(Objects.isNull(falla)) {
-            return new ResponseEntity<>(new ApiMessageResponse("Falla con nombre: " + fallaName + " no encontrada.", false), HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(falla,HttpStatus.OK);
-    }
-
-    @Tags({
-            @Tag(name = "Filtrado"),
-            @Tag(name = "Usuarios"),
-            @Tag(name = "Fallas")
-    })
-    @Operation(summary = "Devuelve los usuarios que pertenencen una falla.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json")}),
-            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Falla no encontrada." , value = "{\"message\":\"Falla con id: 1 no econtrada.\",\"success\":false}")
-            })}),
-            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
-                    @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
-            })})
-    })
-    @GetMapping("/users")
-    public ResponseEntity<?> getUsers(Authentication authentication) {
-        String email = authentication.getName();
-        try {
-            List<UserInfoDto> result = fallaService.getUsers(email);
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(),false), HttpStatus.FORBIDDEN);
-        } catch (NullPointerException | EntityNotFoundException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(),false), HttpStatus.NOT_FOUND);
-        }
-
-    }
-
-    @Tags({
-            @Tag(name = "Filtrado"),
-            @Tag(name = "Solicitudes"),
-            @Tag(name = "Usuarios"),
-            @Tag(name = "Fallas")
-    })
-    @Operation(summary = "Devuelve las solicitudes de usuarios a una falla.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = RequestDto.class))}),
-            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class),examples = {
-                    @ExampleObject(name = "Falla no encontrada." , value = "{\"message\":\"Falla con id: 1 no econtrada.\",\"success\":false}")
-            })}),
-            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
-                    @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
-            })})
-    })
-    @GetMapping("/requests")
-    public ResponseEntity<?> getRequests(Authentication authentication) {
-        String email = authentication.getName();
-        try {
-            List<RequestDto> result = fallaService.getRequests(email);
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(),false),HttpStatus.FORBIDDEN);
-        }
-
     }
 
     @Tags({
@@ -200,35 +102,21 @@ public class FallaController {
             })})
     })
     @PutMapping("/updateRequest")
-    public ResponseEntity<?> acceptRequest(@RequestBody @Valid RequestDto dto,
+    public ResponseEntity<?> updateRequest(@RequestBody @Valid RequestUpdateDTO dto,
                                            Authentication authentication) {
         String email = authentication.getName();
-        if(Objects.isNull(requestService.readRequest(dto.getRequestId()))) {
+        if(Objects.isNull(userService.readRequest(dto.getRequestId()))) {
             return new ResponseEntity<>(new ApiMessageResponse("La solicitud de unión con id: " + dto.getRequestId() + " no existe.", false), HttpStatus.NOT_FOUND);
         }
         try {
-            requestService.updateRequest(dto, email);
+            userService.updateRequest(dto, email);
             return new ResponseEntity<>(new ApiMessageResponse("Solicitud con id: "+ dto.getRequestId() +" aceptada",true), HttpStatus.OK);
         } catch(AccessDeniedException accEx) {
             return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
         }
 
     }
-    @Tags({
-            @Tag(name = "Eventos"),
-            @Tag(name = "Fallas")
-    })
-    @Operation(summary = "Devuelve información de todas las etiquetas de evento de una falla")
-    @GetMapping("/getEventTags")
-    public ResponseEntity<?> getEventTags(Authentication authentication) {
-        String email = authentication.getName();
-        try {
-            List<EventTagInfoDto> result = fallaService.getEventTags(email);
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
-        }
-    }
+
 
     @Tags({
             @Tag(name = "Eventos"),
@@ -252,33 +140,12 @@ public class FallaController {
         }
     }
 
-    @GetMapping("/events")
-    public ResponseEntity<?> getEvents(Authentication authentication) {
-        String email = authentication.getName();
-        try {
-            List<EventInfoDto> result = fallaService.getEvents(email);
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (AccessDeniedException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
-        }
-    }
-
-    @GetMapping("/activeEvents")
-    public ResponseEntity<?> getActiveEvents(Authentication authentication) {
-        String email = authentication.getName();
-        try {
-            List<EventCreateDto> result = fallaService.getActiveEvents(email);
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (AccessDeniedException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
-        }
-    }
 
     @GetMapping("/info")
     public ResponseEntity<?> getFallaInfo(Authentication authentication) {
         String email = authentication.getName();
         try {
-            FallaAdminInfo result = fallaService.getFallaInfo(email);
+            FallaAdminInfoDTO result = fallaService.getFallaInfo(email);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (AccessDeniedException e) {
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);

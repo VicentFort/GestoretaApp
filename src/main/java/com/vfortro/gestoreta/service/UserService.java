@@ -1,20 +1,17 @@
 package com.vfortro.gestoreta.service;
 
-import java.time.LocalDate;
-
-import com.vfortro.gestoreta.conversor.EventConversor;
+import com.vfortro.gestoreta.conversor.FoodNeedConversor;
+import com.vfortro.gestoreta.conversor.RequestConversor;
 import com.vfortro.gestoreta.conversor.UserConversor;
-import com.vfortro.gestoreta.dto.events.AttendantPreferenceInfoDto;
-import com.vfortro.gestoreta.dto.events.EventInfoDto;
-import com.vfortro.gestoreta.dto.fallas.FallaUserInfoDto;
-import com.vfortro.gestoreta.dto.users.UserCreateDto;
-import com.vfortro.gestoreta.dto.users.UserInfoDto;
-import com.vfortro.gestoreta.dto.users.UserUpdateDto;
+import com.vfortro.gestoreta.dto.food.FoodNeedCreateDTO;
+import com.vfortro.gestoreta.dto.requests.RequestCreateDTO;
+import com.vfortro.gestoreta.dto.requests.RequestUpdateDTO;
+import com.vfortro.gestoreta.dto.users.UserCreateDTO;
+import com.vfortro.gestoreta.dto.users.info.UserInfoDTO;
+import com.vfortro.gestoreta.dto.users.UserUpdateDTO;
 import com.vfortro.gestoreta.model.*;
-import com.vfortro.gestoreta.repository.AttendandPreferenceRepository;
-import com.vfortro.gestoreta.repository.EventTagRepository;
-import com.vfortro.gestoreta.repository.PositionRepository;
-import com.vfortro.gestoreta.repository.UserRepository;
+import com.vfortro.gestoreta.model.enums.FoodNeedType;
+import com.vfortro.gestoreta.repository.*;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,25 +27,38 @@ import java.util.Objects;
 
 @Service
 public class UserService {
+
+    //REPOSITORIES
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private UserConversor userConversor;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
     @Autowired
     private EventTagRepository eventTagRepository;
     @Autowired
     private AttendandPreferenceRepository attendandPreferenceRepository;
     @Autowired
-    private EventConversor eventConversor;
+    private FoodNeedRepository foodNeedRepository;
+    @Autowired
+    private RequestRepository requestRepository;
+
+    //CONVERSORS
+    @Autowired
+    private UserConversor userConversor;
     @Autowired
     private PositionRepository positionRepository;
+    @Autowired
+    private FoodNeedConversor foodNeedConversor;
+    @Autowired
+    private RequestConversor requestConversor;
+
+    //OTHER
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+
 
 
     @Transactional
-    public UserCreateDto createUser(UserCreateDto user) {
+    public UserCreateDTO createUser(UserCreateDTO user) {
         if(userRepository.existsByEmail(user.getEmail()) || user.getEmail().isEmpty()) throw new EntityExistsException("Ja existeix un usuari amb email: " + user.getEmail());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User toSave = userConversor.fromDto2Entity(user);
@@ -73,21 +83,21 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserCreateDto readUser(String email) {
+    public UserCreateDTO readUser(String email) {
         User user = userRepository.findUserByEmail(email);
         if(user == null) return null;
         return userConversor.fromEntity2Dto(user);
     }
 
     @Transactional(readOnly = true)
-    public UserCreateDto readUser(Long userId) {
+    public UserCreateDTO readUser(Long userId) {
         User user = userRepository.findById(userId).orElse(null);
         if(user == null) return null;
         return userConversor.fromEntity2Dto(user);
     }
 
     @Transactional
-    public UserInfoDto updateUser(UserUpdateDto newUser, String email) throws AccessDeniedException, NullPointerException {
+    public UserInfoDTO updateUser(UserUpdateDTO newUser, String email) throws AccessDeniedException, NullPointerException {
         if(!userRepository.existsByEmail(email)) throw new NullPointerException("El usuario no existe.");
         if(!Objects.equals(email, userRepository.findUserByEmail(email).getEmail())) throw new AccessDeniedException("Sin permiso.");
         User updatedUser = userRepository.findUserByEmail(email);
@@ -201,8 +211,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserInfoDto readUserSecure( String email) throws AccessDeniedException {
-        UserCreateDto user = readUser(email);
+    public UserInfoDTO readUserSecure(String email) throws AccessDeniedException {
+        UserCreateDTO user = readUser(email);
         if(user == null) return null;
         if(!Objects.equals(user.getUserId(), readUser(email).getUserId())) throw new AccessDeniedException("Sin permiso.");
         User userEnt = userRepository.findUserByEmail(email);
@@ -212,17 +222,6 @@ public class UserService {
             eventTitles.add(assist.getEvent().getTitle());
         }
         return userConversor.fromEntity2InfoDto(userEnt);
-    }
-
-    @Transactional(readOnly = true)
-    public FallaUserInfoDto getFallaInfo(String email) {
-        User user =userRepository.findUserByEmail(email);
-        if(user.getFalla() == null) return null;
-        FallaUserInfoDto result = new FallaUserInfoDto();
-        result.setFallaId(user.getFalla().getId());
-        result.setName(user.getFalla().getName());
-        result.setCreationDate(user.getFalla().getCreationDate());
-        return result;
     }
 
     @Transactional(readOnly = true)
@@ -256,36 +255,61 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<AttendantPreferenceInfoDto> getAttPrefs(String email) throws NullPointerException {
-        List<AttendantPreferenceInfoDto> prefs = new ArrayList<>();
-        User user = userRepository.findUserByEmail(email);
-        if(user.getFalla()== null) {
-            throw new NullPointerException("El usuario no tiene falla asignada");
-        }
-        for(AttendantPreference pref : user.getAttendantPreferences()) {
-            AttendantPreferenceInfoDto dto = new AttendantPreferenceInfoDto();
-            dto.setId(pref.getId());
-            dto.setEventTagName(pref.getEventTag().getName());
-            dto.setUserName(user.getName());
-            dto.setUserSurname(user.getSurname());
-            prefs.add(dto);
-        }
-        return prefs;
-    }
-
-    @Transactional(readOnly = true)
-    public List<EventInfoDto> getEvents(String email) {
-        User user = userRepository.findUserByEmail(email);
-        List<EventInfoDto> events = new ArrayList<>();
-        for(Assist assist : user.getAssists()) {
-            events.add(eventConversor.fromEntity2InfoDto(assist.getEvent()));
-        }
-        return events;
-    }
-
-    @Transactional(readOnly = true)
     public User readUserAsEntity(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("No existeix el user amb email: " +email));
         return user;
+    }
+
+    @Transactional(readOnly = true)
+    public FoodNeedCreateDTO readFoodNeed(Long foodNeedId) {
+        FoodNeed need = foodNeedRepository.findById(foodNeedId).orElse(null);
+        if(need == null) return null;
+        return foodNeedConversor.fromEntity2Dto(need);
+    }
+
+    @Transactional
+    public UserInfoDTO createFoodNeed(String desc, String email) throws AccessDeniedException {
+        User user = userRepository.findUserByEmail(email);
+        FoodNeed need = new FoodNeed();
+        need.setDescription(FoodNeedType.fromString(desc));
+        need.setUser(user);
+        foodNeedRepository.saveAndFlush(need);
+        return userConversor.fromEntity2InfoDto(userRepository.findUserByEmail(email));
+    }
+
+    @Transactional
+    public UserInfoDTO deleteFoodNeed(Long needId, String email) throws AccessDeniedException {
+        User user = userRepository.findUserByEmail(email);
+        FoodNeed need = foodNeedRepository.findFoodNeedById(needId);
+        if(!Objects.equals(user.getId(), need.getUser().getId())) throw new AccessDeniedException("Sin permiso.");
+        foodNeedRepository.deleteById(need.getId());
+        return userConversor.fromEntity2InfoDto(userRepository.findUserByEmail(email));
+    }
+
+    @Transactional(readOnly = true)
+    public RequestUpdateDTO readRequest(Long requestId) {
+        Request req = requestRepository.findById(requestId).orElse(null);
+        if(req == null) return null;
+        return requestConversor.fromEntity2Dto(req);
+    }
+
+    @Transactional
+    public RequestUpdateDTO createRequest(RequestCreateDTO dto, String email) throws NullPointerException, EntityNotFoundException, IllegalAccessException, AccessDeniedException {
+        if(!Objects.equals(dto.getIdUser(), readUser(email).getUserId())) throw new AccessDeniedException("Sin permiso.");
+        Request toSave = requestConversor.fromDto2Entity(dto);
+        if(Objects.nonNull(toSave.getUser().getFalla()))
+            throw new IllegalAccessException("El usuario con id:" + dto.getIdUser() + " ya está en una falla.");
+        Request saved = requestRepository.saveAndFlush(toSave);
+        return requestConversor.fromEntity2Dto(saved);
+    }
+
+    @Transactional
+    public void updateRequest(RequestUpdateDTO dto, String email) throws AccessDeniedException {
+        if(!Objects.equals(dto.getIdFalla(), readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
+        if(!checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
+        Request request = requestRepository.findRequestById(dto.getRequestId());
+        request.setAproved(dto.getAproved());
+        request.setReply(dto.getReply());
+        requestRepository.saveAndFlush(request);
     }
 }

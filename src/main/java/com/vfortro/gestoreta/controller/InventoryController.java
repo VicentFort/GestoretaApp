@@ -1,19 +1,18 @@
 package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.ApiMessageResponse;
-import com.vfortro.gestoreta.dto.inventory.items.InventoryItemCreateDto;
-import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDto;
-import com.vfortro.gestoreta.dto.inventory.items.InventoryItemUpdateDto;
-import com.vfortro.gestoreta.dto.inventory.loans.LoanInfoDto;
-import com.vfortro.gestoreta.dto.inventory.loans.ReturnLoanDto;
-import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactCreateDto;
-import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactUpdateDto;
-import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementDto;
-import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementInfoDto;
-import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementResultDto;
-import com.vfortro.gestoreta.dto.inventory.stores.StoreCreateDto;
-import com.vfortro.gestoreta.dto.inventory.stores.StoreInfoDto;
-import com.vfortro.gestoreta.dto.inventory.stores.StoreUpdateDto;
+import com.vfortro.gestoreta.dto.inventory.items.InventoryItemCreateDTO;
+import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDTO;
+import com.vfortro.gestoreta.dto.inventory.items.InventoryItemUpdateDTO;
+import com.vfortro.gestoreta.dto.inventory.loans.LoanInfoDTO;
+import com.vfortro.gestoreta.dto.inventory.loans.ReturnLoanDTO;
+import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactCreateDTO;
+import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactUpdateDTO;
+import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementRequestDTO;
+import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementInfoDTO;
+import com.vfortro.gestoreta.dto.inventory.stores.StoreCreateDTO;
+import com.vfortro.gestoreta.dto.inventory.stores.StoreInfoDTO;
+import com.vfortro.gestoreta.dto.inventory.stores.StoreUpdateDTO;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
 import com.vfortro.gestoreta.service.InventoryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,12 +40,12 @@ public class InventoryController {
     })
     @Operation(summary = "Crea un magatzem en la base de dades")
     @PostMapping("/createStore")
-    public ResponseEntity<?> createStore(@RequestBody StoreCreateDto newStore,
+    public ResponseEntity<?> createStore(@RequestBody StoreCreateDTO newStore,
                                          Authentication auth) {
         String email = auth.getName();
         try {
             if(Objects.nonNull(newStore) && Objects.nonNull(email)) {
-                StoreInfoDto result = inventoryService.createStore(newStore,email);
+                StoreInfoDTO result = inventoryService.createStore(newStore,email);
                 return new ResponseEntity<>(result, HttpStatus.OK);
             }
             return new ResponseEntity<>(new ApiMessageResponse("La informació del nou magatzem estava incompleta", false), HttpStatus.FORBIDDEN);
@@ -61,11 +60,11 @@ public class InventoryController {
     })
     @Operation(summary="Crea un item en la base de dades")
     @PostMapping("/createItem")
-    public ResponseEntity<?> createItem(@RequestBody InventoryItemCreateDto newItem,
+    public ResponseEntity<?> createItem(@RequestBody InventoryItemCreateDTO newItem,
                                         Authentication auth) {
         String email = auth.getName();
         try {
-            InventoryItemInfoDto result = inventoryService.createItem(newItem, email);
+            InventoryItemInfoDTO result = inventoryService.createItem(newItem, email);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch(AccessDeniedException ex) {
             return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
@@ -75,11 +74,11 @@ public class InventoryController {
     }
 
     @PostMapping("/processMovement")
-    public ResponseEntity<?> processMovement(@RequestBody InventoryMovementDto movement,
+    public ResponseEntity<?> processMovement(@RequestBody InventoryMovementRequestDTO movement,
                                               Authentication auth) {
         String email = auth.getName();
         try {
-            InventoryMovementInfoDto result = inventoryService.processMovement(movement, email);
+            InventoryMovementInfoDTO result = inventoryService.processMovement(movement, email);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch(AccessDeniedException ex) {
             return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
@@ -90,11 +89,11 @@ public class InventoryController {
     }
 
     @PostMapping("/returnLoan")
-    public ResponseEntity<?> returnLoan(@RequestBody ReturnLoanDto returnDto,
+    public ResponseEntity<?> returnLoan(@RequestBody ReturnLoanDTO returnDto,
                                         Authentication auth) {
         String email = auth.getName();
         try {
-            LoanInfoDto result = inventoryService.returnLoan(returnDto, email);
+            LoanInfoDTO result = inventoryService.returnLoan(returnDto, email);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch(AccessDeniedException ex) {
             return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
@@ -105,7 +104,7 @@ public class InventoryController {
 
 
     @PutMapping("/updateStore")
-    public ResponseEntity<?> updateStore(@RequestBody StoreUpdateDto updatedStore,
+    public ResponseEntity<?> updateStore(@RequestBody StoreUpdateDTO updatedStore,
                                          Authentication auth) {
         String email = auth.getName();
         try {
@@ -120,7 +119,7 @@ public class InventoryController {
 
 
     @PutMapping("/updateItem")
-    public ResponseEntity<?> updateItem(@RequestBody InventoryItemUpdateDto updatedItem,
+    public ResponseEntity<?> updateItem(@RequestBody InventoryItemUpdateDTO updatedItem,
                                         Authentication auth) {
         String email = auth.getName();
         try {
@@ -134,7 +133,7 @@ public class InventoryController {
     }
 
     @PostMapping("/createContact")
-    public ResponseEntity<?> createContact(@RequestBody LoanContactCreateDto contact,
+    public ResponseEntity<?> createContact(@RequestBody LoanContactCreateDTO contact,
                                            Authentication auth) {
         String email = auth.getName();
         try {
@@ -146,7 +145,7 @@ public class InventoryController {
     }
 
     @PutMapping("/updateContact")
-    public ResponseEntity<?> updateContact(@RequestBody LoanContactUpdateDto contact,
+    public ResponseEntity<?> updateContact(@RequestBody LoanContactUpdateDTO contact,
                                            Authentication auth) {
         String email = auth.getName();
         try {

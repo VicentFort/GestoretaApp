@@ -1,13 +1,9 @@
 package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.*;
-import com.vfortro.gestoreta.dto.assists.AssistDto;
-import com.vfortro.gestoreta.dto.assists.AssistResultDto;
-import com.vfortro.gestoreta.dto.events.EventCreateDto;
-import com.vfortro.gestoreta.dto.events.EventFilter;
-import com.vfortro.gestoreta.dto.events.EventUpdateDto;
-import com.vfortro.gestoreta.dto.food.FoodNeedResultDto;
-import com.vfortro.gestoreta.service.AssistService;
+import com.vfortro.gestoreta.dto.assists.AssistDTO;
+import com.vfortro.gestoreta.dto.events.EventCreateDTO;
+import com.vfortro.gestoreta.dto.events.EventUpdateDTO;
 import com.vfortro.gestoreta.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,7 +23,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
-import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -37,29 +32,6 @@ public class EventController {
     @Autowired
     private EventService eventService;
 
-    @Autowired
-    private AssistService assistService;
-
-    @Tags({
-            @Tag(name = "Filtrado"),
-            @Tag(name = "Eventos")
-    })
-
-    @Operation(summary = "Busca un evento en la base de datos dada su Id.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = EventCreateDto.class))}),
-            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Evento no encontrado", value = "{\"message\":\"Evento no encontrado\",\"success\":false}"  )
-            })})
-    })
-    @GetMapping("/{eventId}")
-    public ResponseEntity<?> getEventById(@PathVariable @Valid Long eventId) {
-        EventCreateDto eventCreateDto = eventService.readEvent(eventId);
-        if(!Objects.nonNull(eventCreateDto)) {
-            return new ResponseEntity<>(new ApiMessageResponse("Evento no encontrado", false), HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(eventCreateDto,HttpStatus.OK);
-    }
 
     @Tags({
             @Tag(name = "Creación"),
@@ -80,41 +52,18 @@ public class EventController {
             })})
     })
     @PostMapping("/create")
-    public ResponseEntity<?> postEvent(@Valid @RequestBody EventCreateDto event,
+    public ResponseEntity<?> postEvent(@Valid @RequestBody EventCreateDTO event,
                                        Authentication auth) {
         String email = auth.getName();
         try {
             if(event.getEndHour().isBefore(event.getStartHour()) || event.getStartHour().isAfter(event.getEndHour())) return new ResponseEntity<>(new ApiMessageResponse("El event té horaris imprecissos.", false), HttpStatus.INTERNAL_SERVER_ERROR);
-            EventCreateDto result = eventService.createEvent(event, email);
+            EventCreateDTO result = eventService.createEvent(event, email);
             return new ResponseEntity<>(result, HttpStatus.CREATED);
         } catch(EntityNotFoundException entityEx) {
             return new ResponseEntity<>(new ApiMessageResponse(entityEx.getMessage(), false), HttpStatus.NOT_FOUND);
         }  catch (AccessDeniedException accEx) {
             return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
         }
-    }
-
-    @Tags({
-        @Tag(name = "Filtrado"),
-        @Tag(name = "Eventos")
-    })
-    @Operation(summary = "Filtra los eventos de una falla")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = EventCreateDto.class))}),
-            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "No se han encontrado resultados", value = "{\"message\":\"No hay eventos que coincidan con los filtros.\",\"success\":false}")
-            })})
-    })
-    @GetMapping("/filter/{fallaId}")
-    public ResponseEntity<?> filterEvents(@PathVariable @Valid Long fallaId,
-                                          @ModelAttribute @Valid EventFilter filter)
-    {
-        List<EventCreateDto> results = eventService.findByFilters(fallaId,filter);
-        if(results.isEmpty()) {
-            return new ResponseEntity<>(new ApiMessageResponse("No hay eventos que coinicdan con los filtros.", false), HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(results, HttpStatus.OK);
-
     }
 
     @Tags({
@@ -167,7 +116,7 @@ public class EventController {
             })})
     })
     @PutMapping("/update")
-    public ResponseEntity<?> updateEvent(@RequestBody @Valid EventUpdateDto newEvent,
+    public ResponseEntity<?> updateEvent(@RequestBody @Valid EventUpdateDTO newEvent,
                                          Authentication authentication) {
         String email = authentication.getName();
         if(newEvent.getEndHour().isBefore(newEvent.getStartHour()) || newEvent.getStartHour().isAfter(newEvent.getEndHour())) return new ResponseEntity<>(new ApiMessageResponse("El event té horaris imprecissos.", false), HttpStatus.OK);
@@ -175,7 +124,7 @@ public class EventController {
             return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + newEvent.getEventId() + " no existe.", false), HttpStatus.NOT_FOUND);
         }
         try {
-            EventCreateDto result = eventService.updateEvent(newEvent, email);
+            EventCreateDTO result = eventService.updateEvent(newEvent, email);
             if(Objects.isNull(result)) {
                 return new ResponseEntity<>(new ApiMessageResponse("El evento con id:" + newEvent.getEventId() + " no se ha podido actualizar", false), HttpStatus.INTERNAL_SERVER_ERROR);
             }
@@ -201,11 +150,11 @@ public class EventController {
     public ResponseEntity<?> joinEvent(@PathVariable @Valid Long eventId,
                                        Authentication authentication) {
         String email = authentication.getName();
-        if(Objects.nonNull(assistService.readAssist(email, eventId))) {
+        if(Objects.nonNull(eventService.readAssist(email, eventId))) {
             return new ResponseEntity<>(new ApiMessageResponse("La asistencia del usuario al evento con id: " +eventId + " ya existe.",false), HttpStatus.CONFLICT);
         }
         try {
-            AssistDto result = assistService.createAssist(email, eventId);
+            AssistDTO result = eventService.createAssist(email, eventId);
             return new ResponseEntity<>(new ApiMessageResponse("Asistencia creada con id: " +  result.getAssistId(), true), HttpStatus.CREATED);
         } catch(EntityExistsException ex) {
             return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -228,112 +177,14 @@ public class EventController {
     public ResponseEntity<?> leaveEvent(@PathVariable @Valid Long eventId,
                                         Authentication authentication) {
         String email = authentication.getName();
-        AssistDto assist = assistService.readAssist(email, eventId);
+        AssistDTO assist = eventService.readAssist(email, eventId);
         if(Objects.isNull(assist)) {
             return new ResponseEntity<>(new ApiMessageResponse("La asistencia del usuario con id: al evento con id: " + eventId + " no existe.", false), HttpStatus.NOT_FOUND);
         }
-        assistService.deleteAssist(assist.getAssistId());
+        eventService.deleteAssist(assist.getAssistId());
         return new ResponseEntity<>(new ApiMessageResponse("La asistencia con id: " +assist.getAssistId() + " ha sido eliminada.", true), HttpStatus.OK);
     }
 
-    @Tags({
-            @Tag(name = "Filtrado"),
-            @Tag(name = "Asistencias")
-    })
-    @Operation(summary = "Obtiene las asistencias a un evento")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
-            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Evento inexistente.", value = "El evento con id: 1 no existe.")
-            })}),
-            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation =  ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
-                    @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
-            })})
-    })
-    @GetMapping("/assists/{eventId}")
-    public ResponseEntity<?> getAssists(@PathVariable @Valid Long eventId,
-                                        Authentication authentication) {
-        String email = authentication.getName();
-        EventCreateDto event = eventService.readEvent(eventId);
-        if(Objects.isNull(event)) {
-            return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + eventId + " no existe.",false), HttpStatus.NOT_FOUND);
-        }
-        try {
-            List<AssistResultDto> result = eventService.getAssists(eventId, email);
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
-        }
-
-    }
-
-    @Tags({
-            @Tag(name = "Filtrado"),
-            @Tag(name = "N. Alimentarias"),
-            @Tag(name = "Eventos")
-    })
-    @Operation(summary = "Obtiene las necesidades alimentarias del evento")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = FoodNeedResultDto.class))}),
-            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Evento no encontrado", value = "{\"message\":\"El evento con id: 1 no existe.\",\"success\":false}"),
-                    @ExampleObject(name = "Evento sin usuarios con necesidades", value = "{\"message\":\"El evento con id: 1 no tiene asistencias.\",\"success\":false}")
-            })}),
-            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation =  ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
-                    @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
-            })})
-    })
-    @GetMapping("/foodNeed/{eventId}")
-    public ResponseEntity<?> getFoodNeeds(@PathVariable @Valid Long eventId,
-                                          Authentication authentication) {
-        String email = authentication.getName();
-        if(Objects.isNull(eventService.readEvent(eventId))) {
-            return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + eventId + " no existe.", false), HttpStatus.NOT_FOUND);
-        }
-        try {
-            List<FoodNeedResultDto> result = eventService.getFoodNeeds(eventId,email);
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (NullPointerException nullEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(nullEx.getMessage(),false),HttpStatus.NOT_FOUND);
-        } catch (AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
-        }
-    }
-
-    @Tags({
-            @Tag(name = "Filtrado"),
-            @Tag(name = "Asistencias"),
-            @Tag(name = "Eventos")
-    })
-    @Operation(summary = "Devuelve la cantidad de gente que hay apuntada en un evento")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "text/plain", schema = @Schema(implementation = Integer.class))}),
-            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Evento no encontrado", value = "{\"message\":\"El evento con id: 1 no existe.\",\"success\":false}")
-            })}),
-            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
-                    @ExampleObject(name = "Falla incorrecta.", value = "{\"message\":\"Sin permiso para esta falla.\",\"success\":false}")
-
-            })})
-    })
-    @GetMapping("/peopleCount/{eventId}")
-    public ResponseEntity<?> getPeopleCount(@PathVariable @Valid Long eventId,
-                                            Authentication authentication) {
-        String email = authentication.getName();
-        if(Objects.isNull(eventService.readEvent(eventId))) {
-            return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + eventId + " no existe.", false), HttpStatus.NOT_FOUND);
-        }
-        try {
-            int result = eventService.getPeopleCount(eventId, email);
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
-        }
-
-    }
 
 
 }

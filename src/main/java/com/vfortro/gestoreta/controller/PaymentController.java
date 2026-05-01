@@ -3,7 +3,7 @@ package com.vfortro.gestoreta.controller;
 import com.vfortro.gestoreta.dto.ApiMessageResponse;
 import com.vfortro.gestoreta.dto.payments.CouponExchangeRequestDTO;
 import com.vfortro.gestoreta.dto.payments.CouponPurchaseRequestDTO;
-import com.vfortro.gestoreta.dto.payments.coupons.CouponCreateDto;
+import com.vfortro.gestoreta.dto.payments.coupons.CouponCreateDTO;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
 import com.vfortro.gestoreta.service.PaymentService;
 import jakarta.persistence.EntityNotFoundException;
@@ -41,7 +41,7 @@ public class PaymentController {
     }
 
     @PostMapping("/createCoupon")
-    public ResponseEntity<?> createCoupon(@Valid @RequestBody CouponCreateDto coupon, Authentication auth) {
+    public ResponseEntity<?> createCoupon(@Valid @RequestBody CouponCreateDTO coupon, Authentication auth) {
         String email = auth.getName();
         try {
             paymentService.createCoupon(coupon, email);

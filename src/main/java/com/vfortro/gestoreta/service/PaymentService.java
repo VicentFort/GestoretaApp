@@ -4,15 +4,10 @@ package com.vfortro.gestoreta.service;
 import com.vfortro.gestoreta.conversor.payments.CouponConversor;
 import com.vfortro.gestoreta.conversor.payments.PurchaseConversor;
 import com.vfortro.gestoreta.conversor.payments.PurchaseDetailConversor;
-import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementDto;
-import com.vfortro.gestoreta.dto.payments.CouponRequestDto;
-import com.vfortro.gestoreta.dto.payments.CouponExchangeRequestDTO;
 import com.vfortro.gestoreta.dto.payments.GenericPaymentRequestDTO;
-import com.vfortro.gestoreta.dto.payments.coupons.CouponCreateDto;
+import com.vfortro.gestoreta.dto.payments.coupons.CouponCreateDTO;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
 import com.vfortro.gestoreta.model.User;
-import com.vfortro.gestoreta.model.enums.MovementType;
-import com.vfortro.gestoreta.model.enums.PaymentLogType;
 import com.vfortro.gestoreta.model.payments.*;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import com.vfortro.gestoreta.repository.UserRepository;
@@ -24,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -71,26 +65,31 @@ public class PaymentService {
         //1. Validación de permisos de usuario.
         User manager = userService.readUserAsEntity(email);
         if(manager.getFalla()==null) {
-            throw new EntityNotFoundException("El usuari no te falla");
+            throw new EntityNotFoundException("El usuari no té falla");
         }
         if(!userService.checkAdminAccess(email)) {
             throw new AccessDeniedException("Sense permís!");
         }
+
+        //2. Procesar el pago
         PaymentHandler handler = paymentHandlers.stream()
                 .filter(h -> h.supports(request.getType()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No hi ha manjeador de pagament per a aquest tipus"));
         List<PaymentLog> logs = handler.processPayment(request, manager);
+
+        //3. Guardar los logs.
         logRepository.saveAll(logs);
     }
 
     @Transactional
-    public void createCoupon(CouponCreateDto dto, String email) throws AccessDeniedException {
+    public void createCoupon(CouponCreateDTO dto, String email) throws AccessDeniedException {
         if(!userService.checkAdminAccess(email)) {
             throw new AccessDeniedException("Sense permís!");
         }
         Coupon toSave = couponConversor.fromDto2Entity(dto);
         couponRepository.save(toSave);
     }
+
 
 }

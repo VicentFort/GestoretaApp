@@ -1,6 +1,6 @@
 package com.vfortro.gestoreta.conversor;
 
-import com.vfortro.gestoreta.dto.food.FoodNeedCreateDto;
+import com.vfortro.gestoreta.dto.food.FoodNeedCreateDTO;
 import com.vfortro.gestoreta.model.FoodNeed;
 import com.vfortro.gestoreta.model.enums.FoodNeedType;
 import com.vfortro.gestoreta.repository.UserRepository;
@@ -14,15 +14,15 @@ public class FoodNeedConversor {
     @Autowired
     private UserRepository userRepository;
 
-    public FoodNeedCreateDto fromEntity2Dto(FoodNeed need) {
-        FoodNeedCreateDto dto = new FoodNeedCreateDto();
+    public FoodNeedCreateDTO fromEntity2Dto(FoodNeed need) {
+        FoodNeedCreateDTO dto = new FoodNeedCreateDTO();
         dto.setFoodNeedId(need.getId());
         dto.setDescription(need.getDescription().getValue());
         dto.setUserId(need.getUser().getId());
         return dto;
     }
 
-    public FoodNeed fromDto2Entity(FoodNeedCreateDto dto) {
+    public FoodNeed fromDto2Entity(FoodNeedCreateDTO dto) {
         FoodNeed need = new FoodNeed();
         need.setDescription(FoodNeedType.valueOf(dto.getDescription()));
 

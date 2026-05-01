@@ -3,7 +3,7 @@ package com.vfortro.gestoreta.service.payments;
 import com.vfortro.gestoreta.conversor.payments.PurchaseConversor;
 import com.vfortro.gestoreta.conversor.payments.PurchaseDetailConversor;
 import com.vfortro.gestoreta.dto.payments.CouponPurchaseRequestDTO;
-import com.vfortro.gestoreta.dto.payments.CouponRequestDto;
+import com.vfortro.gestoreta.dto.payments.CouponRequestDTO;
 import com.vfortro.gestoreta.dto.payments.GenericPaymentRequestDTO;
 import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.model.enums.PaymentLogType;
@@ -50,7 +50,7 @@ public class CouponPaymentHandler implements PaymentHandler {
     }
 
     @Override
-    public List<PaymentLog> processPayment(GenericPaymentRequestDTO dto, User manager) {
+    public List<PaymentLog> processPayment(GenericPaymentRequestDTO dto, User manager) throws IllegalStateException {
         CouponPurchaseRequestDTO request = (CouponPurchaseRequestDTO) dto;
         List<PaymentLog> logs = new ArrayList<>();
         //1.1 Obtenemos el usuario que ha hecho la compra.
@@ -61,7 +61,7 @@ public class CouponPaymentHandler implements PaymentHandler {
         Double totalSum = 0.0D;
 
         //3. Procesar tickes (coupons) comprados.
-        for(CouponRequestDto couponDto: request.getCoupons()) {
+        for(CouponRequestDTO couponDto: request.getCoupons()) {
             //3.0 Encontrar el cupon en la base de datos y crear un detalle de compra de se cupon.
             Coupon coupon = couponRepository.findById(couponDto.getCouponId()).orElseThrow(() -> new EntityNotFoundException("No existeix el ticket amb id: " + couponDto.getCouponId()));
             PurchaseDetail detail = detailConversor.fromDto2Entity(couponDto, toSave, coupon);

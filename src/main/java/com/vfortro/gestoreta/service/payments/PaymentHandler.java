@@ -10,6 +10,5 @@ import java.util.List;
 
 public interface PaymentHandler {
     boolean supports(PaymentLogType type);
-
     List<PaymentLog> processPayment(GenericPaymentRequestDTO dto, User manager) throws AccessDeniedException;
 }

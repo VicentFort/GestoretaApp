@@ -1,30 +1,25 @@
 package com.vfortro.gestoreta.conversor;
 
-import com.vfortro.gestoreta.dto.assists.AttendantPrefInfoDto;
-import com.vfortro.gestoreta.dto.events.EventInfoDto;
-import com.vfortro.gestoreta.dto.events.EventInfoUserDto;
-import com.vfortro.gestoreta.dto.events.EventTagInfoDto;
-import com.vfortro.gestoreta.dto.fallas.FallaAdminInfo;
-import com.vfortro.gestoreta.dto.fallas.FallaCreateDto;
-import com.vfortro.gestoreta.dto.fallas.FallaUserInfoDto;
-import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDto;
-import com.vfortro.gestoreta.dto.inventory.loans.LoanInfoDto;
-import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactInfoDto;
-import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementInfoDto;
-import com.vfortro.gestoreta.dto.inventory.stores.StoreInfoDto;
-import com.vfortro.gestoreta.dto.requests.RequestInfoDto;
-import com.vfortro.gestoreta.dto.users.UserInfoDto;
-import com.vfortro.gestoreta.dto.users.UserInfoFallaDto;
+import com.vfortro.gestoreta.conversor.inventory.InventoryItemConversor;
+import com.vfortro.gestoreta.conversor.inventory.InventoryMovementConversor;
+import com.vfortro.gestoreta.conversor.inventory.LoanContactConversor;
+import com.vfortro.gestoreta.conversor.inventory.StoreConversor;
+import com.vfortro.gestoreta.dto.attendants.AttPrefAdminInfoDTO;
+import com.vfortro.gestoreta.dto.events.EventInfoDTO;
+import com.vfortro.gestoreta.dto.events.EventTagAdminInfoDTO;
+import com.vfortro.gestoreta.dto.fallas.info.FallaAdminInfoDTO;
+import com.vfortro.gestoreta.dto.fallas.FallaCreateDTO;
+import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDTO;
+import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactInfoDTO;
+import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementInfoDTO;
+import com.vfortro.gestoreta.dto.inventory.stores.StoreInfoDTO;
+import com.vfortro.gestoreta.dto.requests.RequestInfoDTO;
+import com.vfortro.gestoreta.dto.users.info.UserInfoFallaDTO;
 import com.vfortro.gestoreta.model.*;
 import com.vfortro.gestoreta.model.inventory.*;
-import com.vfortro.gestoreta.repository.EventRepository;
-import com.vfortro.gestoreta.service.FallaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +50,7 @@ public class FallaConversor {
     }
 
 
-    public Falla fromDto2Entity(FallaCreateDto dto) {
+    public Falla fromDto2Entity(FallaCreateDTO dto) {
         Falla falla = new Falla();
         falla.setId(dto.getFallaId());
         falla.setName(dto.getName());
@@ -63,8 +58,8 @@ public class FallaConversor {
         falla.setShieldUrl(dto.getShieldUrl());
         return falla;
     }
-    public FallaCreateDto fromEntity2DTO(Falla falla) {
-        FallaCreateDto dto = new FallaCreateDto();
+    public FallaCreateDTO fromEntity2DTO(Falla falla) {
+        FallaCreateDTO dto = new FallaCreateDTO();
         dto.setFallaId(falla.getId());
         dto.setName(falla.getName());
         dto.setCreationDate(falla.getCreationDate());
@@ -74,17 +69,17 @@ public class FallaConversor {
 
 
 
-    public FallaAdminInfo fromEntity2AdminInfo(Falla falla) {
-        List<EventTagInfoDto> tags = new ArrayList<>();
-        List<UserInfoFallaDto> users = new ArrayList<>();
-        List<EventInfoDto> events = new ArrayList<>();
-        List<RequestInfoDto> requests = new ArrayList<>();
-        List<AttendantPrefInfoDto> prefs = new ArrayList<>();
-        List<StoreInfoDto> stores = new ArrayList<>();
-        List<InventoryItemInfoDto> inventoryItems = new ArrayList<>();
-        List<LoanContactInfoDto> contacts = new ArrayList<>();
-        List<InventoryMovementInfoDto> inventoryMovements = new ArrayList<>();
-        FallaAdminInfo dto = new FallaAdminInfo();
+    public FallaAdminInfoDTO fromEntity2AdminInfo(Falla falla) {
+        List<EventTagAdminInfoDTO> tags = new ArrayList<>();
+        List<UserInfoFallaDTO> users = new ArrayList<>();
+        List<EventInfoDTO> events = new ArrayList<>();
+        List<RequestInfoDTO> requests = new ArrayList<>();
+        List<AttPrefAdminInfoDTO> prefs = new ArrayList<>();
+        List<StoreInfoDTO> stores = new ArrayList<>();
+        List<InventoryItemInfoDTO> inventoryItems = new ArrayList<>();
+        List<LoanContactInfoDTO> contacts = new ArrayList<>();
+        List<InventoryMovementInfoDTO> inventoryMovements = new ArrayList<>();
+        FallaAdminInfoDTO dto = new FallaAdminInfoDTO();
         dto.setName(falla.getName());
         dto.setFallaId(falla.getId());
 

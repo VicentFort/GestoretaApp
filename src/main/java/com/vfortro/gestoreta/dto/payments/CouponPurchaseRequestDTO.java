@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 public class CouponPurchaseRequestDTO extends GenericPaymentRequestDTO {
     @NotNull
-    private List<CouponRequestDto> coupons;
+    private List<CouponRequestDTO> coupons;
     @NotNull
     private Long userId;
     @NotNull

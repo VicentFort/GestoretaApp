@@ -13,7 +13,7 @@ import java.util.List;
 
 public class CouponExchangeRequestDTO extends GenericPaymentRequestDTO{
     @NotNull
-    private List<CouponRequestDto> coupons;
+    private List<CouponRequestDTO> coupons;
     @NotNull
     private Long userId;
     @NotNull

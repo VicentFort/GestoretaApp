@@ -1,8 +1,8 @@
 package com.vfortro.gestoreta.service.payments;
 
-import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementDto;
+import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementRequestDTO;
 import com.vfortro.gestoreta.dto.payments.CouponExchangeRequestDTO;
-import com.vfortro.gestoreta.dto.payments.CouponRequestDto;
+import com.vfortro.gestoreta.dto.payments.CouponRequestDTO;
 import com.vfortro.gestoreta.dto.payments.GenericPaymentRequestDTO;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
 import com.vfortro.gestoreta.model.User;
@@ -46,13 +46,13 @@ public class CouponExchangeHandler implements PaymentHandler {
     }
 
     @Override
-    public List<PaymentLog> processPayment(GenericPaymentRequestDTO dto, User manager) throws AccessDeniedException {
+    public List<PaymentLog> processPayment(GenericPaymentRequestDTO dto, User manager) throws AccessDeniedException, InsufficientStockException {
         CouponExchangeRequestDTO request = (CouponExchangeRequestDTO)dto;
         List<PaymentLog> logs = new ArrayList<>();
         //1.1 Obtenemos el usuario que ha hecho la compra.
         User user = userService.readUserAsEntity(request.getUserId());
 
-        for(CouponRequestDto couponDTO: request.getCoupons()) {
+        for(CouponRequestDTO couponDTO: request.getCoupons()) {
             //2.0 Encontrar el cupon en la base de datos y crear un detalle de compra de se cupon.
             Coupon coupon = couponRepository.findById(couponDTO.getCouponId()).orElseThrow(() -> new EntityNotFoundException("No existeix el ticket amb id: " + couponDTO.getCouponId()));
 
@@ -68,7 +68,7 @@ public class CouponExchangeHandler implements PaymentHandler {
 
 
             //2.2 Generar el movimiento de inventario.
-            InventoryMovementDto movementDto = new InventoryMovementDto();
+            InventoryMovementRequestDTO movementDto = new InventoryMovementRequestDTO();
             movementDto.setMessage(logMessage);
             movementDto.setItemId(coupon.getItem().getItemId());
             movementDto.setAmount(couponDTO.getAmount());

@@ -1,6 +1,6 @@
 package com.vfortro.gestoreta.conversor.payments;
 
-import com.vfortro.gestoreta.dto.payments.CouponRequestDto;
+import com.vfortro.gestoreta.dto.payments.CouponRequestDTO;
 import com.vfortro.gestoreta.model.payments.Coupon;
 import com.vfortro.gestoreta.model.payments.Purchase;
 import com.vfortro.gestoreta.model.payments.PurchaseDetail;
@@ -15,7 +15,7 @@ public class PurchaseDetailConversor {
     @Autowired
     private CouponRepository couponRepository;
 
-    public PurchaseDetail fromDto2Entity(CouponRequestDto dto, Purchase purchase, Coupon coupon) throws EntityNotFoundException {
+    public PurchaseDetail fromDto2Entity(CouponRequestDTO dto, Purchase purchase, Coupon coupon) throws EntityNotFoundException {
         PurchaseDetail detail = new PurchaseDetail();
         detail.setAmount(dto.getAmount());
         detail.setPurchase(purchase);

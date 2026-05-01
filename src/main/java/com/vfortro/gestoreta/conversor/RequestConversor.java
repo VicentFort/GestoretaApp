@@ -1,8 +1,8 @@
 package com.vfortro.gestoreta.conversor;
 
-import com.vfortro.gestoreta.dto.requests.RequestCreateDto;
-import com.vfortro.gestoreta.dto.requests.RequestDto;
-import com.vfortro.gestoreta.dto.requests.RequestInfoDto;
+import com.vfortro.gestoreta.dto.requests.RequestCreateDTO;
+import com.vfortro.gestoreta.dto.requests.RequestUpdateDTO;
+import com.vfortro.gestoreta.dto.requests.RequestInfoDTO;
 import com.vfortro.gestoreta.model.Request;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import com.vfortro.gestoreta.repository.UserRepository;
@@ -19,8 +19,8 @@ public class RequestConversor {
     @Autowired
     private FallaRepository fallaRepository;
 
-    public RequestDto fromEntity2Dto(Request request) {
-        RequestDto dto = new RequestDto();
+    public RequestUpdateDTO fromEntity2Dto(Request request) {
+        RequestUpdateDTO dto = new RequestUpdateDTO();
         dto.setRequestId(request.getId());
         dto.setIdUser(request.getUser().getId());
         dto.setIdFalla(request.getFalla().getId());
@@ -30,8 +30,8 @@ public class RequestConversor {
         return dto;
     }
 
-    public RequestInfoDto fromEntity2InfoDto(Request req) {
-        RequestInfoDto dto = new RequestInfoDto();
+    public RequestInfoDTO fromEntity2InfoDto(Request req) {
+        RequestInfoDTO dto = new RequestInfoDTO();
         dto.setUsername(req.getUser().getName());
         dto.setFallaName(req.getFalla().getName());
         dto.setReply(req.getReply());
@@ -41,7 +41,7 @@ public class RequestConversor {
         return dto;
     }
 
-    public Request fromDto2Entity(RequestCreateDto dto) throws NullPointerException, EntityNotFoundException {
+    public Request fromDto2Entity(RequestCreateDTO dto) throws NullPointerException, EntityNotFoundException {
         Request req = new Request();
 
         if(dto.getIdUser() == null) throw new NullPointerException("La solicitud debe tener una id de usuario.");
@@ -57,7 +57,7 @@ public class RequestConversor {
         return req;
     }
 
-    public Request fromDto2Entity(RequestDto dto) throws NullPointerException, EntityNotFoundException {
+    public Request fromDto2Entity(RequestUpdateDTO dto) throws NullPointerException, EntityNotFoundException {
         Request req = new Request();
         req.setId(dto.getRequestId());
 

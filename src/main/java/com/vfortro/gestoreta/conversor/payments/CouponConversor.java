@@ -1,6 +1,6 @@
 package com.vfortro.gestoreta.conversor.payments;
 
-import com.vfortro.gestoreta.dto.payments.coupons.CouponCreateDto;
+import com.vfortro.gestoreta.dto.payments.coupons.CouponCreateDTO;
 import com.vfortro.gestoreta.model.Falla;
 import com.vfortro.gestoreta.model.inventory.InventoryItem;
 import com.vfortro.gestoreta.model.payments.Coupon;
@@ -18,7 +18,7 @@ public class CouponConversor{
     @Autowired
     private InventoryItemRepository itemRepository;
 
-    public Coupon fromDto2Entity(CouponCreateDto dto) throws EntityNotFoundException {
+    public Coupon fromDto2Entity(CouponCreateDTO dto) throws EntityNotFoundException {
         Coupon coupon = new Coupon();
         coupon.setName(dto.getName());
         coupon.setPrice(dto.getPrice());

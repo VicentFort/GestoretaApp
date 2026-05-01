@@ -1,20 +1,20 @@
 package com.vfortro.gestoreta.service;
 
-import com.vfortro.gestoreta.conversor.*;
-import com.vfortro.gestoreta.dto.inventory.items.InventoryItemCreateDto;
-import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDto;
-import com.vfortro.gestoreta.dto.inventory.items.InventoryItemUpdateDto;
-import com.vfortro.gestoreta.dto.inventory.loans.LoanInfoDto;
-import com.vfortro.gestoreta.dto.inventory.loans.ReturnLoanDto;
-import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactCreateDto;
-import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactInfoDto;
-import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactUpdateDto;
-import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementDto;
-import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementInfoDto;
-import com.vfortro.gestoreta.dto.inventory.stores.StoreCreateDto;
-import com.vfortro.gestoreta.dto.inventory.stores.StoreInfoDto;
-import com.vfortro.gestoreta.dto.inventory.stores.StoreUpdateDto;
-import com.vfortro.gestoreta.dto.users.UserCreateDto;
+import com.vfortro.gestoreta.conversor.inventory.*;
+import com.vfortro.gestoreta.dto.inventory.items.InventoryItemCreateDTO;
+import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDTO;
+import com.vfortro.gestoreta.dto.inventory.items.InventoryItemUpdateDTO;
+import com.vfortro.gestoreta.dto.inventory.loans.LoanInfoDTO;
+import com.vfortro.gestoreta.dto.inventory.loans.ReturnLoanDTO;
+import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactCreateDTO;
+import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactInfoDTO;
+import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactUpdateDTO;
+import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementRequestDTO;
+import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementInfoDTO;
+import com.vfortro.gestoreta.dto.inventory.stores.StoreCreateDTO;
+import com.vfortro.gestoreta.dto.inventory.stores.StoreInfoDTO;
+import com.vfortro.gestoreta.dto.inventory.stores.StoreUpdateDTO;
+import com.vfortro.gestoreta.dto.users.UserCreateDTO;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
 import com.vfortro.gestoreta.model.Falla;
 import com.vfortro.gestoreta.model.User;
@@ -78,7 +78,7 @@ public class InventoryService {
 
 
     @Transactional
-    public StoreInfoDto createStore(StoreCreateDto newStore, String email) throws AccessDeniedException {
+    public StoreInfoDTO createStore(StoreCreateDTO newStore, String email) throws AccessDeniedException {
         if(!userService.checkAdminAccess(email)) { throw new AccessDeniedException("Sense permís.");}
         Falla falla = fallaRepository.findFallaById(userService.readUser(email).getFallaId());
         Store toCreate = storeConversor.fromDto2Entity(newStore,falla);
@@ -87,7 +87,7 @@ public class InventoryService {
     }
 
     @Transactional
-    public InventoryItemInfoDto createItem(InventoryItemCreateDto newItem, String email) throws AccessDeniedException {
+    public InventoryItemInfoDTO createItem(InventoryItemCreateDTO newItem, String email) throws AccessDeniedException {
         if(!userService.checkAdminAccess(email)) { throw new AccessDeniedException("Sense permís");}
         Falla falla = fallaRepository.findFallaById(userService.readUser(email).getFallaId());
         InventoryItem toSave = inventoryItemConversor.fromDto2Entity(newItem, falla);
@@ -96,9 +96,9 @@ public class InventoryService {
     }
 
     @Transactional
-    public InventoryMovementInfoDto processMovement(InventoryMovementDto dto, String email) throws AccessDeniedException, InsufficientStockException {
+    public InventoryMovementInfoDTO processMovement(InventoryMovementRequestDTO dto, String email) throws AccessDeniedException, InsufficientStockException {
         if(!userService.checkAdminAccess(email)) { throw new AccessDeniedException("Sense permís"); }
-        UserCreateDto user = userService.readUser(email);
+        UserCreateDTO user = userService.readUser(email);
         Stock stock = stockRepository.findByStoreStoreIdAndInventoryItemItemId(dto.getStoreId(), dto.getItemId())
                 .orElseGet(() -> {
                     if (dto.getType() == MovementType.INCOMING) {
@@ -141,12 +141,12 @@ public class InventoryService {
             stockRepository.deleteById(stock.getStockId());
         }
 
-        InventoryMovementInfoDto infoDto = movementConversor.fromEntity2Dto(saved);
+        InventoryMovementInfoDTO infoDto = movementConversor.fromEntity2Dto(saved);
         return infoDto;
     }
 
     @Transactional
-    public void processMovement(InventoryMovementDto dto, User manager) throws AccessDeniedException, InsufficientStockException {
+    public void processMovement(InventoryMovementRequestDTO dto, User manager) throws AccessDeniedException, InsufficientStockException {
         Stock stock = stockRepository.findByStoreStoreIdAndInventoryItemItemId(dto.getStoreId(), dto.getItemId())
                 .orElseGet(() -> {
                     if (dto.getType() == MovementType.INCOMING) {
@@ -189,11 +189,11 @@ public class InventoryService {
             stockRepository.deleteById(stock.getStockId());
         }
 
-        InventoryMovementInfoDto infoDto = movementConversor.fromEntity2Dto(saved);
+        InventoryMovementInfoDTO infoDto = movementConversor.fromEntity2Dto(saved);
     }
 
     @Transactional
-    public Loan registerLoan(InventoryMovementDto dto, InventoryItem item) throws EntityNotFoundException {
+    public Loan registerLoan(InventoryMovementRequestDTO dto, InventoryItem item) throws EntityNotFoundException {
         Loan loan = new Loan();
         loan.setAmount(dto.getAmount());
         loan.setAcquisitionDate(dto.getAdquisitionDate());
@@ -222,11 +222,11 @@ public class InventoryService {
     }
 
     @Transactional
-    public LoanInfoDto returnLoan(ReturnLoanDto dto, String email) throws AccessDeniedException, IllegalStateException {
+    public LoanInfoDTO returnLoan(ReturnLoanDTO dto, String email) throws AccessDeniedException, IllegalStateException {
         if(!userService.checkAdminAccess(email)) {
             throw new AccessDeniedException("Sense permís!");
         }
-        UserCreateDto user = userService.readUser(email);
+        UserCreateDTO user = userService.readUser(email);
 
         Loan loan = loanRepository.findById(dto.getLoanId()).orElseThrow(() -> new EntityNotFoundException("Préstec no trobat"));
 
@@ -271,7 +271,7 @@ public class InventoryService {
     }
 
     @Transactional
-    public void updateStore(StoreUpdateDto updatedStore, String email) throws AccessDeniedException, EntityNotFoundException {
+    public void updateStore(StoreUpdateDTO updatedStore, String email) throws AccessDeniedException, EntityNotFoundException {
         if(!userService.checkAdminAccess(email)) {throw new AccessDeniedException("Sense permís!");}
         Store storeToUpdate = storeRepository.findById(updatedStore.getStoreId()).orElseThrow(() -> new EntityNotFoundException("No existeix el magatzem"));
 
@@ -292,7 +292,7 @@ public class InventoryService {
     }
 
 
-    public void updateItem(InventoryItemUpdateDto updatedItem, String email) throws AccessDeniedException, EntityNotFoundException {
+    public void updateItem(InventoryItemUpdateDTO updatedItem, String email) throws AccessDeniedException, EntityNotFoundException {
         if(!userService.checkAdminAccess(email)) { throw new AccessDeniedException("Sense permís!");}
         InventoryItem itemToUpdate = inventoryItemRepository.findById(updatedItem.getItemId()).orElseThrow(() -> new EntityNotFoundException("No existeix el item"));
 
@@ -306,7 +306,7 @@ public class InventoryService {
     }
 
     @Transactional
-    public LoanContactInfoDto createContact(LoanContactCreateDto contact, String email) throws AccessDeniedException {
+    public LoanContactInfoDTO createContact(LoanContactCreateDTO contact, String email) throws AccessDeniedException {
         if(!userService.checkAdminAccess(email)) { throw new AccessDeniedException("Sense permís");}
         Falla falla = fallaRepository.findFallaById(userService.readUser(email).getFallaId());
         LoanContact toCreate = contactConversor.fromDto2Entity(contact, falla);
@@ -315,7 +315,7 @@ public class InventoryService {
     }
 
     @Transactional
-    public void updateContact(LoanContactUpdateDto contact, String email) throws AccessDeniedException, EntityNotFoundException {
+    public void updateContact(LoanContactUpdateDTO contact, String email) throws AccessDeniedException, EntityNotFoundException {
         if(!userService.checkAdminAccess(email)) { throw new AccessDeniedException("Sense permís"); }
         LoanContact toUpdate = contactRepository.findById(contact.getId()).orElseThrow(() -> new EntityNotFoundException("No existeix el contacte"));
 

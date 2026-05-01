@@ -1,16 +1,11 @@
 package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.*;
-import com.vfortro.gestoreta.dto.events.AttendantPreferenceInfoDto;
-import com.vfortro.gestoreta.dto.events.EventInfoDto;
-import com.vfortro.gestoreta.dto.fallas.FallaUserInfoDto;
-import com.vfortro.gestoreta.dto.requests.RequestCreateDto;
-import com.vfortro.gestoreta.dto.requests.RequestDto;
-import com.vfortro.gestoreta.dto.users.UserCreateDto;
-import com.vfortro.gestoreta.dto.users.UserInfoDto;
-import com.vfortro.gestoreta.dto.users.UserUpdateDto;
-import com.vfortro.gestoreta.service.FoodNeedService;
-import com.vfortro.gestoreta.service.RequestService;
+import com.vfortro.gestoreta.dto.requests.RequestCreateDTO;
+import com.vfortro.gestoreta.dto.requests.RequestUpdateDTO;
+import com.vfortro.gestoreta.dto.users.UserCreateDTO;
+import com.vfortro.gestoreta.dto.users.info.UserInfoDTO;
+import com.vfortro.gestoreta.dto.users.UserUpdateDTO;
 import com.vfortro.gestoreta.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -41,11 +36,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private FoodNeedService foodNeedService;
 
-    @Autowired
-    private RequestService requestService;
 
     @Tags({
             @Tag(name = "Creación"),
@@ -67,9 +58,9 @@ public class UserController {
                 })
     })
     @PostMapping("/create")
-    public ResponseEntity<?> postUser(@RequestBody @Valid UserCreateDto user) {
+    public ResponseEntity<?> postUser(@RequestBody @Valid UserCreateDTO user) {
         try {
-            UserCreateDto result = userService.createUser(user);
+            UserCreateDTO result = userService.createUser(user);
             return new ResponseEntity<>(new ApiMessageResponse("Usuario con id: " + result.getUserId() + " creado en la base de datos.", true), HttpStatus.CREATED);
 
         } catch (Exception e) {
@@ -95,11 +86,11 @@ public class UserController {
             })})
     })
     @PutMapping("/update")
-    public ResponseEntity<?> updateUser(@RequestBody UserUpdateDto newUser,
+    public ResponseEntity<?> updateUser(@RequestBody UserUpdateDTO newUser,
                                         Authentication authentication) {
         String email = authentication.getName();
         try {
-            UserInfoDto result = userService.updateUser(newUser, email);
+            UserInfoDTO result = userService.updateUser(newUser, email);
             if(newUser.getName().isBlank()) return new ResponseEntity<>(new ApiMessageResponse("Nom en blanc", false), HttpStatus.INTERNAL_SERVER_ERROR);
 
             if(newUser.getSurname().isBlank()) return new ResponseEntity<>(new ApiMessageResponse("Cognoms en blanc", false), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -119,9 +110,9 @@ public class UserController {
             @Tag(name = "Filtrado"),
             @Tag(name = "Usuarios")
     })
-    @Operation(summary = "Busca un usuario en la base de datos dado su nombre.")
+    @Operation(summary = "Devuelve la info del usuario que está logeado")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = UserCreateDto.class))}),
+            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = UserCreateDTO.class))}),
             @ApiResponse(responseCode = "404", content = {@Content(mediaType = "text/json", schema = @Schema(implementation =  ApiMessageResponse.class), examples = {
                     @ExampleObject(name = "Usuario no encontrado", value = "{\"message\":\"El usuario con id: 1 no existe.\",\"success\":false}")
             })}),
@@ -130,10 +121,10 @@ public class UserController {
             })})
     })
     @GetMapping("/getUserInfo")
-    public ResponseEntity<?> getUserById(Authentication authentication) {
+    public ResponseEntity<?> getUserInfo(Authentication authentication) {
         String email = authentication.getName();
         try {
-            UserInfoDto result = userService.readUserSecure(email);
+            UserInfoDTO result = userService.readUserSecure(email);
             if(Objects.isNull(result)) {
                 return new ResponseEntity<>(new ApiMessageResponse("El usuario no existe.", false), HttpStatus.NOT_FOUND);
             }
@@ -164,7 +155,7 @@ public class UserController {
         String email = authentication.getName();
         String desc = payload.get("desc").toString();
         try {
-            UserInfoDto result = foodNeedService.createFoodNeed(desc, email);
+            UserInfoDTO result = userService.createFoodNeed(desc, email);
             return new ResponseEntity<>(result, HttpStatus.CREATED);
         } catch(AccessDeniedException accEx) {
             return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
@@ -172,58 +163,18 @@ public class UserController {
 
     }
 
-    @Tags({
-            @Tag(name = "Creación"),
-            @Tag(name = "Solicitudes"),
-            @Tag(name = "Fallas"),
-            @Tag(name = "Usuarios")
-    })
-    @Operation(summary = "Crea una solicitud de un usuario a una falla")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
-            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Dto incompleto.", value = "{\"message\":\"La solicitud debe tener una id de usuario.\",\"success\":false}")
-            })}),
-            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Usuario no encontrado", value = "{\"message\":\"El usuario con id: 1 no existe.\",\"success\":false}"),
-                    @ExampleObject(name = "Falla no encontrada", value = "{\"message\":\"La falla con id: 1 no existe.\",\"success\":false}")
-            })}),
-            @ApiResponse(responseCode = "500", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Conflicto usuario/falla", value = "{\"message\":\"El usuario con id: 1 ya está en una falla\",\"success\":false}")
-            })}),
-            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}")
-            })})
-    })
-    @PostMapping("/createRequest")
-    public ResponseEntity<?> createRequest(@RequestBody @Valid RequestCreateDto requestDto,
-                                           Authentication authentication) {
+    @DeleteMapping("/deleteNeed")
+    public ResponseEntity<?> deleteFoodNeed(@RequestParam(name="needId") @Valid Long needId,
+                                            Authentication authentication) {
         String email = authentication.getName();
         try {
-            RequestDto result = requestService.createRequest(requestDto, email);
-            return new ResponseEntity<>(new ApiMessageResponse("Solicitud creada con id: " + result.getRequestId(), false), HttpStatus.CREATED);
-        } catch(NullPointerException nullEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(nullEx.getMessage(), false), HttpStatus.FORBIDDEN);
-        } catch(EntityNotFoundException entEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(entEx.getMessage(), false), HttpStatus.NOT_FOUND);
-        } catch(IllegalAccessException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch(AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+            UserInfoDTO result = userService.deleteFoodNeed(needId, email);
+            return new ResponseEntity<>(result,HttpStatus.OK);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
         }
     }
 
-    @Tags({
-            @Tag(name = "Usuarios"),
-            @Tag(name = "Fallas")
-    })
-    @Operation(summary = "Devuelve información general de la falla del usuario")
-    @GetMapping("/falla")
-    public ResponseEntity<?> getFallaInfo(Authentication authentication) {
-        String email = authentication.getName();
-        FallaUserInfoDto result = userService.getFallaInfo(email);
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
 
     @Tags({
             @Tag(name = "Usuarios"),
@@ -263,43 +214,47 @@ public class UserController {
         }
     }
 
+
     @Tags({
+            @Tag(name = "Creación"),
+            @Tag(name = "Solicitudes"),
+            @Tag(name = "Fallas"),
             @Tag(name = "Usuarios")
     })
-    @Operation(summary = "Obtiene info de las preferencias de evento del usuario")
-    @GetMapping("/getAttPrefs")
-    public ResponseEntity<?> getAttPrefs(Authentication authentication) {
+    @Operation(summary = "Crea una solicitud de un usuario a una falla")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Dto incompleto.", value = "{\"message\":\"La solicitud debe tener una id de usuario.\",\"success\":false}")
+            })}),
+            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Usuario no encontrado", value = "{\"message\":\"El usuario con id: 1 no existe.\",\"success\":false}"),
+                    @ExampleObject(name = "Falla no encontrada", value = "{\"message\":\"La falla con id: 1 no existe.\",\"success\":false}")
+            })}),
+            @ApiResponse(responseCode = "500", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Conflicto usuario/falla", value = "{\"message\":\"El usuario con id: 1 ya está en una falla\",\"success\":false}")
+            })}),
+            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
+                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}")
+            })})
+    })
+    @PostMapping("/createRequest")
+    public ResponseEntity<?> createRequest(@RequestBody @Valid RequestCreateDTO requestDto,
+                                           Authentication authentication) {
         String email = authentication.getName();
         try {
-            List<AttendantPreferenceInfoDto> result =userService.getAttPrefs(email);
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (NullPointerException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.NOT_FOUND);
-        }
-
-    }
-
-    @GetMapping("/events")
-    public ResponseEntity<?> getUserEvents(Authentication authentication) {
-        String email = authentication.getName();
-        try {
-            List<EventInfoDto> result = userService.getEvents(email);
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
-
+            RequestUpdateDTO result = userService.createRequest(requestDto, email);
+            return new ResponseEntity<>(new ApiMessageResponse("Solicitud creada con id: " + result.getRequestId(), false), HttpStatus.CREATED);
+        } catch(NullPointerException nullEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(nullEx.getMessage(), false), HttpStatus.FORBIDDEN);
+        } catch(EntityNotFoundException entEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(entEx.getMessage(), false), HttpStatus.NOT_FOUND);
+        } catch(IllegalAccessException accEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch(AccessDeniedException accEx) {
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
         }
     }
-    @DeleteMapping("/deleteNeed")
-    public ResponseEntity<?> deleteFoodNeed(@RequestParam(name="needId") @Valid Long needId,
-                                            Authentication authentication) {
-        String email = authentication.getName();
-        try {
-            UserInfoDto result = foodNeedService.deleteFoodNeed(needId, email);
-            return new ResponseEntity<>(result,HttpStatus.OK);
-        } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
-        }
-    }
+
 
 }

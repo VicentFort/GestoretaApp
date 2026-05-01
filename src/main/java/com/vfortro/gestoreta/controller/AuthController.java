@@ -1,7 +1,7 @@
 package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.ApiMessageResponse;
-import com.vfortro.gestoreta.dto.users.LoginRequest;
+import com.vfortro.gestoreta.dto.users.LoginRequestDTO;
 import com.vfortro.gestoreta.service.auth.JwtService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
@@ -34,7 +34,7 @@ public class AuthController {
             @Tag(name = "Auth")
     })
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequestDTO request) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.email(),request.password())

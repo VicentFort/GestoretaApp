@@ -1,6 +1,6 @@
 package com.vfortro.gestoreta.conversor;
 
-import com.vfortro.gestoreta.dto.assists.AssistDto;
+import com.vfortro.gestoreta.dto.assists.AssistDTO;
 import com.vfortro.gestoreta.model.Assist;
 import com.vfortro.gestoreta.repository.AssistRepository;
 import com.vfortro.gestoreta.repository.EventRepository;
@@ -24,8 +24,8 @@ public class AssistConversor {
     @Autowired
     private AssistRepository assistRepository;
 
-    public AssistDto formEntity2Dto(Assist assist) {
-        AssistDto dto = new AssistDto();
+    public AssistDTO formEntity2Dto(Assist assist) {
+        AssistDTO dto = new AssistDTO();
         dto.setAssistId(assist.getId());
         dto.setUserId(assist.getUser().getId());
         dto.setEventId(assist.getEvent().getId());
@@ -33,7 +33,7 @@ public class AssistConversor {
         return dto;
     }
 
-    public Assist fromDto2Entity(AssistDto dto) {
+    public Assist fromDto2Entity(AssistDTO dto) {
         Assist assist = new Assist();
         assist.setId(dto.getAssistId());
 
