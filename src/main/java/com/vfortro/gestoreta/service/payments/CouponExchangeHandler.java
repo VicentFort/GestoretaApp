@@ -1,0 +1,95 @@
+package com.vfortro.gestoreta.service.payments;
+
+import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementDto;
+import com.vfortro.gestoreta.dto.payments.CouponExchangeRequestDTO;
+import com.vfortro.gestoreta.dto.payments.CouponRequestDto;
+import com.vfortro.gestoreta.dto.payments.GenericPaymentRequestDTO;
+import com.vfortro.gestoreta.exceptions.InsufficientStockException;
+import com.vfortro.gestoreta.model.User;
+import com.vfortro.gestoreta.model.enums.MovementType;
+import com.vfortro.gestoreta.model.enums.PaymentLogType;
+import com.vfortro.gestoreta.model.payments.Coupon;
+import com.vfortro.gestoreta.model.payments.CouponStock;
+import com.vfortro.gestoreta.model.payments.PaymentLog;
+import com.vfortro.gestoreta.repository.inventory.InventoryItemRepository;
+import com.vfortro.gestoreta.repository.payments.CouponRepository;
+import com.vfortro.gestoreta.repository.payments.CouponStockRepository;
+import com.vfortro.gestoreta.service.InventoryService;
+import com.vfortro.gestoreta.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class CouponExchangeHandler implements PaymentHandler {
+
+    @Autowired
+    private CouponRepository couponRepository;
+    @Autowired
+    private CouponStockRepository stockRepository;
+    @Autowired
+    private InventoryItemRepository itemRepository;
+
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private InventoryService inventoryService;
+
+    @Override
+    public boolean supports(PaymentLogType type) {
+        return type == PaymentLogType.COUPON_EXCHANGED;
+    }
+
+    @Override
+    public List<PaymentLog> processPayment(GenericPaymentRequestDTO dto, User manager) throws AccessDeniedException {
+        CouponExchangeRequestDTO request = (CouponExchangeRequestDTO)dto;
+        List<PaymentLog> logs = new ArrayList<>();
+        //1.1 Obtenemos el usuario que ha hecho la compra.
+        User user = userService.readUserAsEntity(request.getUserId());
+
+        for(CouponRequestDto couponDTO: request.getCoupons()) {
+            //2.0 Encontrar el cupon en la base de datos y crear un detalle de compra de se cupon.
+            Coupon coupon = couponRepository.findById(couponDTO.getCouponId()).orElseThrow(() -> new EntityNotFoundException("No existeix el ticket amb id: " + couponDTO.getCouponId()));
+
+            String logMessage = couponDTO.getAmount() + " tickets bescanviats de: " + coupon.getName() + " amb id: " + coupon.getCouponId() + ". Gestionat per: " + manager.getName() + " " + manager.getSurname();
+
+            //2.1 Gestión del stock de cupones del usuario
+            CouponStock stock = stockRepository.findByCouponCouponIdAndUserId(coupon.getCouponId(), user.getId()).orElseThrow(() -> new InsufficientStockException("El usuari no te stock de tiquets"));
+            if(stock.getAmount() - couponDTO.getAmount() < 0) {
+                throw new InsufficientStockException("L'usuari no té prou tickets per a fer el bescanvi");
+            }
+            stock.setAmount(stock.getAmount() - couponDTO.getAmount());
+            stockRepository.save(stock);
+
+
+            //2.2 Generar el movimiento de inventario.
+            InventoryMovementDto movementDto = new InventoryMovementDto();
+            movementDto.setMessage(logMessage);
+            movementDto.setItemId(coupon.getItem().getItemId());
+            movementDto.setAmount(couponDTO.getAmount());
+            movementDto.setStoreId(request.getStoreId());
+            movementDto.setType(MovementType.OUTGOING);
+            inventoryService.processMovement(movementDto, manager);
+
+            //2.3 Generar PaymentLog.
+            PaymentLog log = new PaymentLog();
+            log.setManager(manager);
+            log.setFalla(manager.getFalla());
+            log.setUser(user);
+            log.setCoupon(coupon);
+            //NO HAY COMPRA
+            log.setItem(coupon.getItem());
+            log.setPrice(coupon.getPrice());
+            log.setDate(LocalDateTime.now());
+            log.setType(PaymentLogType.COUPON_EXCHANGED);
+            log.setMessage(logMessage);
+            logs.add(log);
+        }
+        return logs;
+    }
+}

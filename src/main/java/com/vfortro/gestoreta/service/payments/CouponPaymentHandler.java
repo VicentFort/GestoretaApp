@@ -1,0 +1,109 @@
+package com.vfortro.gestoreta.service.payments;
+
+import com.vfortro.gestoreta.conversor.payments.PurchaseConversor;
+import com.vfortro.gestoreta.conversor.payments.PurchaseDetailConversor;
+import com.vfortro.gestoreta.dto.payments.CouponPurchaseRequestDTO;
+import com.vfortro.gestoreta.dto.payments.CouponRequestDto;
+import com.vfortro.gestoreta.dto.payments.GenericPaymentRequestDTO;
+import com.vfortro.gestoreta.model.User;
+import com.vfortro.gestoreta.model.enums.PaymentLogType;
+import com.vfortro.gestoreta.model.payments.*;
+import com.vfortro.gestoreta.repository.inventory.InventoryItemRepository;
+import com.vfortro.gestoreta.repository.payments.CouponRepository;
+import com.vfortro.gestoreta.repository.payments.CouponStockRepository;
+import com.vfortro.gestoreta.repository.payments.PaymentLogRepository;
+import com.vfortro.gestoreta.repository.payments.PurchaseRepository;
+import com.vfortro.gestoreta.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class CouponPaymentHandler implements PaymentHandler {
+
+    @Autowired
+    private CouponRepository couponRepository;
+    @Autowired
+    private InventoryItemRepository itemRepository;
+    @Autowired
+    private CouponStockRepository stockRepository;
+    @Autowired
+    private PaymentLogRepository logRepository;
+    @Autowired
+    private PurchaseRepository purchaseRepository;
+
+    @Autowired
+    private PurchaseConversor purchaseConversor;
+    @Autowired
+    private PurchaseDetailConversor detailConversor;
+
+    @Autowired
+    private UserService userService;
+
+    @Override
+    public boolean supports(PaymentLogType type) {
+        return type == PaymentLogType.COUPON_SOLD;
+    }
+
+    @Override
+    public List<PaymentLog> processPayment(GenericPaymentRequestDTO dto, User manager) {
+        CouponPurchaseRequestDTO request = (CouponPurchaseRequestDTO) dto;
+        List<PaymentLog> logs = new ArrayList<>();
+        //1.1 Obtenemos el usuario que ha hecho la compra.
+        User user = userService.readUserAsEntity(request.getUserId());
+
+        //2 Creación de la compra (purchase) en la base de datos y el contador de precio.
+        Purchase toSave = purchaseConversor.fromDto2Entity(request, manager.getFalla());
+        Double totalSum = 0.0D;
+
+        //3. Procesar tickes (coupons) comprados.
+        for(CouponRequestDto couponDto: request.getCoupons()) {
+            //3.0 Encontrar el cupon en la base de datos y crear un detalle de compra de se cupon.
+            Coupon coupon = couponRepository.findById(couponDto.getCouponId()).orElseThrow(() -> new EntityNotFoundException("No existeix el ticket amb id: " + couponDto.getCouponId()));
+            PurchaseDetail detail = detailConversor.fromDto2Entity(couponDto, toSave, coupon);
+            toSave.getDetails().add(detail);
+            totalSum += coupon.getPrice()  * couponDto.getAmount();
+
+            //3.1 Preparar el mensaje de log para el PaymentLog y el registro de inventario.
+            String logMessage = couponDto.getAmount() + " tiquets venuts de: " + coupon.getName() + " amb id: " + coupon.getCouponId() + " per part de: " + manager.getName() + " " + manager.getSurname();
+
+            //3.2 Actualizar el stock de tickets.
+            CouponStock stock = stockRepository.findByCouponCouponIdAndUserId(coupon.getCouponId(), user.getId())
+                    .orElseGet(() -> {
+                        CouponStock newStock = new CouponStock();
+                        newStock.setCoupon(coupon);
+                        newStock.setUser(user);
+                        newStock.setAmount(0L);
+                        newStock.setFalla(manager.getFalla());
+                        return newStock;
+                    });
+            stock.setAmount(stock.getAmount() + couponDto.getAmount());
+            stockRepository.save(stock);
+
+            //3.3 Generar PaymentLog.
+            PaymentLog log = new PaymentLog();
+            log.setManager(manager);
+            log.setFalla(manager.getFalla());
+            log.setUser(user);
+            log.setCoupon(coupon);
+            log.setPurchase(toSave);
+            log.setItem(coupon.getItem());
+            log.setPrice(coupon.getPrice());
+            log.setDate(LocalDateTime.now());
+            log.setType(PaymentLogType.COUPON_SOLD);
+            log.setMessage(logMessage);
+            logs.add(log);
+        }
+        //4. Comprobar que el total pagado sea mayor o igual a los precios de los cupones
+        if(Math.abs(totalSum - request.getTotalPrice()) > 0.00001) {
+            throw new IllegalStateException("El valor de la compra no coincideix a la quantitat abonada.");
+        }
+        //5. Guardar la compra
+        Purchase savedPurchase = purchaseRepository.saveAndFlush(toSave);
+        return logs;
+    }
+}

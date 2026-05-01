@@ -1,12 +1,13 @@
 package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.ApiMessageResponse;
-import com.vfortro.gestoreta.dto.payments.ExchangeRequestDto;
-import com.vfortro.gestoreta.dto.payments.PurchaseRequestDto;
+import com.vfortro.gestoreta.dto.payments.CouponExchangeRequestDTO;
+import com.vfortro.gestoreta.dto.payments.CouponPurchaseRequestDTO;
 import com.vfortro.gestoreta.dto.payments.coupons.CouponCreateDto;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
 import com.vfortro.gestoreta.service.PaymentService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,10 +26,10 @@ public class PaymentController {
     private PaymentService paymentService;
 
     @PostMapping("/sellCoupons")
-    public ResponseEntity<?> sellCoupon(@RequestBody PurchaseRequestDto request, Authentication auth) {
+    public ResponseEntity<?> sellCoupon(@Valid @RequestBody CouponPurchaseRequestDTO request, Authentication auth) {
         String email = auth.getName();
         try {
-            paymentService.sellCoupons(request,email);
+            paymentService.processPayment(request,email);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (AccessDeniedException e) {
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.UNAUTHORIZED);
@@ -40,7 +41,7 @@ public class PaymentController {
     }
 
     @PostMapping("/createCoupon")
-    public ResponseEntity<?> createCoupon(@RequestBody CouponCreateDto coupon, Authentication auth) {
+    public ResponseEntity<?> createCoupon(@Valid @RequestBody CouponCreateDto coupon, Authentication auth) {
         String email = auth.getName();
         try {
             paymentService.createCoupon(coupon, email);
@@ -51,10 +52,10 @@ public class PaymentController {
     }
 
     @PostMapping("/exchangeCoupon")
-    public ResponseEntity<?> exchangeCoupon(@RequestBody ExchangeRequestDto request, Authentication auth) {
+    public ResponseEntity<?> exchangeCoupon(@RequestBody CouponExchangeRequestDTO request, Authentication auth) {
         String email = auth.getName();
         try {
-            paymentService.exchangeCoupon(request, email);
+            paymentService.processPayment(request, email);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (AccessDeniedException e) {
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.UNAUTHORIZED);

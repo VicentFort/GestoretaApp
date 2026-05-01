@@ -1,18 +1,17 @@
 package com.vfortro.gestoreta.dto.payments;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class ExchangeRequestDto {
+
+public class CouponExchangeRequestDTO extends GenericPaymentRequestDTO{
     @NotNull
     private List<CouponRequestDto> coupons;
     @NotNull

@@ -17,6 +17,7 @@ import com.vfortro.gestoreta.dto.inventory.stores.StoreUpdateDto;
 import com.vfortro.gestoreta.dto.users.UserCreateDto;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
 import com.vfortro.gestoreta.model.Falla;
+import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.model.enums.LoanState;
 import com.vfortro.gestoreta.model.enums.MovementType;
 import com.vfortro.gestoreta.model.enums.NotificationType;
@@ -142,6 +143,53 @@ public class InventoryService {
 
         InventoryMovementInfoDto infoDto = movementConversor.fromEntity2Dto(saved);
         return infoDto;
+    }
+
+    @Transactional
+    public void processMovement(InventoryMovementDto dto, User manager) throws AccessDeniedException, InsufficientStockException {
+        Stock stock = stockRepository.findByStoreStoreIdAndInventoryItemItemId(dto.getStoreId(), dto.getItemId())
+                .orElseGet(() -> {
+                    if (dto.getType() == MovementType.INCOMING) {
+                        Stock newStock = new Stock();
+                        newStock.setStore(storeRepository.findById(dto.getStoreId()).orElseThrow(() -> new EntityNotFoundException("No existeix el magaztem")));
+                        newStock.setInventoryItem(inventoryItemRepository.findById(dto.getItemId()).orElseThrow(() -> new EntityNotFoundException("No existeix el magaztem")));
+                        newStock.setAmount(0L);
+                        return newStock;
+                    }
+                    throw new InsufficientStockException("No hi ha registre de stock per a este item!");
+                });
+        if(dto.getType() == MovementType.OUTGOING|| dto.getType() == MovementType.LOAN) {
+            if(stock.getAmount() < dto.getAmount()) {
+                throw new InsufficientStockException("Stock insuficient!");
+            }
+            stock.setAmount(stock.getAmount() - dto.getAmount());
+        } else {
+            stock.setAmount(stock.getAmount() + dto.getAmount());
+        }
+        Loan newLoan = null;
+        if(dto.getType()==MovementType.LOAN) {
+            newLoan = registerLoan(dto, stock.getInventoryItem());
+        }
+
+        InventoryMovement mov = new InventoryMovement();
+        mov.setItem(stock.getInventoryItem());
+        mov.setStore(stock.getStore());
+        mov.setAmount(dto.getAmount());
+        mov.setType(dto.getType());
+        mov.setMessage(dto.getMessage());
+        mov.setCreatedBy(manager.getName()+ " " + manager.getSurname());
+        mov.setLoan(newLoan);
+        mov.setFalla(stock.getStore().getFalla());
+        mov.setDate(LocalDateTime.now());
+
+        InventoryMovement saved = movementRepository.saveAndFlush(mov);
+        if(stock.getAmount()>0L) {
+            stockRepository.saveAndFlush(stock);
+        } else {
+            stockRepository.deleteById(stock.getStockId());
+        }
+
+        InventoryMovementInfoDto infoDto = movementConversor.fromEntity2Dto(saved);
     }
 
     @Transactional
