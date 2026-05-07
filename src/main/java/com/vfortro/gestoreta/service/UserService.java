@@ -83,9 +83,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserCreateDTO readUser(String email) {
-        User user = userRepository.findUserByEmail(email);
-        if(user == null) return null;
+    public UserCreateDTO readUser(String email) throws EntityNotFoundException{
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("L'usuari amb email: " + email + " no existeix."));
         return userConversor.fromEntity2Dto(user);
     }
 

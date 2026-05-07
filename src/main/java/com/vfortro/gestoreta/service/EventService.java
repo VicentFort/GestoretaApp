@@ -3,15 +3,19 @@ package com.vfortro.gestoreta.service;
 import com.vfortro.gestoreta.conversor.AssistConversor;
 import com.vfortro.gestoreta.conversor.EventConversor;
 import com.vfortro.gestoreta.conversor.EventTagConversor;
+import com.vfortro.gestoreta.dto.ApiMessageResponse;
 import com.vfortro.gestoreta.dto.assists.AssistDTO;
 import com.vfortro.gestoreta.dto.events.EventCreateDTO;
 import com.vfortro.gestoreta.dto.events.EventTagAdminInfoDTO;
 import com.vfortro.gestoreta.dto.events.EventUpdateDTO;
 import com.vfortro.gestoreta.model.*;
 import com.vfortro.gestoreta.repository.*;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,20 +92,24 @@ public class EventService {
     }
 
     @Transactional
-    public void deleteEvent(Long eventId, String email) throws AccessDeniedException {
-        Event event = eventRepository.findEventById(eventId);
-        if(!Objects.equals(event.getFalla().getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
-        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
+    public void deleteEvent(Long eventId, String email) throws AccessDeniedException, EntityNotFoundException {
+        Event event = eventRepository.findById(eventId).orElseThrow( () -> new EntityNotFoundException("No existeix l'esdeveniment amb id: " + eventId));
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sense permís");
+        if(!Objects.equals(event.getFalla().getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sense permís");
         eventRepository.delete(event);
     }
 
     @Transactional
-    public EventCreateDTO updateEvent(EventUpdateDTO newEvent, String email) throws AccessDeniedException {
-        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
-        Event updatedEvent = eventRepository.findEventById(newEvent.getEventId());
+    public EventCreateDTO updateEvent(EventUpdateDTO newEvent, String email) throws AccessDeniedException, EntityNotFoundException {
+        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sense permís");
+        Event updatedEvent = eventRepository.findById(newEvent.getEventId()).orElseThrow(() -> new EntityNotFoundException("No existeix l'esdeveniment amb id: " + newEvent.getEventId()));
         if(!Objects.equals(updatedEvent.getFalla().getId(), userService.readUser(email).getFallaId())) {
-           throw new AccessDeniedException("Sin permiso para esta falla.");
+           throw new AccessDeniedException("Sense permís");
         }
+        if(newEvent.getEndHour().isBefore(newEvent.getStartHour()) || newEvent.getStartHour().isAfter(newEvent.getEndHour())) {
+            throw new IllegalStateException("La data d'inici es posterior a la data de fi");
+        }
+
         if(newEvent.getDone() != null) updatedEvent.setDone(newEvent.getDone());
         if(newEvent.getPublicField() != null) updatedEvent.setPublicField(newEvent.getPublicField());
         if(newEvent.getTitle() != null) updatedEvent.setTitle(newEvent.getTitle());
@@ -150,17 +158,32 @@ public class EventService {
     }
 
     @Transactional
-    public AssistDTO createAssist(String email, Long eventId) {
+    public AssistDTO createAssist(String email, Long eventId) throws EntityNotFoundException, EntityExistsException {
+        if(!eventRepository.existsById(eventId)) {
+            throw new EntityNotFoundException("L'esdeveniment amb id: " + eventId + " no existex");
+        }
+
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("L'usuari amb email: " + email + " no existeix."));
+        if(assistRepository.existsByUserIdAndEventId(user.getId(), eventId)) {
+            throw new EntityExistsException("Ja existeix la assistència");
+        };
+
         AssistDTO dto = new AssistDTO();
-        dto.setUserId(userService.readUser(email).getUserId());
+        dto.setUserId(user.getId());
         dto.setEventId(eventId);
+
         Assist saved = assistRepository.saveAndFlush(assistConversor.fromDto2Entity(dto));
         return assistConversor.formEntity2Dto(saved);
     }
 
     @Transactional
-    public void deleteAssist(Long assistId) {
-        assistRepository.deleteById(assistId);
+    public void deleteAssist(Long assistId, String email) throws EntityNotFoundException, IllegalStateException {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("No exiteix l'usuari amb email: " + email));
+        Assist assist = assistRepository.findById(assistId).orElseThrow(() -> new EntityNotFoundException("No existeix l'assistència"));
+        if(!Objects.equals(assist.getUser().getId(), user.getId())) {
+            throw new IllegalStateException("L'assistència no pertany a l'usuari indicat");
+        }
+        assistRepository.delete(assist);
     }
 
     @Transactional(readOnly = true)

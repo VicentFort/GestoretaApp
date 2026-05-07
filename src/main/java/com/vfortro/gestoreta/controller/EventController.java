@@ -56,13 +56,13 @@ public class EventController {
                                        Authentication auth) {
         String email = auth.getName();
         try {
-            if(event.getEndHour().isBefore(event.getStartHour()) || event.getStartHour().isAfter(event.getEndHour())) return new ResponseEntity<>(new ApiMessageResponse("El event té horaris imprecissos.", false), HttpStatus.INTERNAL_SERVER_ERROR);
+            if(event.getEndHour().isBefore(event.getStartHour()) || event.getStartHour().isAfter(event.getEndHour())) return new ResponseEntity<>(new ApiMessageResponse("El event té horaris imprecissos.", false), HttpStatus.FORBIDDEN);
             EventCreateDTO result = eventService.createEvent(event, email);
             return new ResponseEntity<>(result, HttpStatus.CREATED);
         } catch(EntityNotFoundException entityEx) {
             return new ResponseEntity<>(new ApiMessageResponse(entityEx.getMessage(), false), HttpStatus.NOT_FOUND);
         }  catch (AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -85,14 +85,13 @@ public class EventController {
     public ResponseEntity<?> deleteEvent(@PathVariable @Valid Long eventId,
                                          Authentication authentication) {
         String email = authentication.getName();
-        if(Objects.isNull(eventService.readEvent(eventId))) {
-            return new ResponseEntity<>(new ApiMessageResponse("El evento a eliminar no existe.",false), HttpStatus.NOT_FOUND);
-        }
         try {
             eventService.deleteEvent(eventId, email);
-            return new ResponseEntity<>(new ApiMessageResponse("Evento eliminado",true), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiMessageResponse("Esdeveniment eliminat",true), HttpStatus.OK);
         } catch(AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.UNAUTHORIZED);
+        } catch (EntityNotFoundException ex) {
+            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.NOT_FOUND);
         }
 
     }
@@ -119,17 +118,14 @@ public class EventController {
     public ResponseEntity<?> updateEvent(@RequestBody @Valid EventUpdateDTO newEvent,
                                          Authentication authentication) {
         String email = authentication.getName();
-        if(newEvent.getEndHour().isBefore(newEvent.getStartHour()) || newEvent.getStartHour().isAfter(newEvent.getEndHour())) return new ResponseEntity<>(new ApiMessageResponse("El event té horaris imprecissos.", false), HttpStatus.OK);
-        if(Objects.isNull(eventService.readEvent(newEvent.getEventId()))) {
-            return new ResponseEntity<>(new ApiMessageResponse("El evento con id: " + newEvent.getEventId() + " no existe.", false), HttpStatus.NOT_FOUND);
-        }
         try {
             EventCreateDTO result = eventService.updateEvent(newEvent, email);
-            if(Objects.isNull(result)) {
-                return new ResponseEntity<>(new ApiMessageResponse("El evento con id:" + newEvent.getEventId() + " no se ha podido actualizar", false), HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-            return new ResponseEntity<>("Evento actualizado.", HttpStatus.OK);
+            return new ResponseEntity<>("Esdeveniment actualitzat.", HttpStatus.OK);
         } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.UNAUTHORIZED);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.NOT_FOUND);
+        } catch (IllegalStateException e) {
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
         }
 
@@ -150,14 +146,13 @@ public class EventController {
     public ResponseEntity<?> joinEvent(@PathVariable @Valid Long eventId,
                                        Authentication authentication) {
         String email = authentication.getName();
-        if(Objects.nonNull(eventService.readAssist(email, eventId))) {
-            return new ResponseEntity<>(new ApiMessageResponse("La asistencia del usuario al evento con id: " +eventId + " ya existe.",false), HttpStatus.CONFLICT);
-        }
         try {
             AssistDTO result = eventService.createAssist(email, eventId);
             return new ResponseEntity<>(new ApiMessageResponse("Asistencia creada con id: " +  result.getAssistId(), true), HttpStatus.CREATED);
         } catch(EntityExistsException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
+        } catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.NOT_FOUND);
         }
 
     }
@@ -177,12 +172,14 @@ public class EventController {
     public ResponseEntity<?> leaveEvent(@PathVariable @Valid Long eventId,
                                         Authentication authentication) {
         String email = authentication.getName();
-        AssistDTO assist = eventService.readAssist(email, eventId);
-        if(Objects.isNull(assist)) {
-            return new ResponseEntity<>(new ApiMessageResponse("La asistencia del usuario con id: al evento con id: " + eventId + " no existe.", false), HttpStatus.NOT_FOUND);
+        try {
+            eventService.deleteAssist(eventId, email);
+            return new ResponseEntity<>("OK!", HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
-        eventService.deleteAssist(assist.getAssistId());
-        return new ResponseEntity<>(new ApiMessageResponse("La asistencia con id: " +assist.getAssistId() + " ha sido eliminada.", true), HttpStatus.OK);
     }
 
 
