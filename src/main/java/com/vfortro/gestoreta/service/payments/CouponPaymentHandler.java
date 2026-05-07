@@ -6,12 +6,12 @@ import com.vfortro.gestoreta.dto.payments.CouponPurchaseRequestDTO;
 import com.vfortro.gestoreta.dto.payments.CouponRequestDTO;
 import com.vfortro.gestoreta.dto.payments.GenericPaymentRequestDTO;
 import com.vfortro.gestoreta.model.User;
-import com.vfortro.gestoreta.model.enums.PaymentLogType;
+import com.vfortro.gestoreta.model.enums.PaymentType;
 import com.vfortro.gestoreta.model.payments.*;
 import com.vfortro.gestoreta.repository.inventory.InventoryItemRepository;
 import com.vfortro.gestoreta.repository.payments.CouponRepository;
 import com.vfortro.gestoreta.repository.payments.CouponStockRepository;
-import com.vfortro.gestoreta.repository.payments.PaymentLogRepository;
+import com.vfortro.gestoreta.repository.payments.PaymentRepository;
 import com.vfortro.gestoreta.repository.payments.PurchaseRepository;
 import com.vfortro.gestoreta.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,11 +28,7 @@ public class CouponPaymentHandler implements PaymentHandler {
     @Autowired
     private CouponRepository couponRepository;
     @Autowired
-    private InventoryItemRepository itemRepository;
-    @Autowired
     private CouponStockRepository stockRepository;
-    @Autowired
-    private PaymentLogRepository logRepository;
     @Autowired
     private PurchaseRepository purchaseRepository;
 
@@ -45,14 +41,14 @@ public class CouponPaymentHandler implements PaymentHandler {
     private UserService userService;
 
     @Override
-    public boolean supports(PaymentLogType type) {
-        return type == PaymentLogType.COUPON_SOLD;
+    public boolean supports(PaymentType type) {
+        return type == PaymentType.COUPON_SOLD;
     }
 
     @Override
-    public List<PaymentLog> processPayment(GenericPaymentRequestDTO dto, User manager) throws IllegalStateException {
+    public List<Payment> processPayment(GenericPaymentRequestDTO dto, User manager) throws IllegalStateException {
         CouponPurchaseRequestDTO request = (CouponPurchaseRequestDTO) dto;
-        List<PaymentLog> logs = new ArrayList<>();
+        List<Payment> payments = new ArrayList<>();
         //1.1 Obtenemos el usuario que ha hecho la compra.
         User user = userService.readUserAsEntity(request.getUserId());
 
@@ -68,8 +64,8 @@ public class CouponPaymentHandler implements PaymentHandler {
             toSave.getDetails().add(detail);
             totalSum += coupon.getPrice()  * couponDto.getAmount();
 
-            //3.1 Preparar el mensaje de log para el PaymentLog y el registro de inventario.
-            String logMessage = couponDto.getAmount() + " tiquets venuts de: " + coupon.getName() + " amb id: " + coupon.getCouponId() + " per part de: " + manager.getName() + " " + manager.getSurname();
+            //3.1 Preparar el mensaje de log para el Payment y el registro de inventario.
+            String paymentMessage = couponDto.getAmount() + " tiquets venuts de: " + coupon.getName() + " amb id: " + coupon.getCouponId() + " per part de: " + manager.getName() + " " + manager.getSurname();
 
             //3.2 Actualizar el stock de tickets.
             CouponStock stock = stockRepository.findByCouponCouponIdAndUserId(coupon.getCouponId(), user.getId())
@@ -84,19 +80,19 @@ public class CouponPaymentHandler implements PaymentHandler {
             stock.setAmount(stock.getAmount() + couponDto.getAmount());
             stockRepository.save(stock);
 
-            //3.3 Generar PaymentLog.
-            PaymentLog log = new PaymentLog();
-            log.setManager(manager);
-            log.setFalla(manager.getFalla());
-            log.setUser(user);
-            log.setCoupon(coupon);
-            log.setPurchase(toSave);
-            log.setItem(coupon.getItem());
-            log.setPrice(coupon.getPrice());
-            log.setDate(LocalDateTime.now());
-            log.setType(PaymentLogType.COUPON_SOLD);
-            log.setMessage(logMessage);
-            logs.add(log);
+            //3.3 Generar Payment.
+            Payment payment = new Payment();
+            payment.setManager(manager);
+            payment.setFalla(manager.getFalla());
+            payment.setUser(user);
+            payment.setCoupon(coupon);
+            payment.setPurchase(toSave);
+            payment.setItem(coupon.getItem());
+            payment.setPrice(coupon.getPrice());
+            payment.setDate(LocalDateTime.now());
+            payment.setType(PaymentType.COUPON_SOLD);
+            payment.setMessage(paymentMessage);
+            payments.add(payment);
         }
         //4. Comprobar que el total pagado sea mayor o igual a los precios de los cupones
         if(Math.abs(totalSum - request.getTotalPrice()) > 0.00001) {
@@ -104,6 +100,6 @@ public class CouponPaymentHandler implements PaymentHandler {
         }
         //5. Guardar la compra
         Purchase savedPurchase = purchaseRepository.saveAndFlush(toSave);
-        return logs;
+        return payments;
     }
 }

@@ -1,18 +1,18 @@
 package com.vfortro.gestoreta.converters;
 
-import com.vfortro.gestoreta.model.enums.PaymentLogType;
+import com.vfortro.gestoreta.model.enums.PaymentType;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
 @Converter(autoApply = true)
-public class PaymentLogTypeConverter implements AttributeConverter<PaymentLogType, String> {
+public class PaymentLogTypeConverter implements AttributeConverter<PaymentType, String> {
     @Override
-    public String convertToDatabaseColumn(PaymentLogType paymentLogType) {
+    public String convertToDatabaseColumn(PaymentType paymentLogType) {
         return (paymentLogType == null) ? null : paymentLogType.getValue();
     }
 
     @Override
-    public PaymentLogType convertToEntityAttribute(String s) {
-        return (s == null) ? null : PaymentLogType.fromValue(s);
+    public PaymentType convertToEntityAttribute(String s) {
+        return (s == null) ? null : PaymentType.fromValue(s);
     }
 }

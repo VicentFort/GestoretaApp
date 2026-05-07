@@ -1,16 +1,13 @@
 package com.vfortro.gestoreta.model;
 
 import com.vfortro.gestoreta.model.payments.CouponStock;
-import com.vfortro.gestoreta.model.payments.PaymentLog;
+import com.vfortro.gestoreta.model.payments.Payment;
 import com.vfortro.gestoreta.model.payments.Purchase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -84,10 +81,10 @@ public class User implements Serializable {
     private Set<Purchase> purchases = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
-    private Set<PaymentLog> paymentLogs = new LinkedHashSet<>();
+    private Set<Payment> paymentLogs = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "manager")
-    private Set<PaymentLog> managerLogs = new LinkedHashSet<>();
+    private Set<Payment> managerLogs = new LinkedHashSet<>();
 
     @Column(name="nickname")
     private String nickname;

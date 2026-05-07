@@ -28,7 +28,7 @@ public class PaymentService {
     @Autowired
     private CouponStockRepository stockRepository;
     @Autowired
-    private PaymentLogRepository logRepository;
+    private PaymentRepository paymentRepository;
     @Autowired
     private PurchaseDetailRepository detailRepository;
     @Autowired
@@ -76,10 +76,10 @@ public class PaymentService {
                 .filter(h -> h.supports(request.getType()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No hi ha manjeador de pagament per a aquest tipus"));
-        List<PaymentLog> logs = handler.processPayment(request, manager);
+        List<Payment> payments = handler.processPayment(request, manager);
 
         //3. Guardar los logs.
-        logRepository.saveAll(logs);
+        paymentRepository.saveAll(payments);
     }
 
     @Transactional

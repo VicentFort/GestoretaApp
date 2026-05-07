@@ -2,14 +2,12 @@ package com.vfortro.gestoreta.model.payments;
 
 import com.vfortro.gestoreta.model.Falla;
 import com.vfortro.gestoreta.model.User;
-import com.vfortro.gestoreta.model.enums.PaymentLogType;
+import com.vfortro.gestoreta.model.enums.PaymentType;
 import com.vfortro.gestoreta.model.inventory.InventoryItem;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.JdbcType;
-import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -17,8 +15,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "payment_logs")
-public class PaymentLog implements Serializable {
+@Table(name = "payments")
+public class Payment implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "log_id", nullable = false)
@@ -36,7 +34,7 @@ public class PaymentLog implements Serializable {
 
     @NotNull
     @Column(name="type", nullable = false, columnDefinition = "payment_log_type")
-    private PaymentLogType type;
+    private PaymentType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

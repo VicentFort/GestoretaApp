@@ -47,7 +47,7 @@ public class Coupon implements Serializable {
     private Set<PurchaseDetail> purchaseDetails = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "coupon")
-    private Set<PaymentLog> paymentLogs = new LinkedHashSet<>();
+    private Set<Payment> paymentLogs = new LinkedHashSet<>();
 
 
 }

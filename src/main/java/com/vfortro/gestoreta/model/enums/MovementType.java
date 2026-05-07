@@ -3,7 +3,7 @@ package com.vfortro.gestoreta.model.enums;
 public enum MovementType {
     INCOMING("Entrada"),
     OUTGOING("Eixida"),
-    LOAN("Prèstec");
+    LOAN("Préstec");
 
     private final String value;
 

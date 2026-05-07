@@ -251,7 +251,7 @@ public class InventoryService {
         mov.setFalla(stock.getStore().getFalla());
         mov.setDate(LocalDateTime.now());
         mov.setType(MovementType.INCOMING);
-        mov.setMessage("Retorn del prèstec: " + dto.getMessage());
+        mov.setMessage("Retorn del préstec: " + dto.getMessage());
         mov.setCreatedBy(user.getName()+" " +user.getSurname());
         mov.setLoan(loan);
         movementRepository.saveAndFlush(mov);

@@ -1,6 +1,6 @@
 package com.vfortro.gestoreta.model.enums;
 
-public enum PaymentLogType {
+public enum PaymentType {
     COUPON_SOLD("Venda de tiquet"),
     COUPON_EXCHANGED("Bescanvi de tiquet"),
     FEE_PAYMENT("Pagament de quota"),
@@ -9,13 +9,13 @@ public enum PaymentLogType {
     GRANT_PAYMENT("Pagament de subvenció"),
     PRIZE_REWARD_PAYMENT("Pagament de recompensa per premi"),
     MAINTENANCE_EXPENSE("Gasto de manteniment"),
-    RENT_EXPENSE("Gasto d.alquiler"),
+    RENT_EXPENSE("Gasto de lloguer"),
     ADMINISTRATIVE_EXPENSE("Gasto administratiu"),
     LOTTERY_EXPENSE("Gasto de loteria"),
     PYROTECHNICS_EXPENSE("Gasto de pirotècnia"),
     STAFF_EXPENSE("Gasto de personal"),
     ARTS_AND_CRAFTS_EXPENSE("Gasto de material artístic o plàstic"),
-    OFFICE_MATERIAL_EXPENSE("Gasto de material d.oficiona"),
+    OFFICE_MATERIAL_EXPENSE("Gasto de material d.oficina"),
     SW_HW_EXPENSE("Gasto informàtic o electrònic"),
     DRINK_FOOD_EXPENSE("Gasto de beguda o menjar"),
     SUBSCRIBER_EXPENSE("Gasto d.abonats"),
@@ -26,15 +26,15 @@ public enum PaymentLogType {
 
     private final String value;
 
-    PaymentLogType(String value) { this.value = value; }
+    PaymentType(String value) { this.value = value; }
 
     @com.fasterxml.jackson.annotation.JsonCreator
     public String getValue() {
         return value;
     }
 
-    public static PaymentLogType fromValue(String value) {
-        for(PaymentLogType type: PaymentLogType.values()) {
+    public static PaymentType fromValue(String value) {
+        for(PaymentType type: PaymentType.values()) {
             if(type.value.equalsIgnoreCase(value)) {
                 return type;
             }

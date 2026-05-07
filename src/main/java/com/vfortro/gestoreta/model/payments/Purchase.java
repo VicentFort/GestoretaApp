@@ -38,5 +38,5 @@ public class Purchase {
     private Set<PurchaseDetail> details = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "purchase")
-    private Set<PaymentLog> paymentLogs = new LinkedHashSet<>();
+    private Set<Payment> paymentLogs = new LinkedHashSet<>();
 }

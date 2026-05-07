@@ -7,10 +7,10 @@ import com.vfortro.gestoreta.dto.payments.GenericPaymentRequestDTO;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
 import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.model.enums.MovementType;
-import com.vfortro.gestoreta.model.enums.PaymentLogType;
+import com.vfortro.gestoreta.model.enums.PaymentType;
 import com.vfortro.gestoreta.model.payments.Coupon;
 import com.vfortro.gestoreta.model.payments.CouponStock;
-import com.vfortro.gestoreta.model.payments.PaymentLog;
+import com.vfortro.gestoreta.model.payments.Payment;
 import com.vfortro.gestoreta.repository.inventory.InventoryItemRepository;
 import com.vfortro.gestoreta.repository.payments.CouponRepository;
 import com.vfortro.gestoreta.repository.payments.CouponStockRepository;
@@ -41,14 +41,14 @@ public class CouponExchangeHandler implements PaymentHandler {
     private InventoryService inventoryService;
 
     @Override
-    public boolean supports(PaymentLogType type) {
-        return type == PaymentLogType.COUPON_EXCHANGED;
+    public boolean supports(PaymentType type) {
+        return type == PaymentType.COUPON_EXCHANGED;
     }
 
     @Override
-    public List<PaymentLog> processPayment(GenericPaymentRequestDTO dto, User manager) throws AccessDeniedException, InsufficientStockException {
+    public List<Payment> processPayment(GenericPaymentRequestDTO dto, User manager) throws AccessDeniedException, InsufficientStockException {
         CouponExchangeRequestDTO request = (CouponExchangeRequestDTO)dto;
-        List<PaymentLog> logs = new ArrayList<>();
+        List<Payment> logs = new ArrayList<>();
         //1.1 Obtenemos el usuario que ha hecho la compra.
         User user = userService.readUserAsEntity(request.getUserId());
 
@@ -76,8 +76,8 @@ public class CouponExchangeHandler implements PaymentHandler {
             movementDto.setType(MovementType.OUTGOING);
             inventoryService.processMovement(movementDto, manager);
 
-            //2.3 Generar PaymentLog.
-            PaymentLog log = new PaymentLog();
+            //2.3 Generar Payment.
+            Payment log = new Payment();
             log.setManager(manager);
             log.setFalla(manager.getFalla());
             log.setUser(user);
@@ -86,7 +86,7 @@ public class CouponExchangeHandler implements PaymentHandler {
             log.setItem(coupon.getItem());
             log.setPrice(coupon.getPrice());
             log.setDate(LocalDateTime.now());
-            log.setType(PaymentLogType.COUPON_EXCHANGED);
+            log.setType(PaymentType.COUPON_EXCHANGED);
             log.setMessage(logMessage);
             logs.add(log);
         }

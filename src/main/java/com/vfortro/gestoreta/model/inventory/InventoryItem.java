@@ -3,12 +3,11 @@ package com.vfortro.gestoreta.model.inventory;
 import com.vfortro.gestoreta.model.Falla;
 import com.vfortro.gestoreta.model.enums.ItemCategory;
 import com.vfortro.gestoreta.model.payments.Coupon;
-import com.vfortro.gestoreta.model.payments.PaymentLog;
+import com.vfortro.gestoreta.model.payments.Payment;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.checkerframework.checker.units.qual.C;
 
 import java.io.Serializable;
 import java.util.LinkedHashSet;
@@ -59,5 +58,5 @@ public class InventoryItem implements Serializable {
     private Set<Coupon> coupons = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "item")
-    private Set<PaymentLog> paymentLogs = new LinkedHashSet<>();
+    private Set<Payment> paymentLogs = new LinkedHashSet<>();
 }
