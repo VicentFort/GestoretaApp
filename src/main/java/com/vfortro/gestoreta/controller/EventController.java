@@ -63,6 +63,8 @@ public class EventController {
             return new ResponseEntity<>(new ApiMessageResponse(entityEx.getMessage(), false), HttpStatus.NOT_FOUND);
         }  catch (AccessDeniedException accEx) {
             return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.UNAUTHORIZED);
+        } catch(IllegalAccessException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
     }
 
@@ -92,6 +94,8 @@ public class EventController {
             return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.UNAUTHORIZED);
         } catch (EntityNotFoundException ex) {
             return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.NOT_FOUND);
+        } catch(IllegalAccessException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
 
     }
@@ -127,6 +131,8 @@ public class EventController {
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.NOT_FOUND);
         } catch (IllegalStateException e) {
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
+        } catch(IllegalAccessException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
 
     }

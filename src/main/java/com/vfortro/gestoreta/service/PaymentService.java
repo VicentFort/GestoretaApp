@@ -60,7 +60,7 @@ public class PaymentService {
 
 
     @Transactional
-    public void processPayment(GenericPaymentRequestDTO request, String email) throws AccessDeniedException, EntityNotFoundException, InsufficientStockException, IllegalStateException {
+    public void processPayment(GenericPaymentRequestDTO request, String email) throws AccessDeniedException, EntityNotFoundException, InsufficientStockException, IllegalStateException, IllegalAccessException {
 
         //1. Validación de permisos de usuario.
         User manager = userService.readUserAsEntity(email);
@@ -83,7 +83,7 @@ public class PaymentService {
     }
 
     @Transactional
-    public void createCoupon(CouponCreateDTO dto, String email) throws AccessDeniedException {
+    public void createCoupon(CouponCreateDTO dto, String email) throws AccessDeniedException, IllegalAccessException {
         if(!userService.checkAdminAccess(email)) {
             throw new AccessDeniedException("Sense permís!");
         }

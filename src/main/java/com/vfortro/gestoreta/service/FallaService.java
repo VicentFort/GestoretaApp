@@ -44,7 +44,7 @@ public class FallaService {
     }
 
     @Transactional
-    public void updateFalla(FallaUpdateDTO newFalla, String email) throws AccessDeniedException, NullPointerException {
+    public void updateFalla(FallaUpdateDTO newFalla, String email) throws AccessDeniedException, EntityNotFoundException, IllegalAccessException {
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         UserCreateDTO user = userService.readUser(email);
         if(user.getFallaId() == null) throw new NullPointerException("El usuario no tiene falla asignada.");
@@ -69,7 +69,7 @@ public class FallaService {
     }
 
     @Transactional
-    public void addEventTag(String email, String name) throws AccessDeniedException, EntityNotFoundException, EntityExistsException {
+    public void addEventTag(String email, String name) throws AccessDeniedException, EntityNotFoundException, EntityExistsException, IllegalAccessException {
         UserCreateDTO userDto = userService.readUser(email);
         if(userDto.getFallaId()== null) throw new EntityNotFoundException("El usuario no tiene una falla asociada.");
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin acceso.");
@@ -82,7 +82,7 @@ public class FallaService {
     }
 
     @Transactional(readOnly = true)
-    public FallaAdminInfoDTO getFallaInfo(String email) throws AccessDeniedException {
+    public FallaAdminInfoDTO getFallaInfo(String email) throws AccessDeniedException, IllegalAccessException {
         UserCreateDTO infoDto = userService.readUser(email);
         if(infoDto.getFallaId()==null) throw new EntityNotFoundException("No existe la falla del usuario.");
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
@@ -92,13 +92,13 @@ public class FallaService {
     }
 
     @Transactional
-    public void editAdminAccess(Long userId, Boolean access, String email) throws AccessDeniedException {
+    public void editAdminAccess(Long userId, Boolean access, String email) throws AccessDeniedException, IllegalAccessException {
         if(!userService.checkAdminAccess(email) || !userService.checkOtherAccess(email)) throw new AccessDeniedException("Sense permissos.");
         userService.editAdminAccess(userId, access);
     }
 
     @Transactional
-    public void deleteEventTag(Long tagId, String email) throws AccessDeniedException {
+    public void deleteEventTag(Long tagId, String email) throws AccessDeniedException, IllegalAccessException {
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         eventTagRepository.deleteById(tagId);
     }

@@ -64,7 +64,7 @@ public class EventService {
 
 
     @Transactional
-    public EventCreateDTO createEvent(@Valid EventCreateDTO event, String email) throws EntityNotFoundException, AccessDeniedException {
+    public EventCreateDTO createEvent(@Valid EventCreateDTO event, String email) throws EntityNotFoundException, AccessDeniedException, IllegalAccessException {
         if(fallaRepository.existsById(event.getId())) {
             throw new EntityNotFoundException("La falla a la que se está asociando el evento: " + event.getTitle() + " no existe");
         }
@@ -92,7 +92,7 @@ public class EventService {
     }
 
     @Transactional
-    public void deleteEvent(Long eventId, String email) throws AccessDeniedException, EntityNotFoundException {
+    public void deleteEvent(Long eventId, String email) throws AccessDeniedException, EntityNotFoundException, IllegalAccessException {
         Event event = eventRepository.findById(eventId).orElseThrow( () -> new EntityNotFoundException("No existeix l'esdeveniment amb id: " + eventId));
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sense permís");
         if(!Objects.equals(event.getFalla().getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sense permís");
@@ -100,7 +100,7 @@ public class EventService {
     }
 
     @Transactional
-    public EventCreateDTO updateEvent(EventUpdateDTO newEvent, String email) throws AccessDeniedException, EntityNotFoundException {
+    public EventCreateDTO updateEvent(EventUpdateDTO newEvent, String email) throws AccessDeniedException, EntityNotFoundException, IllegalAccessException {
         if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sense permís");
         Event updatedEvent = eventRepository.findById(newEvent.getEventId()).orElseThrow(() -> new EntityNotFoundException("No existeix l'esdeveniment amb id: " + newEvent.getEventId()));
         if(!Objects.equals(updatedEvent.getFalla().getId(), userService.readUser(email).getFallaId())) {

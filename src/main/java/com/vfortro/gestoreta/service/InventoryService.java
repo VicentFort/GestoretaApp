@@ -78,7 +78,7 @@ public class InventoryService {
 
 
     @Transactional
-    public StoreInfoDTO createStore(StoreCreateDTO newStore, String email) throws AccessDeniedException {
+    public StoreInfoDTO createStore(StoreCreateDTO newStore, String email) throws AccessDeniedException, IllegalAccessException {
         if(!userService.checkAdminAccess(email)) { throw new AccessDeniedException("Sense permís.");}
         Falla falla = fallaRepository.findFallaById(userService.readUser(email).getFallaId());
         Store toCreate = storeConversor.fromDto2Entity(newStore,falla);
@@ -87,7 +87,7 @@ public class InventoryService {
     }
 
     @Transactional
-    public InventoryItemInfoDTO createItem(InventoryItemCreateDTO newItem, String email) throws AccessDeniedException {
+    public InventoryItemInfoDTO createItem(InventoryItemCreateDTO newItem, String email) throws AccessDeniedException, IllegalAccessException {
         if(!userService.checkAdminAccess(email)) { throw new AccessDeniedException("Sense permís");}
         Falla falla = fallaRepository.findFallaById(userService.readUser(email).getFallaId());
         InventoryItem toSave = inventoryItemConversor.fromDto2Entity(newItem, falla);
@@ -96,7 +96,7 @@ public class InventoryService {
     }
 
     @Transactional
-    public InventoryMovementInfoDTO processMovement(InventoryMovementRequestDTO dto, String email) throws AccessDeniedException, InsufficientStockException {
+    public InventoryMovementInfoDTO processMovement(InventoryMovementRequestDTO dto, String email) throws AccessDeniedException, InsufficientStockException, IllegalAccessException {
         if(!userService.checkAdminAccess(email)) { throw new AccessDeniedException("Sense permís"); }
         UserCreateDTO user = userService.readUser(email);
         Stock stock = stockRepository.findByStoreStoreIdAndInventoryItemItemId(dto.getStoreId(), dto.getItemId())
@@ -222,7 +222,7 @@ public class InventoryService {
     }
 
     @Transactional
-    public LoanInfoDTO returnLoan(ReturnLoanDTO dto, String email) throws AccessDeniedException, IllegalStateException {
+    public LoanInfoDTO returnLoan(ReturnLoanDTO dto, String email) throws AccessDeniedException, IllegalStateException, IllegalAccessException {
         if(!userService.checkAdminAccess(email)) {
             throw new AccessDeniedException("Sense permís!");
         }
@@ -264,14 +264,14 @@ public class InventoryService {
     }
 
     @Transactional
-    public void deleteStore(Long storeId, String email) throws AccessDeniedException {
+    public void deleteStore(Long storeId, String email) throws AccessDeniedException, IllegalAccessException {
         if(!userService.checkAdminAccess(email)) {throw new AccessDeniedException("Sense permís!");}
         if(!storeRepository.existsById(storeId)) {throw new  EntityNotFoundException("No existeix el magatzem");}
         storeRepository.deleteById(storeId);
     }
 
     @Transactional
-    public void updateStore(StoreUpdateDTO updatedStore, String email) throws AccessDeniedException, EntityNotFoundException {
+    public void updateStore(StoreUpdateDTO updatedStore, String email) throws AccessDeniedException, EntityNotFoundException, IllegalAccessException {
         if(!userService.checkAdminAccess(email)) {throw new AccessDeniedException("Sense permís!");}
         Store storeToUpdate = storeRepository.findById(updatedStore.getStoreId()).orElseThrow(() -> new EntityNotFoundException("No existeix el magatzem"));
 
@@ -285,14 +285,15 @@ public class InventoryService {
     }
 
     @Transactional
-    public void deleteItem(Long itemId, String email) throws AccessDeniedException, EntityNotFoundException {
+    public void deleteItem(Long itemId, String email) throws AccessDeniedException, EntityNotFoundException, IllegalAccessException {
         if(!userService.checkAdminAccess(email)) {throw new AccessDeniedException("Sense permís!");}
         if(!inventoryItemRepository.existsById(itemId)) {throw new EntityNotFoundException("No existeix el item");}
         inventoryItemRepository.deleteById(itemId);
     }
 
 
-    public void updateItem(InventoryItemUpdateDTO updatedItem, String email) throws AccessDeniedException, EntityNotFoundException {
+    @Transactional
+    public void updateItem(InventoryItemUpdateDTO updatedItem, String email) throws AccessDeniedException, EntityNotFoundException, IllegalAccessException {
         if(!userService.checkAdminAccess(email)) { throw new AccessDeniedException("Sense permís!");}
         InventoryItem itemToUpdate = inventoryItemRepository.findById(updatedItem.getItemId()).orElseThrow(() -> new EntityNotFoundException("No existeix el item"));
 
@@ -306,7 +307,7 @@ public class InventoryService {
     }
 
     @Transactional
-    public LoanContactInfoDTO createContact(LoanContactCreateDTO contact, String email) throws AccessDeniedException {
+    public LoanContactInfoDTO createContact(LoanContactCreateDTO contact, String email) throws AccessDeniedException, IllegalAccessException {
         if(!userService.checkAdminAccess(email)) { throw new AccessDeniedException("Sense permís");}
         Falla falla = fallaRepository.findFallaById(userService.readUser(email).getFallaId());
         LoanContact toCreate = contactConversor.fromDto2Entity(contact, falla);
@@ -315,7 +316,7 @@ public class InventoryService {
     }
 
     @Transactional
-    public void updateContact(LoanContactUpdateDTO contact, String email) throws AccessDeniedException, EntityNotFoundException {
+    public void updateContact(LoanContactUpdateDTO contact, String email) throws AccessDeniedException, EntityNotFoundException, IllegalAccessException {
         if(!userService.checkAdminAccess(email)) { throw new AccessDeniedException("Sense permís"); }
         LoanContact toUpdate = contactRepository.findById(contact.getId()).orElseThrow(() -> new EntityNotFoundException("No existeix el contacte"));
 

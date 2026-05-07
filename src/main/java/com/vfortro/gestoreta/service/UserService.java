@@ -139,8 +139,11 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public boolean checkAdminAccess(String email) {
-        User user = userRepository.findUserByEmail(email);
+    public boolean checkAdminAccess(String email) throws EntityNotFoundException, IllegalAccessException {
+        User user = userRepository.findByEmail(email).orElseThrow( () -> new EntityNotFoundException("No existeix l'usuari amb email: " + email));
+        if(user.getFalla() == null) {
+            throw new IllegalAccessException("L'usuari no te falla");
+        }
         if(user.getPositions() == null) return false;
         if(user.getPositions().isEmpty()) return false;
         for(Position position : user.getPositions()) {
@@ -303,7 +306,7 @@ public class UserService {
     }
 
     @Transactional
-    public void updateRequest(RequestUpdateDTO dto, String email) throws AccessDeniedException {
+    public void updateRequest(RequestUpdateDTO dto, String email) throws AccessDeniedException, IllegalAccessException {
         if(!Objects.equals(dto.getIdFalla(), readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
         if(!checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
         Request request = requestRepository.findRequestById(dto.getRequestId());

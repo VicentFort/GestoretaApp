@@ -37,6 +37,8 @@ public class PaymentController {
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.NOT_FOUND);
         } catch (IllegalStateException e) {
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch(IllegalAccessException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
     }
 
@@ -48,6 +50,8 @@ public class PaymentController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (AccessDeniedException e) {
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false),HttpStatus.UNAUTHORIZED);
+        } catch(IllegalAccessException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
     }
 
@@ -63,6 +67,8 @@ public class PaymentController {
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.PAYMENT_REQUIRED);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.NOT_FOUND);
+        } catch(IllegalAccessException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
     }
 }
