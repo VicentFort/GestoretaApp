@@ -67,7 +67,7 @@ public class PaymentService {
         if(manager.getFalla()==null) {
             throw new EntityNotFoundException("El usuari no té falla");
         }
-        if(!userService.checkAdminAccess(email)) {
+        if(!userService.checkManagerAccess(email)) {
             throw new AccessDeniedException("Sense permís!");
         }
 
@@ -84,7 +84,7 @@ public class PaymentService {
 
     @Transactional
     public void createCoupon(CouponCreateDTO dto, String email) throws AccessDeniedException, IllegalAccessException {
-        if(!userService.checkAdminAccess(email)) {
+        if(!userService.checkManagerAccess(email)) {
             throw new AccessDeniedException("Sense permís!");
         }
         Coupon toSave = couponConversor.fromDto2Entity(dto);

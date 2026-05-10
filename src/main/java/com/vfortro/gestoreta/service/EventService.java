@@ -69,7 +69,7 @@ public class EventService {
             throw new EntityNotFoundException("La etiqueta a la que se está asociando el evento: " + event.getTitle() + " no existe");
         }
         if(!Objects.equals(event.getFallaId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
-        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
+        if(!userService.checkManagerAccess(email)) throw new AccessDeniedException("Sin permiso.");
         Event toSave = eventConversor.fromDto2Entity(event);
         Event saved = eventRepository.saveAndFlush(toSave);
 
@@ -91,14 +91,14 @@ public class EventService {
     @Transactional
     public void deleteEvent(Long eventId, String email) throws AccessDeniedException, EntityNotFoundException, IllegalAccessException {
         Event event = eventRepository.findById(eventId).orElseThrow( () -> new EntityNotFoundException("No existeix l'esdeveniment amb id: " + eventId));
-        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sense permís");
+        if(!userService.checkManagerAccess(email)) throw new AccessDeniedException("Sense permís");
         if(!Objects.equals(event.getFalla().getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sense permís");
         eventRepository.delete(event);
     }
 
     @Transactional
     public EventCreateDTO updateEvent(EventUpdateDTO newEvent, String email) throws AccessDeniedException, EntityNotFoundException, IllegalAccessException {
-        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sense permís");
+        if(!userService.checkManagerAccess(email)) throw new AccessDeniedException("Sense permís");
         Event updatedEvent = eventRepository.findById(newEvent.getEventId()).orElseThrow(() -> new EntityNotFoundException("No existeix l'esdeveniment amb id: " + newEvent.getEventId()));
         if(!Objects.equals(updatedEvent.getFalla().getId(), userService.readUser(email).getFallaId())) {
            throw new AccessDeniedException("Sense permís");

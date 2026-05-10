@@ -45,7 +45,7 @@ public class FallaService {
 
     @Transactional
     public void updateFalla(FallaUpdateDTO newFalla, String email) throws AccessDeniedException, EntityNotFoundException, IllegalAccessException {
-        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
+        if(!userService.checkManagerAccess(email)) throw new AccessDeniedException("Sin permiso.");
         UserCreateDTO user = userService.readUser(email);
         if(user.getFallaId() == null) throw new NullPointerException("El usuario no tiene falla asignada.");
         Falla updatedFalla = fallaRepository.findFallaById(user.getFallaId());
@@ -72,7 +72,7 @@ public class FallaService {
     public void addEventTag(String email, String name) throws AccessDeniedException, EntityNotFoundException, EntityExistsException, IllegalAccessException {
         UserCreateDTO userDto = userService.readUser(email);
         if(userDto.getFallaId()== null) throw new EntityNotFoundException("El usuario no tiene una falla asociada.");
-        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin acceso.");
+        if(!userService.checkManagerAccess(email)) throw new AccessDeniedException("Sin acceso.");
         Falla falla = fallaRepository.findFallaById(userDto.getFallaId());
         if(eventTagRepository.existsEventTagByNameAndFalla(name, falla)) throw new EntityExistsException("Ya existe una etiqueta: " + name + " para la falla: " + falla.getName());
         EventTag tagSave = new EventTag();
@@ -85,7 +85,7 @@ public class FallaService {
     public FallaAdminInfoDTO getFallaInfo(String email) throws AccessDeniedException, IllegalAccessException {
         UserCreateDTO infoDto = userService.readUser(email);
         if(infoDto.getFallaId()==null) throw new EntityNotFoundException("No existe la falla del usuario.");
-        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
+        if(!userService.checkManagerAccess(email)) throw new AccessDeniedException("Sin permiso.");
         Falla falla = fallaRepository.findFallaById(infoDto.getFallaId());
         return fallaConversor.fromEntity2AdminInfo(falla);
 
@@ -93,13 +93,13 @@ public class FallaService {
 
     @Transactional
     public void editAdminAccess(Long userId, Boolean access, String email) throws AccessDeniedException, IllegalAccessException {
-        if(!userService.checkAdminAccess(email) || !userService.checkOtherAccess(email)) throw new AccessDeniedException("Sense permissos.");
+        if(!userService.checkManagerAccess(email) || !userService.checkOtherAccess(email)) throw new AccessDeniedException("Sense permissos.");
         userService.editAdminAccess(userId, access);
     }
 
     @Transactional
     public void deleteEventTag(Long tagId, String email) throws AccessDeniedException, IllegalAccessException {
-        if(!userService.checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
+        if(!userService.checkManagerAccess(email)) throw new AccessDeniedException("Sin permiso.");
         eventTagRepository.deleteById(tagId);
     }
 }

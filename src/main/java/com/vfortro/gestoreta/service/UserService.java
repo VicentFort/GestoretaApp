@@ -10,6 +10,7 @@ import com.vfortro.gestoreta.dto.users.UserCreateDTO;
 import com.vfortro.gestoreta.dto.users.info.UserInfoDTO;
 import com.vfortro.gestoreta.dto.users.UserUpdateDTO;
 import com.vfortro.gestoreta.model.*;
+import com.vfortro.gestoreta.model.enums.AccessType;
 import com.vfortro.gestoreta.model.enums.FoodNeedType;
 import com.vfortro.gestoreta.repository.*;
 import jakarta.persistence.EntityExistsException;
@@ -308,10 +309,38 @@ public class UserService {
     @Transactional
     public void updateRequest(RequestUpdateDTO dto, String email) throws AccessDeniedException, IllegalAccessException {
         if(!Objects.equals(dto.getIdFalla(), readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
-        if(!checkAdminAccess(email)) throw new AccessDeniedException("Sin permiso.");
+        if(!checkManagerAccess(email)) throw new AccessDeniedException("Sin permiso.");
         Request request = requestRepository.findRequestById(dto.getRequestId());
         request.setAproved(dto.getAproved());
         request.setReply(dto.getReply());
         requestRepository.saveAndFlush(request);
+    }
+
+    @Transactional(readOnly = true)
+    public Boolean checkManagerAccess(String email) throws IllegalAccessException, EntityNotFoundException {
+        User user = userRepository.findByEmail(email).orElseThrow( () -> new EntityNotFoundException("No existeix l'usuari amb email: " + email));
+        if(user.getFalla() == null) {
+            throw new IllegalAccessException("L'usuari no te falla");
+        }
+        if(user.getCharges() == null) return false;
+        if(user.getCharges().isEmpty()) return false;
+        for(Charge charge : user.getCharges()) {
+            if(charge.getType() == AccessType.MANAGER || charge.getType() == AccessType.SUPERUSER) return true;
+        }
+        return false;
+    }
+
+    @Transactional(readOnly = true)
+    public Boolean checkSuperUserAccess(String email) throws IllegalAccessException, EntityNotFoundException {
+        User user = userRepository.findByEmail(email).orElseThrow( () -> new EntityNotFoundException("No existeix l'usuari amb email: " + email));
+        if(user.getFalla() == null) {
+            throw new IllegalAccessException("L'usuari no te falla");
+        }
+        if(user.getCharges() == null) return false;
+        if(user.getCharges().isEmpty()) return false;
+        for(Charge charge : user.getCharges()) {
+            if(charge.getType() == AccessType.SUPERUSER) return true;
+        }
+        return false;
     }
 }
