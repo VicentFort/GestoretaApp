@@ -44,7 +44,7 @@ public class Falla implements Serializable {
     private Set<Event> events = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "falla")
-    private Set<Position> positions = new LinkedHashSet<>();
+    private Set<Charge> charges = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "falla")
     private Set<Request> requests = new LinkedHashSet<>();

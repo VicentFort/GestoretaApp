@@ -65,7 +65,7 @@ public class UserService {
         toSave.setCreationDate(LocalDateTime.now());
         User saved = userRepository.saveAndFlush(toSave);
         if(user.getAdminAccess()!= null) {
-            Position createPos = new Position();
+            Charge createPos = new Charge();
             createPos.setAdminAccess(true);
             createPos.setUser(saved);
             createPos.setName("Càrrec genèric");
@@ -113,12 +113,12 @@ public class UserService {
 
     @Transactional
     public void editAdminAccess(Long userId, Boolean adminAccess) {
-        Position pos = positionRepository.findByUserId(userId);
+        Charge pos = positionRepository.findByUserId(userId);
         if(pos!=null) {
             pos.setAdminAccess(adminAccess);
             positionRepository.saveAndFlush(pos);
         } else {
-            Position createPos = new Position();
+            Charge createPos = new Charge();
             User user = userRepository.findUserById(userId);
             createPos.setAdminAccess(true);
             createPos.setUser(user);
@@ -144,10 +144,10 @@ public class UserService {
         if(user.getFalla() == null) {
             throw new IllegalAccessException("L'usuari no te falla");
         }
-        if(user.getPositions() == null) return false;
-        if(user.getPositions().isEmpty()) return false;
-        for(Position position : user.getPositions()) {
-            if(position.getAdminAccess()) return true;
+        if(user.getCharges() == null) return false;
+        if(user.getCharges().isEmpty()) return false;
+        for(Charge charge : user.getCharges()) {
+            if(charge.getAdminAccess()) return true;
         }
         return false;
     }
@@ -155,9 +155,9 @@ public class UserService {
     @Transactional(readOnly = true)
     public boolean checkBankAccess(String email) {
         User user = userRepository.findUserByEmail(email);
-        if(user.getPositions().isEmpty()) return false;
-        for(Position position : user.getPositions()) {
-            if(position.getBankAccess()) return true;
+        if(user.getCharges().isEmpty()) return false;
+        for(Charge charge : user.getCharges()) {
+            if(charge.getBankAccess()) return true;
         }
         return false;
     }
@@ -165,9 +165,9 @@ public class UserService {
     @Transactional(readOnly = true)
     public boolean checkLotteryAccess(String email) {
         User user = userRepository.findUserByEmail(email);
-        if(user.getPositions().isEmpty()) return false;
-        for(Position position : user.getPositions()) {
-            if(position.getLotteryAccess()) return true;
+        if(user.getCharges().isEmpty()) return false;
+        for(Charge charge : user.getCharges()) {
+            if(charge.getLotteryAccess()) return true;
         }
         return false;
     }
@@ -175,9 +175,9 @@ public class UserService {
     @Transactional(readOnly = true)
     public boolean checkArtsAccess(String email) {
         User user = userRepository.findUserByEmail(email);
-        if(user.getPositions().isEmpty()) return false;
-        for(Position position : user.getPositions()) {
-            if(position.getArtsAccess()) return true;
+        if(user.getCharges().isEmpty()) return false;
+        for(Charge charge : user.getCharges()) {
+            if(charge.getArtsAccess()) return true;
         }
         return false;
     }
@@ -185,9 +185,9 @@ public class UserService {
     @Transactional(readOnly = true)
     public boolean checkPyrothecnicsAccess(String email) {
         User user = userRepository.findUserByEmail(email);
-        if(user.getPositions().isEmpty()) return false;
-        for(Position position : user.getPositions()) {
-            if(position.getPyrotechnicsAccess()) return true;
+        if(user.getCharges().isEmpty()) return false;
+        for(Charge charge : user.getCharges()) {
+            if(charge.getPyrotechnicsAccess()) return true;
         }
         return false;
     }
@@ -195,9 +195,9 @@ public class UserService {
     @Transactional(readOnly = true)
     public boolean checkHouseHoldAccess(String email) {
         User user = userRepository.findUserByEmail(email);
-        if(user.getPositions().isEmpty()) return false;
-        for(Position position : user.getPositions()) {
-            if(position.getHouseholdAccess()) return true;
+        if(user.getCharges().isEmpty()) return false;
+        for(Charge charge : user.getCharges()) {
+            if(charge.getHouseholdAccess()) return true;
         }
         return false;
     }
@@ -205,9 +205,9 @@ public class UserService {
     @Transactional(readOnly = true)
     public boolean checkOtherAccess(String email) {
         User user = userRepository.findUserByEmail(email);
-        if(user.getPositions().isEmpty()) return false;
-        for(Position position : user.getPositions()) {
-            if(position.getOtherAccess()) return true;
+        if(user.getCharges().isEmpty()) return false;
+        for(Charge charge : user.getCharges()) {
+            if(charge.getOtherAccess()) return true;
         }
         return false;
     }

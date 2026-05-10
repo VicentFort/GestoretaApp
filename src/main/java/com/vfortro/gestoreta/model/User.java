@@ -69,7 +69,7 @@ public class User implements Serializable {
     private Set<FoodNeed> foodNeeds = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
-    private Set<Position> positions = new LinkedHashSet<>();
+    private Set<Charge> charges = new LinkedHashSet<>();
 
     @OneToMany
     private Set<Request> requests = new LinkedHashSet<>();

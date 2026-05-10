@@ -53,7 +53,7 @@ public class UserConversor {
         dto.setShowBday(user.getShowBday());
         dto.setJoinDate(user.getJoinDate());
         dto.setNickname(user.getNickname());
-        dto.setAdminAccess(user.getPositions().stream().anyMatch(Position::getAdminAccess));
+        dto.setAdminAccess(user.getCharges().stream().anyMatch(Charge::getAdminAccess));
         List<FoodNeedCreateDTO> needs = new ArrayList<>();
         List<AttPrefInfoDTO> prefs = new ArrayList<>();
         for (FoodNeed need : user.getFoodNeeds()) {
@@ -85,7 +85,7 @@ public class UserConversor {
         dto.setShowBday(user.getShowBday());
         dto.setJoinDate(user.getJoinDate());
         dto.setNickname(user.getNickname());
-        dto.setAdminAccess(user.getPositions().stream().anyMatch(Position::getAdminAccess));
+        dto.setAdminAccess(user.getCharges().stream().anyMatch(Charge::getAdminAccess));
         if (user.getFalla() != null) dto.setFallaInfo(fromEntity2UserInfo(user.getFalla()));
         List<EventInfoUserDTO> events = new ArrayList<>();
         List<FoodNeedCreateDTO> needs = new ArrayList<>();

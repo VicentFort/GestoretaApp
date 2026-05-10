@@ -1,10 +1,10 @@
 package com.vfortro.gestoreta.repository;
 
-import com.vfortro.gestoreta.model.Position;
+import com.vfortro.gestoreta.model.Charge;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PositionRepository extends JpaRepository<Position, Long> {
-    Position findPositionByUserId(Long userId);
+public interface PositionRepository extends JpaRepository<Charge, Long> {
+    Charge findPositionByUserId(Long userId);
 
-    Position findByUserId(Long userId);
+    Charge findByUserId(Long userId);
 }

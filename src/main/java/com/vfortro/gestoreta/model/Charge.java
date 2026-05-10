@@ -1,5 +1,6 @@
 package com.vfortro.gestoreta.model;
 
+import com.vfortro.gestoreta.model.enums.AccessType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -13,8 +14,8 @@ import java.io.Serializable;
 @Getter
 @Setter
 @Entity
-@Table(name = "positions")
-public class Position implements Serializable {
+@Table(name = "charges")
+public class Charge implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "position_id", nullable = false)
@@ -70,5 +71,7 @@ public class Position implements Serializable {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(name="type",nullable = true, columnDefinition = "access_type")
+    private AccessType type;
 
 }
