@@ -17,7 +17,7 @@ public class EventCreateDTO {
     private @NotNull String title;
     private @NotNull Boolean publicField;
     private @NotNull Boolean done;
-    private Float price;
+    private Double price;
     private @NotNull String description;
     private Integer maxPeople;
     private @NotNull LocalDate date;
@@ -29,6 +29,6 @@ public class EventCreateDTO {
     private @NotNull String createdBy;
     private LocalDateTime createdAt;
     private LocalDate endDate;
-    private Boolean open;
+    private Boolean active;
     private Boolean checkNeeds;
 }

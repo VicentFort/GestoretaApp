@@ -3,7 +3,6 @@ package com.vfortro.gestoreta.service;
 import com.vfortro.gestoreta.conversor.AssistConversor;
 import com.vfortro.gestoreta.conversor.EventConversor;
 import com.vfortro.gestoreta.conversor.EventTagConversor;
-import com.vfortro.gestoreta.dto.ApiMessageResponse;
 import com.vfortro.gestoreta.dto.assists.AssistDTO;
 import com.vfortro.gestoreta.dto.events.EventCreateDTO;
 import com.vfortro.gestoreta.dto.events.EventTagAdminInfoDTO;
@@ -14,8 +13,6 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -110,7 +107,7 @@ public class EventService {
             throw new IllegalStateException("La data d'inici es posterior a la data de fi");
         }
 
-        if(newEvent.getDone() != null) updatedEvent.setDone(newEvent.getDone());
+        if(newEvent.getDone() != null) updatedEvent.setActive(newEvent.getDone());
         if(newEvent.getPublicField() != null) updatedEvent.setPublicField(newEvent.getPublicField());
         if(newEvent.getTitle() != null) updatedEvent.setTitle(newEvent.getTitle());
         if(newEvent.getDescription() != null) updatedEvent.setDescription(newEvent.getDescription());

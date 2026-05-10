@@ -22,7 +22,7 @@ public class EventInfoDTO {
     private String description;
     private Boolean done;
     private Boolean publicField;
-    private Float price;
+    private Double price;
     private LocalDate date;
     private String tagName;
     private Long tagId;
@@ -34,7 +34,7 @@ public class EventInfoDTO {
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDate endDate;
-    private Boolean open;
+    private Boolean active;
     private Boolean checkNeeds;
 
 }

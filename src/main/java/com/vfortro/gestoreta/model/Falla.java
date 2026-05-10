@@ -37,10 +37,6 @@ public class Falla implements Serializable {
     @Column(name = "shield_url", length = Integer.MAX_VALUE)
     private String shieldUrl;
 
-    @NotNull
-    @Column(name = "id_falla", nullable = false)
-    private Long idFalla;
-
     @OneToMany(mappedBy = "falla")
     private Set<EventTag> eventTags = new LinkedHashSet<>();
 

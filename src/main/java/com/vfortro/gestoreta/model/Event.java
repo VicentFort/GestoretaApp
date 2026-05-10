@@ -9,8 +9,6 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.io.Serializable;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.LinkedHashSet;
@@ -46,10 +44,10 @@ public class Event implements Serializable {
     @NotNull
     @ColumnDefault("false")
     @Column(name = "done", nullable = false)
-    private Boolean done;
+    private Boolean active;
 
     @Column(name = "price")
-    private Float price;
+    private Double price;
 
     @NotNull
     @Column(name = "description", nullable = false, length = Integer.MAX_VALUE)
@@ -66,7 +64,6 @@ public class Event implements Serializable {
     @Column(name = "title", nullable = false, length = Integer.MAX_VALUE)
     private String title;
 
-
     @Column(name = "start_hour")
     private LocalTime startHour;
 
@@ -81,7 +78,7 @@ public class Event implements Serializable {
 
     @NotNull
     @Column(name="created_by", nullable = false)
-    private String creatdBy;
+    private String createdBy;
 
     @NotNull
     @Column(name="created_at", nullable = false)
@@ -92,12 +89,6 @@ public class Event implements Serializable {
     @Column(name="end_date", nullable= false)
     @ColumnDefault("now()")
     private LocalDateTime endDate;
-
-    @NotNull
-    @Column(name="open", nullable = false)
-    @ColumnDefault("false")
-    private Boolean open;
-
 
     @NotNull
     @Column(name="check_needs", nullable = false)

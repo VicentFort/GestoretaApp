@@ -20,7 +20,7 @@ public class EventUpdateDTO {
     @Schema(example = "false", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private Boolean done;
     @Schema(example = "6.0", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
-    private Float price;
+    private Double price;
     @Schema(example = "Event súper guay de la meua falla.", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String description;
     @Schema(example = "75", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
@@ -32,7 +32,7 @@ public class EventUpdateDTO {
     private LocalTime startHour;
     private LocalTime endHour;
     private LocalDate endDate;
-    private Boolean open;
+    private Boolean active;
     private Boolean checkNeeds;
     private List<Long> attendantIds;
 }

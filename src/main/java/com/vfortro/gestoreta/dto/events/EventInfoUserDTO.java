@@ -16,12 +16,12 @@ public class EventInfoUserDTO {
     private String title;
     private String description;
     private Boolean done;
-    private Float price;
+    private Double price;
     private LocalDate date;
     private String tagName;
     private LocalTime startHour;
     private LocalTime endHour;
     private String createdBy;
     private LocalDate endDate;
-    private Boolean open;
+    private Boolean active;
 }
