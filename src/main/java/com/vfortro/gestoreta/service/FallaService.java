@@ -7,8 +7,11 @@ import com.vfortro.gestoreta.dto.fallas.info.FallaUserInfoDTO;
 import com.vfortro.gestoreta.dto.fallas.FallaUpdateDTO;
 import com.vfortro.gestoreta.dto.users.UserCreateDTO;
 import com.vfortro.gestoreta.model.*;
+import com.vfortro.gestoreta.model.enums.AccessType;
+import com.vfortro.gestoreta.repository.ChargeRepository;
 import com.vfortro.gestoreta.repository.EventTagRepository;
 import com.vfortro.gestoreta.repository.FallaRepository;
+import com.vfortro.gestoreta.repository.UserRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +29,10 @@ public class FallaService {
     private FallaRepository fallaRepository;
     @Autowired
     private EventTagRepository eventTagRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ChargeRepository chargeRepository;
 
     //CONVERSORS
     @Autowired
@@ -92,13 +99,44 @@ public class FallaService {
     }
 
     @Transactional
-    public void editAdminAccess(Long userId, Boolean access, String email) throws AccessDeniedException, IllegalAccessException {
-        if(!userService.checkManagerAccess(email) || !userService.checkOtherAccess(email)) throw new AccessDeniedException("Sense permissos.");
-        userService.editAdminAccess(userId, access);
+    public void editAccessType(Long userId, AccessType type, String email) throws AccessDeniedException, IllegalStateException, EntityNotFoundException, IllegalAccessException {
+
+        //Buscamos en la B.D. el usuario y el gestor asociados a la operación.
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("No existeix l'usuari"));
+        if(!userService.checkSuperUserAccess(email)) throw new AccessDeniedException("Sense permissos.");
+        User manager = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("No existeix el gestor"));
+        //Comprobamos que ambos tengan falla.
+        if(user.getFalla() == null) {
+            throw new IllegalAccessException("L'usuari no està en una falla");
+        }
+
+        if(!fallaRepository.existsById(user.getFalla().getId())) {
+            throw new EntityNotFoundException("La falla del usuari no existeix en la base de dades");
+        }
+
+        //Comprobamos que la falla sea la misma.
+        if(!Objects.equals(manager.getFalla(), user.getFalla())) {
+            throw new IllegalStateException("La falla del gestor i l'usuari no son la mateixa");
+        }
+        Falla falla = manager.getFalla();
+
+        //Modificamos el cargo.
+        Charge charge = user.getCharges().stream().findFirst().orElse(null);
+        if(charge == null) { //Si no existe el cargo.
+            charge = new Charge();
+            charge.setType(type);
+            charge.setUser(user);
+            charge.setFalla(falla);
+        } else { //Si ya existe el cargo.
+            charge.setType(type);
+        }
+
+        //Guardamos el cargo.
+        chargeRepository.save(charge);
     }
 
     @Transactional
-    public void deleteEventTag(Long tagId, String email) throws AccessDeniedException, IllegalAccessException {
+    public void deleteEventTag(Long tagId, String email) throws AccessDeniedException, IllegalAccessException, EntityNotFoundException {
         if(!userService.checkManagerAccess(email)) throw new AccessDeniedException("Sin permiso.");
         eventTagRepository.deleteById(tagId);
     }

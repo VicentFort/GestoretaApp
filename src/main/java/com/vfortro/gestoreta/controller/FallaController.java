@@ -5,6 +5,7 @@ import com.vfortro.gestoreta.dto.fallas.info.FallaAdminInfoDTO;
 import com.vfortro.gestoreta.dto.fallas.FallaCreateDTO;
 import com.vfortro.gestoreta.dto.fallas.FallaUpdateDTO;
 import com.vfortro.gestoreta.dto.requests.RequestUpdateDTO;
+import com.vfortro.gestoreta.model.enums.AccessType;
 import com.vfortro.gestoreta.service.FallaService;
 import com.vfortro.gestoreta.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -164,14 +165,18 @@ public class FallaController {
     }
     @PostMapping("/editAdminAccess/{userId}")
     public ResponseEntity<?> editAdminAccess(Authentication authentication,
-                                              @RequestBody Boolean access,
+                                              @RequestBody AccessType access,
                                              @PathVariable Long userId) {
         String email = authentication.getName();
         try {
-            fallaService.editAdminAccess(userId,access, email);
+            fallaService.editAccessType(userId,access, email);
             return new ResponseEntity<>("Canvis fets", HttpStatus.OK);
-        } catch(Exception e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(),false), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch(AccessDeniedException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch(IllegalAccessException | IllegalStateException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
     }
 

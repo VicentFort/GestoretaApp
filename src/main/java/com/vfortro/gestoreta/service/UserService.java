@@ -40,12 +40,14 @@ public class UserService {
     private FoodNeedRepository foodNeedRepository;
     @Autowired
     private RequestRepository requestRepository;
+    @Autowired
+    private ChargeRepository chargeRepository;
+    @Autowired
+    private FallaRepository fallaRepository;
 
     //CONVERSORS
     @Autowired
     private UserConversor userConversor;
-    @Autowired
-    private PositionRepository positionRepository;
     @Autowired
     private FoodNeedConversor foodNeedConversor;
     @Autowired
@@ -78,7 +80,7 @@ public class UserService {
             createPos.setLotteryAccess(false);
             createPos.setOtherAccess(false);
             createPos.setPyrotechnicsAccess(false);
-            positionRepository.saveAndFlush(createPos);
+            chargeRepository.saveAndFlush(createPos);
         }
         return userConversor.fromEntity2Dto(saved);
     }
@@ -109,33 +111,6 @@ public class UserService {
         if(newUser.getNickname() != null) updatedUser.setNickname(newUser.getNickname());
         User saved = userRepository.saveAndFlush(updatedUser);
         return userConversor.fromEntity2InfoDto(saved);
-
-    }
-
-    @Transactional
-    public void editAdminAccess(Long userId, Boolean adminAccess) {
-        Charge pos = positionRepository.findByUserId(userId);
-        if(pos!=null) {
-            pos.setAdminAccess(adminAccess);
-            positionRepository.saveAndFlush(pos);
-        } else {
-            Charge createPos = new Charge();
-            User user = userRepository.findUserById(userId);
-            createPos.setAdminAccess(true);
-            createPos.setUser(user);
-            createPos.setName("Càrrec genèric");
-            createPos.setFalla(user.getFalla());
-            createPos.setAdminAccess(adminAccess);
-            createPos.setArtsAccess(false);
-            createPos.setBankAccess(false);
-            createPos.setHouseholdAccess(false);
-            createPos.setLotteryAccess(false);
-            createPos.setOtherAccess(false);
-            createPos.setPyrotechnicsAccess(false);
-            positionRepository.saveAndFlush(createPos);
-        }
-
-
 
     }
 
@@ -318,9 +293,12 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public Boolean checkManagerAccess(String email) throws IllegalAccessException, EntityNotFoundException {
-        User user = userRepository.findByEmail(email).orElseThrow( () -> new EntityNotFoundException("No existeix l'usuari amb email: " + email));
+        User user = userRepository.findByEmail(email).orElseThrow( () -> new EntityNotFoundException("No existeix el gestor amb email: " + email));
         if(user.getFalla() == null) {
-            throw new IllegalAccessException("L'usuari no te falla");
+            throw new IllegalAccessException("El gestor no te falla");
+        }
+        if(!fallaRepository.existsById(user.getFalla().getId())) {
+            throw new EntityExistsException("La falla del gestor no existeix a la base de dades");
         }
         if(user.getCharges() == null) return false;
         if(user.getCharges().isEmpty()) return false;
@@ -332,9 +310,12 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public Boolean checkSuperUserAccess(String email) throws IllegalAccessException, EntityNotFoundException {
-        User user = userRepository.findByEmail(email).orElseThrow( () -> new EntityNotFoundException("No existeix l'usuari amb email: " + email));
+        User user = userRepository.findByEmail(email).orElseThrow( () -> new EntityNotFoundException("No existeix el superusuari amb email: " + email));
         if(user.getFalla() == null) {
-            throw new IllegalAccessException("L'usuari no te falla");
+            throw new IllegalAccessException("El superusuari no te falla");
+        }
+        if(!fallaRepository.existsById(user.getFalla().getId())) {
+            throw new EntityExistsException("La falla del superusuari no existeix a la base de dades");
         }
         if(user.getCharges() == null) return false;
         if(user.getCharges().isEmpty()) return false;
