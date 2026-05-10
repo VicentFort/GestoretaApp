@@ -137,7 +137,8 @@ public class FallaService {
 
     @Transactional
     public void deleteEventTag(Long tagId, String email) throws AccessDeniedException, IllegalAccessException, EntityNotFoundException {
-        if(!userService.checkManagerAccess(email)) throw new AccessDeniedException("Sin permiso.");
+        if(!userService.checkManagerAccess(email)) throw new AccessDeniedException("Sense permís");
+        if(!eventTagRepository.existsById(tagId)) throw new EntityNotFoundException("No existeix la etiqueta");
         eventTagRepository.deleteById(tagId);
     }
 }

@@ -187,8 +187,12 @@ public class FallaController {
         try {
             fallaService.deleteEventTag(tagId, email);
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(),false), HttpStatus.INTERNAL_SERVER_ERROR);
+        }  catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch(AccessDeniedException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch(IllegalAccessException | IllegalStateException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
     }
 
