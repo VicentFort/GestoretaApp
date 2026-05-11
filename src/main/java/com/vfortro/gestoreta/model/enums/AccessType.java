@@ -1,6 +1,7 @@
 package com.vfortro.gestoreta.model.enums;
 
 public enum AccessType {
+    EMPTY_CHARGE("Sense càrrec"),
     REPRESENTATIVE("Representatiu"),
     MANAGER("Gestor"),
     SUPERUSER("Superusuari");

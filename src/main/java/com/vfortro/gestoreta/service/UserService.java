@@ -69,17 +69,10 @@ public class UserService {
         User saved = userRepository.saveAndFlush(toSave);
         if(user.getAdminAccess()!= null) {
             Charge createPos = new Charge();
-            createPos.setAdminAccess(true);
             createPos.setUser(saved);
             createPos.setName("Càrrec genèric");
             createPos.setFalla(saved.getFalla());
-            createPos.setAdminAccess(user.getAdminAccess());
-            createPos.setArtsAccess(false);
-            createPos.setBankAccess(false);
-            createPos.setHouseholdAccess(false);
-            createPos.setLotteryAccess(false);
-            createPos.setOtherAccess(false);
-            createPos.setPyrotechnicsAccess(false);
+            createPos.setType(AccessType.MANAGER);
             chargeRepository.saveAndFlush(createPos);
         }
         return userConversor.fromEntity2Dto(saved);
@@ -112,80 +105,6 @@ public class UserService {
         User saved = userRepository.saveAndFlush(updatedUser);
         return userConversor.fromEntity2InfoDto(saved);
 
-    }
-
-    @Transactional(readOnly = true)
-    public boolean checkAdminAccess(String email) throws EntityNotFoundException, IllegalAccessException {
-        User user = userRepository.findByEmail(email).orElseThrow( () -> new EntityNotFoundException("No existeix l'usuari amb email: " + email));
-        if(user.getFalla() == null) {
-            throw new IllegalAccessException("L'usuari no te falla");
-        }
-        if(user.getCharges() == null) return false;
-        if(user.getCharges().isEmpty()) return false;
-        for(Charge charge : user.getCharges()) {
-            if(charge.getAdminAccess()) return true;
-        }
-        return false;
-    }
-
-    @Transactional(readOnly = true)
-    public boolean checkBankAccess(String email) {
-        User user = userRepository.findUserByEmail(email);
-        if(user.getCharges().isEmpty()) return false;
-        for(Charge charge : user.getCharges()) {
-            if(charge.getBankAccess()) return true;
-        }
-        return false;
-    }
-
-    @Transactional(readOnly = true)
-    public boolean checkLotteryAccess(String email) {
-        User user = userRepository.findUserByEmail(email);
-        if(user.getCharges().isEmpty()) return false;
-        for(Charge charge : user.getCharges()) {
-            if(charge.getLotteryAccess()) return true;
-        }
-        return false;
-    }
-
-    @Transactional(readOnly = true)
-    public boolean checkArtsAccess(String email) {
-        User user = userRepository.findUserByEmail(email);
-        if(user.getCharges().isEmpty()) return false;
-        for(Charge charge : user.getCharges()) {
-            if(charge.getArtsAccess()) return true;
-        }
-        return false;
-    }
-
-    @Transactional(readOnly = true)
-    public boolean checkPyrothecnicsAccess(String email) {
-        User user = userRepository.findUserByEmail(email);
-        if(user.getCharges().isEmpty()) return false;
-        for(Charge charge : user.getCharges()) {
-            if(charge.getPyrotechnicsAccess()) return true;
-        }
-        return false;
-    }
-
-    @Transactional(readOnly = true)
-    public boolean checkHouseHoldAccess(String email) {
-        User user = userRepository.findUserByEmail(email);
-        if(user.getCharges().isEmpty()) return false;
-        for(Charge charge : user.getCharges()) {
-            if(charge.getHouseholdAccess()) return true;
-        }
-        return false;
-    }
-
-    @Transactional(readOnly = true)
-    public boolean checkOtherAccess(String email) {
-        User user = userRepository.findUserByEmail(email);
-        if(user.getCharges().isEmpty()) return false;
-        for(Charge charge : user.getCharges()) {
-            if(charge.getOtherAccess()) return true;
-        }
-        return false;
     }
 
     @Transactional(readOnly = true)

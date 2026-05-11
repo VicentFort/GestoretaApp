@@ -25,7 +25,7 @@ public class InventoryMovementConversor {
         dto.setMovementType(movement.getType());
         dto.setMessage(movement.getMessage());
         dto.setCreatedBy(movement.getCreatedBy());
-        if(movement.getType().equals(MovementType.LOAN)) {
+        if(movement.getType() == MovementType.LOAN) {
             dto.setLoan(loanConversor.fromEntity2Dto(movement.getLoan()));
         }
         return dto;

@@ -4,7 +4,6 @@ import com.vfortro.gestoreta.model.inventory.*;
 import com.vfortro.gestoreta.model.payments.Coupon;
 import com.vfortro.gestoreta.model.payments.CouponStock;
 import com.vfortro.gestoreta.model.payments.Payment;
-import com.vfortro.gestoreta.model.payments.Purchase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -72,9 +71,6 @@ public class Falla implements Serializable {
 
     @OneToMany(mappedBy = "falla")
     private Set<CouponStock> couponStocks = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "falla")
-    private Set<Purchase> purchases = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "falla")
     private Set<Payment> paymentLogs = new LinkedHashSet<>();

@@ -4,6 +4,7 @@ import com.vfortro.gestoreta.dto.attendants.AttPrefInfoDTO;
 import com.vfortro.gestoreta.dto.events.EventInfoUserDTO;
 import com.vfortro.gestoreta.dto.fallas.info.FallaUserInfoDTO;
 import com.vfortro.gestoreta.dto.food.FoodNeedCreateDTO;
+import com.vfortro.gestoreta.model.enums.AccessType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,7 @@ public class UserInfoDTO {
     private LocalDateTime creationDate;
     private LocalDate birthday;
     private Boolean showBday;
-    private Boolean adminAccess;
+    private AccessType accessType;
     private FallaUserInfoDTO fallaInfo;
     private LocalDate joinDate;
     private List<EventInfoUserDTO> events;

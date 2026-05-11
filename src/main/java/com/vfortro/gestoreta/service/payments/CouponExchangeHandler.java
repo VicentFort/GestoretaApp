@@ -32,8 +32,6 @@ public class CouponExchangeHandler implements PaymentHandler {
     private CouponRepository couponRepository;
     @Autowired
     private CouponStockRepository stockRepository;
-    @Autowired
-    private InventoryItemRepository itemRepository;
 
     @Autowired
     private UserService userService;
@@ -47,7 +45,7 @@ public class CouponExchangeHandler implements PaymentHandler {
 
     @Override
     public List<Payment> processPayment(GenericPaymentRequestDTO dto, User manager) throws AccessDeniedException, InsufficientStockException {
-        CouponExchangeRequestDTO request = (CouponExchangeRequestDTO)dto;
+        CouponExchangeRequestDTO request = (CouponExchangeRequestDTO) dto;
         List<Payment> logs = new ArrayList<>();
         //1.1 Obtenemos el usuario que ha hecho la compra.
         User user = userService.readUserAsEntity(request.getUserId());
@@ -81,7 +79,7 @@ public class CouponExchangeHandler implements PaymentHandler {
             log.setManager(manager);
             log.setFalla(manager.getFalla());
             log.setUser(user);
-            log.setCoupon(coupon);
+            log.setCouponExchanged(coupon);
             //NO HAY COMPRA
             log.setItem(coupon.getItem());
             log.setPrice(coupon.getPrice());

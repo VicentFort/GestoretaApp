@@ -2,8 +2,6 @@ package com.vfortro.gestoreta.service;
 
 
 import com.vfortro.gestoreta.conversor.payments.CouponConversor;
-import com.vfortro.gestoreta.conversor.payments.PurchaseConversor;
-import com.vfortro.gestoreta.conversor.payments.PurchaseDetailConversor;
 import com.vfortro.gestoreta.dto.payments.GenericPaymentRequestDTO;
 import com.vfortro.gestoreta.dto.payments.coupons.CouponCreateDTO;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
@@ -30,24 +28,13 @@ public class PaymentService {
     @Autowired
     private PaymentRepository paymentRepository;
     @Autowired
-    private PurchaseDetailRepository detailRepository;
-    @Autowired
-    private PurchaseRepository purchaseRepository;
-    @Autowired
     private FallaRepository fallaRepository;
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private InventoryService inventoryService;
 
-
-    @Autowired
-    private PurchaseConversor purchaseConversor;
-    @Autowired
-    private PurchaseDetailConversor detailConversor;
     @Autowired
     private CouponConversor couponConversor;
 

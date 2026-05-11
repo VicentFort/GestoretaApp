@@ -9,14 +9,13 @@ import com.vfortro.gestoreta.dto.users.UserCreateDTO;
 import com.vfortro.gestoreta.dto.users.info.UserInfoDTO;
 import com.vfortro.gestoreta.dto.users.info.UserInfoFallaDTO;
 import com.vfortro.gestoreta.model.*;
+import com.vfortro.gestoreta.model.enums.AccessType;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class UserConversor {
@@ -30,6 +29,7 @@ public class UserConversor {
     @Autowired
     private EventTagConversor eventTagConversor;
 
+    private final Map<AccessType, Integer> prios = Map.of(AccessType.EMPTY_CHARGE, 0, AccessType.REPRESENTATIVE, 1, AccessType.MANAGER, 2, AccessType.SUPERUSER, 3);
 
     public UserCreateDTO fromEntity2Dto(User user) {
         UserCreateDTO dto = new UserCreateDTO();
@@ -53,7 +53,8 @@ public class UserConversor {
         dto.setShowBday(user.getShowBday());
         dto.setJoinDate(user.getJoinDate());
         dto.setNickname(user.getNickname());
-        dto.setAdminAccess(user.getCharges().stream().anyMatch(Charge::getAdminAccess));
+
+        dto.setAccessType(filterChargeTypes(user));
         List<FoodNeedCreateDTO> needs = new ArrayList<>();
         List<AttPrefInfoDTO> prefs = new ArrayList<>();
         for (FoodNeed need : user.getFoodNeeds()) {
@@ -85,7 +86,7 @@ public class UserConversor {
         dto.setShowBday(user.getShowBday());
         dto.setJoinDate(user.getJoinDate());
         dto.setNickname(user.getNickname());
-        dto.setAdminAccess(user.getCharges().stream().anyMatch(Charge::getAdminAccess));
+        dto.setAccessType(filterChargeTypes(user));
         if (user.getFalla() != null) dto.setFallaInfo(fromEntity2UserInfo(user.getFalla()));
         List<EventInfoUserDTO> events = new ArrayList<>();
         List<FoodNeedCreateDTO> needs = new ArrayList<>();
@@ -104,7 +105,7 @@ public class UserConversor {
             att.setTagId(pref.getEventTag().getId());
             tagNamePrefs.add(att);
         }
-        for(Attendant att : user.getAttendants()) {
+        for(Attendant att : user.getAttendedEvents()) {
             attEvents.add(eventConversor.fromEntity2InfoUserDto(att.getEvent()));
         }
         dto.setEvents(events);
@@ -152,4 +153,23 @@ public class UserConversor {
 
         return dto;
     }
+
+    private AccessType filterChargeTypes (User user) {
+        AccessType accessPivot = AccessType.EMPTY_CHARGE;
+        for(Charge c : user.getCharges()) {
+            if(c != null && c.getType() != null) {
+                if(c.getType() == AccessType.SUPERUSER) {
+                    accessPivot = AccessType.SUPERUSER;
+                    break;
+                }
+                if(prios.containsKey(c.getType())) {
+                    if(prios.get(c.getType()) > prios.get(accessPivot)) {
+                        accessPivot = c.getType();
+                    }
+                }
+            }
+        }
+        return accessPivot;
+    }
 }
+

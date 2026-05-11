@@ -43,11 +43,10 @@ public class Coupon implements Serializable {
     @OneToMany(mappedBy = "coupon")
     private Set<CouponStock> stocks = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "coupon")
-    private Set<PurchaseDetail> purchaseDetails = new LinkedHashSet<>();
+    @OneToMany(mappedBy = "couponExchanged")
+    private Set<Payment> exchangePayments = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "coupon")
-    private Set<Payment> paymentLogs = new LinkedHashSet<>();
-
+    @OneToMany(mappedBy = "couponSold")
+    private Set<Payment> soldPayments = new LinkedHashSet<>();
 
 }

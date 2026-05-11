@@ -11,6 +11,8 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -20,7 +22,7 @@ public class Payment implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "log_id", nullable = false)
-    private Long logId;
+    private Long paymentId;
 
     @Column(name = "price")
     private Double price;
@@ -51,15 +53,16 @@ public class Payment implements Serializable {
     private Falla falla;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "coupon_id")
-    private Coupon coupon;
+    @JoinColumn(name = "coupon_exchanged_id")
+    private Coupon couponExchanged;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "purchase_id")
-    private Purchase purchase;
+    @JoinColumn(name = "coupon_sold_id")
+    private Coupon couponSold;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     private InventoryItem item;
+
 
 }

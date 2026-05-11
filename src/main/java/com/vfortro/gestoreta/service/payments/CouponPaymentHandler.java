@@ -1,18 +1,13 @@
 package com.vfortro.gestoreta.service.payments;
 
-import com.vfortro.gestoreta.conversor.payments.PurchaseConversor;
-import com.vfortro.gestoreta.conversor.payments.PurchaseDetailConversor;
 import com.vfortro.gestoreta.dto.payments.CouponPurchaseRequestDTO;
 import com.vfortro.gestoreta.dto.payments.CouponRequestDTO;
 import com.vfortro.gestoreta.dto.payments.GenericPaymentRequestDTO;
 import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.model.enums.PaymentType;
 import com.vfortro.gestoreta.model.payments.*;
-import com.vfortro.gestoreta.repository.inventory.InventoryItemRepository;
 import com.vfortro.gestoreta.repository.payments.CouponRepository;
 import com.vfortro.gestoreta.repository.payments.CouponStockRepository;
-import com.vfortro.gestoreta.repository.payments.PaymentRepository;
-import com.vfortro.gestoreta.repository.payments.PurchaseRepository;
 import com.vfortro.gestoreta.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,13 +24,6 @@ public class CouponPaymentHandler implements PaymentHandler {
     private CouponRepository couponRepository;
     @Autowired
     private CouponStockRepository stockRepository;
-    @Autowired
-    private PurchaseRepository purchaseRepository;
-
-    @Autowired
-    private PurchaseConversor purchaseConversor;
-    @Autowired
-    private PurchaseDetailConversor detailConversor;
 
     @Autowired
     private UserService userService;
@@ -52,16 +40,12 @@ public class CouponPaymentHandler implements PaymentHandler {
         //1.1 Obtenemos el usuario que ha hecho la compra.
         User user = userService.readUserAsEntity(request.getUserId());
 
-        //2 Creación de la compra (purchase) en la base de datos y el contador de precio.
-        Purchase toSave = purchaseConversor.fromDto2Entity(request, manager.getFalla());
-        Double totalSum = 0.0D;
-
         //3. Procesar tickes (coupons) comprados.
+        Double totalSum = 0.0D;
         for(CouponRequestDTO couponDto: request.getCoupons()) {
             //3.0 Encontrar el cupon en la base de datos y crear un detalle de compra de se cupon.
             Coupon coupon = couponRepository.findById(couponDto.getCouponId()).orElseThrow(() -> new EntityNotFoundException("No existeix el ticket amb id: " + couponDto.getCouponId()));
-            PurchaseDetail detail = detailConversor.fromDto2Entity(couponDto, toSave, coupon);
-            toSave.getDetails().add(detail);
+
             totalSum += coupon.getPrice()  * couponDto.getAmount();
 
             //3.1 Preparar el mensaje de log para el Payment y el registro de inventario.
@@ -85,9 +69,8 @@ public class CouponPaymentHandler implements PaymentHandler {
             payment.setManager(manager);
             payment.setFalla(manager.getFalla());
             payment.setUser(user);
-            payment.setCoupon(coupon);
-            payment.setPurchase(toSave);
             payment.setItem(coupon.getItem());
+            payment.setCouponSold(coupon);
             payment.setPrice(coupon.getPrice());
             payment.setDate(LocalDateTime.now());
             payment.setType(PaymentType.COUPON_SOLD);
@@ -99,7 +82,6 @@ public class CouponPaymentHandler implements PaymentHandler {
             throw new IllegalStateException("El valor de la compra no coincideix a la quantitat abonada.");
         }
         //5. Guardar la compra
-        Purchase savedPurchase = purchaseRepository.saveAndFlush(toSave);
         return payments;
     }
 }

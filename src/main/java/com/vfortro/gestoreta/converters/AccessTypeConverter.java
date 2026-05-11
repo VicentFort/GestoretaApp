@@ -2,7 +2,9 @@ package com.vfortro.gestoreta.converters;
 
 import com.vfortro.gestoreta.model.enums.AccessType;
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
+@Converter(autoApply = true)
 public class AccessTypeConverter implements AttributeConverter<AccessType, String> {
     @Override
     public String convertToDatabaseColumn(AccessType accessType) {

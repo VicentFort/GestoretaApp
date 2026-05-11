@@ -2,7 +2,6 @@ package com.vfortro.gestoreta.model;
 
 import com.vfortro.gestoreta.model.payments.CouponStock;
 import com.vfortro.gestoreta.model.payments.Payment;
-import com.vfortro.gestoreta.model.payments.Purchase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -63,7 +62,7 @@ public class User implements Serializable {
     private Set<AttendantPreference> attendantPreferences = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
-    private Set<Attendant> attendants = new LinkedHashSet<>();
+    private Set<Attendant> attendedEvents = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
     private Set<FoodNeed> foodNeeds = new LinkedHashSet<>();
@@ -71,20 +70,17 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user")
     private Set<Charge> charges = new LinkedHashSet<>();
 
-    @OneToMany
+    @OneToMany(mappedBy = "user")
     private Set<Request> requests = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
     private Set<CouponStock> stocks = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
-    private Set<Purchase> purchases = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "user")
-    private Set<Payment> paymentLogs = new LinkedHashSet<>();
+    private Set<Payment> payments = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "manager")
-    private Set<Payment> managerLogs = new LinkedHashSet<>();
+    private Set<Payment> managedPayments = new LinkedHashSet<>();
 
     @Column(name="nickname")
     private String nickname;
