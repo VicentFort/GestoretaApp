@@ -1,9 +1,7 @@
 package com.vfortro.gestoreta.service;
 
-import com.vfortro.gestoreta.conversor.FoodNeedConversor;
 import com.vfortro.gestoreta.conversor.RequestConversor;
 import com.vfortro.gestoreta.conversor.UserConversor;
-import com.vfortro.gestoreta.dto.food.FoodNeedCreateDTO;
 import com.vfortro.gestoreta.dto.requests.RequestCreateDTO;
 import com.vfortro.gestoreta.dto.requests.RequestUpdateDTO;
 import com.vfortro.gestoreta.dto.users.UserCreateDTO;
@@ -11,7 +9,6 @@ import com.vfortro.gestoreta.dto.users.info.UserInfoDTO;
 import com.vfortro.gestoreta.dto.users.UserUpdateDTO;
 import com.vfortro.gestoreta.model.*;
 import com.vfortro.gestoreta.model.enums.AccessType;
-import com.vfortro.gestoreta.model.enums.FoodNeedType;
 import com.vfortro.gestoreta.repository.*;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,8 +34,6 @@ public class UserService {
     @Autowired
     private AttendandPreferenceRepository attendandPreferenceRepository;
     @Autowired
-    private FoodNeedRepository foodNeedRepository;
-    @Autowired
     private RequestRepository requestRepository;
     @Autowired
     private ChargeRepository chargeRepository;
@@ -48,8 +43,6 @@ public class UserService {
     //CONVERSORS
     @Autowired
     private UserConversor userConversor;
-    @Autowired
-    private FoodNeedConversor foodNeedConversor;
     @Autowired
     private RequestConversor requestConversor;
 
@@ -154,35 +147,26 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public User readUserAsEntity(String email) {
+    public User readUserAsEntity(String email) throws EntityNotFoundException {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("No existeix el user amb email: " +email));
         return user;
     }
 
-    @Transactional(readOnly = true)
-    public FoodNeedCreateDTO readFoodNeed(Long foodNeedId) {
-        FoodNeed need = foodNeedRepository.findById(foodNeedId).orElse(null);
-        if(need == null) return null;
-        return foodNeedConversor.fromEntity2Dto(need);
+    @Transactional
+    public void createFoodNeed(String desc, String email) throws AccessDeniedException, EntityNotFoundException, IllegalStateException {
+        User user = readUserAsEntity(email);
+        if(user.getNeeds().contains(desc)) throw new IllegalStateException("Ja existeix la preferència alimentària");
+        user.getNeeds().add(desc);
+        User saved = userRepository.save(user);
     }
 
     @Transactional
-    public UserInfoDTO createFoodNeed(String desc, String email) throws AccessDeniedException {
-        User user = userRepository.findUserByEmail(email);
-        FoodNeed need = new FoodNeed();
-        need.setDescription(FoodNeedType.fromString(desc));
-        need.setUser(user);
-        foodNeedRepository.saveAndFlush(need);
-        return userConversor.fromEntity2InfoDto(userRepository.findUserByEmail(email));
-    }
-
-    @Transactional
-    public UserInfoDTO deleteFoodNeed(Long needId, String email) throws AccessDeniedException {
-        User user = userRepository.findUserByEmail(email);
-        FoodNeed need = foodNeedRepository.findFoodNeedById(needId);
-        if(!Objects.equals(user.getId(), need.getUser().getId())) throw new AccessDeniedException("Sin permiso.");
-        foodNeedRepository.deleteById(need.getId());
-        return userConversor.fromEntity2InfoDto(userRepository.findUserByEmail(email));
+    public UserInfoDTO deleteFoodNeed(String needType, String email) throws AccessDeniedException, EntityNotFoundException {
+        User user = readUserAsEntity(email);
+        if(!user.getNeeds().contains(needType)) throw new AccessDeniedException("L'usuari no té aquesta necessitat alimentària");
+        user.getNeeds().remove(needType);
+        User saved = userRepository.saveAndFlush(user);
+        return userConversor.fromEntity2InfoDto(saved);
     }
 
     @Transactional(readOnly = true)

@@ -66,9 +66,6 @@ public class User implements Serializable {
     private Set<Attendant> attendedEvents = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
-    private Set<FoodNeed> foodNeeds = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "user")
     private Set<Charge> charges = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
@@ -95,6 +92,6 @@ public class User implements Serializable {
     private LocalDate joinDate;
 
     @Column(name = "food_needs")
-    private String[] needs;
+    private List<String> needs = new ArrayList<>();
 
 }

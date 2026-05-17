@@ -6,8 +6,6 @@ import com.vfortro.gestoreta.dto.requests.RequestUpdateDTO;
 import com.vfortro.gestoreta.dto.users.UserCreateDTO;
 import com.vfortro.gestoreta.dto.users.info.UserInfoDTO;
 import com.vfortro.gestoreta.dto.users.UserUpdateDTO;
-import com.vfortro.gestoreta.model.FoodNeed;
-import com.vfortro.gestoreta.model.enums.FoodNeedType;
 import com.vfortro.gestoreta.repository.UserRepository;
 import com.vfortro.gestoreta.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,7 +26,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -47,7 +44,7 @@ public class UserController {
     @GetMapping("/testNeeds")
     public ResponseEntity<?> getNeeds(Authentication authentication) {
         String email = authentication.getName();
-        String[] needs = testUserRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("XD")).getNeeds();
+        List<String> needs = testUserRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("XD")).getNeeds();
         return new ResponseEntity<>(needs, HttpStatus.OK);
     }
 
@@ -154,37 +151,35 @@ public class UserController {
             @Tag(name = "Usuarios")
     })
     @Operation(summary = "Crea una necesidad alimentaria para un usuario.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Necesidad alimentaria creada.", value = "{\"message\":\"Necesidad alimentaria creada con id 1\",\"success\":false}")
-            })}),
-            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}")
-            })})
-    })
     @PostMapping("/addFoodNeed")
     public ResponseEntity<?> addFoodNeed(@RequestBody @Valid Map<String, String> payload,
                                          Authentication authentication) {
         String email = authentication.getName();
         String desc = payload.get("desc").toString();
         try {
-            UserInfoDTO result = userService.createFoodNeed(desc, email);
-            return new ResponseEntity<>(result, HttpStatus.CREATED);
+            userService.createFoodNeed(desc, email);
+            return ResponseEntity.ok().build();
         } catch(AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(accEx.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch(EntityNotFoundException enEx) {
+            return new ResponseEntity<>(enEx.getMessage(), HttpStatus.NOT_FOUND);
+        } catch(IllegalStateException iaEx) {
+            return new ResponseEntity<>(iaEx.getMessage(), HttpStatus.FORBIDDEN);
         }
 
     }
 
     @DeleteMapping("/deleteNeed")
-    public ResponseEntity<?> deleteFoodNeed(@RequestParam(name="needId") @Valid Long needId,
+    public ResponseEntity<?> deleteFoodNeed(@RequestBody String needType,
                                             Authentication authentication) {
         String email = authentication.getName();
         try {
-            UserInfoDTO result = userService.deleteFoodNeed(needId, email);
+            UserInfoDTO result = userService.deleteFoodNeed(needType, email);
             return new ResponseEntity<>(result,HttpStatus.OK);
         } catch (AccessDeniedException e) {
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
+        } catch(EntityNotFoundException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 

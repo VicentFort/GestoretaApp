@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FoodNeedInfoDTO {
-    private String foodNeedDesc;
+    private String foodNeedType;
     private String userName;
     private String userSurname;
     private String eventTitle;

@@ -79,10 +79,10 @@ public class EventConversor {
         for(Assist assist : event.getAssists()) {
             assists.add(assistConversor.formEntity2Dto(assist));
             User user = assist.getUser();
-            if(!user.getFoodNeeds().isEmpty()) {
-                for(FoodNeed need : user.getFoodNeeds()) {
+            if(!user.getNeeds().isEmpty()) {
+                for(String need : user.getNeeds()) {
                     FoodNeedInfoDTO aux = new FoodNeedInfoDTO();
-                    aux.setFoodNeedDesc(need.getDescription().getValue());
+                    aux.setFoodNeedType(need);
                     aux.setUserName(user.getName());
                     aux.setUserSurname(user.getSurname());
                     aux.setEventTitle(event.getTitle());

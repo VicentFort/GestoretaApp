@@ -3,7 +3,6 @@ package com.vfortro.gestoreta.dto.users.info;
 import com.vfortro.gestoreta.dto.attendants.AttPrefInfoDTO;
 import com.vfortro.gestoreta.dto.events.EventInfoUserDTO;
 import com.vfortro.gestoreta.dto.fallas.info.FallaUserInfoDTO;
-import com.vfortro.gestoreta.dto.food.FoodNeedCreateDTO;
 import com.vfortro.gestoreta.model.enums.AccessType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,7 +30,7 @@ public class UserInfoDTO {
     private LocalDate joinDate;
     private List<EventInfoUserDTO> events;
     private List<EventInfoUserDTO> attEvents;
-    private List<FoodNeedCreateDTO> foodNeeds;
+    private List<String> foodNeeds;
     private List<AttPrefInfoDTO> eventTagPrefs;
 
 

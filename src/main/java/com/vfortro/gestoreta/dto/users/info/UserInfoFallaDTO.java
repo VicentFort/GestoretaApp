@@ -1,7 +1,6 @@
 package com.vfortro.gestoreta.dto.users.info;
 
 import com.vfortro.gestoreta.dto.attendants.AttPrefInfoDTO;
-import com.vfortro.gestoreta.dto.food.FoodNeedCreateDTO;
 import com.vfortro.gestoreta.model.enums.AccessType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,5 +21,5 @@ public class UserInfoFallaDTO {
     private AccessType accessType;
     private LocalDate joinDate;
     private List<AttPrefInfoDTO> prefs;
-    private List<FoodNeedCreateDTO> foodNeeds;
+    private List<String> foodNeeds;
 }

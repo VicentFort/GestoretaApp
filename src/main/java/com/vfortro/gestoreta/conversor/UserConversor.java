@@ -4,7 +4,6 @@ import com.vfortro.gestoreta.dto.attendants.AttPrefInfoDTO;
 import com.vfortro.gestoreta.dto.events.EventInfoUserDTO;
 import com.vfortro.gestoreta.dto.events.EventTagAdminInfoDTO;
 import com.vfortro.gestoreta.dto.fallas.info.FallaUserInfoDTO;
-import com.vfortro.gestoreta.dto.food.FoodNeedCreateDTO;
 import com.vfortro.gestoreta.dto.users.UserCreateDTO;
 import com.vfortro.gestoreta.dto.users.info.UserInfoDTO;
 import com.vfortro.gestoreta.dto.users.info.UserInfoFallaDTO;
@@ -24,8 +23,6 @@ public class UserConversor {
     private FallaRepository fallaRepository;
     @Autowired
     private EventConversor eventConversor;
-    @Autowired
-    private FoodNeedConversor foodNeedConversor;
     @Autowired
     private EventTagConversor eventTagConversor;
 
@@ -55,15 +52,9 @@ public class UserConversor {
         dto.setNickname(user.getNickname());
 
         dto.setAccessType(filterChargeTypes(user));
-        List<FoodNeedCreateDTO> needs = new ArrayList<>();
+        List<String> needs = user.getNeeds();
         List<AttPrefInfoDTO> prefs = new ArrayList<>();
-        for (FoodNeed need : user.getFoodNeeds()) {
-            FoodNeedCreateDTO dtoN = new FoodNeedCreateDTO();
-            if (need.getUser().getId() != null) dtoN.setUserId(need.getUser().getId());
-            if (need.getId() != null) dtoN.setFoodNeedId(need.getId());
-            if (need.getDescription() != null) dtoN.setDescription(need.getDescription().getValue());
-            needs.add(dtoN);
-        }
+
         dto.setFoodNeeds(needs);
         for(AttendantPreference pref: user.getAttendantPreferences()) {
             AttPrefInfoDTO prefDto = new AttPrefInfoDTO();
@@ -89,14 +80,11 @@ public class UserConversor {
         dto.setAccessType(filterChargeTypes(user));
         if (user.getFalla() != null) dto.setFallaInfo(fromEntity2UserInfo(user.getFalla()));
         List<EventInfoUserDTO> events = new ArrayList<>();
-        List<FoodNeedCreateDTO> needs = new ArrayList<>();
+        List<String> needs = user.getNeeds();
         List<AttPrefInfoDTO> tagNamePrefs = new ArrayList<>();
         List<EventInfoUserDTO> attEvents = new ArrayList<>();
         for (Assist a : user.getAssists()) {
             events.add(eventConversor.fromEntity2InfoUserDto(a.getEvent()));
-        }
-        for (FoodNeed need : user.getFoodNeeds()) {
-            needs.add(foodNeedConversor.fromEntity2Dto(need));
         }
         for (AttendantPreference pref : user.getAttendantPreferences()) {
             AttPrefInfoDTO att = new AttPrefInfoDTO();
