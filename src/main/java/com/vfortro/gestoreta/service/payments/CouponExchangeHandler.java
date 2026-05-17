@@ -11,7 +11,6 @@ import com.vfortro.gestoreta.model.enums.PaymentType;
 import com.vfortro.gestoreta.model.payments.Coupon;
 import com.vfortro.gestoreta.model.payments.CouponStock;
 import com.vfortro.gestoreta.model.payments.Payment;
-import com.vfortro.gestoreta.repository.inventory.InventoryItemRepository;
 import com.vfortro.gestoreta.repository.payments.CouponRepository;
 import com.vfortro.gestoreta.repository.payments.CouponStockRepository;
 import com.vfortro.gestoreta.service.InventoryService;

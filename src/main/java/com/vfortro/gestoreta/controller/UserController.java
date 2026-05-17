@@ -6,6 +6,9 @@ import com.vfortro.gestoreta.dto.requests.RequestUpdateDTO;
 import com.vfortro.gestoreta.dto.users.UserCreateDTO;
 import com.vfortro.gestoreta.dto.users.info.UserInfoDTO;
 import com.vfortro.gestoreta.dto.users.UserUpdateDTO;
+import com.vfortro.gestoreta.model.FoodNeed;
+import com.vfortro.gestoreta.model.enums.FoodNeedType;
+import com.vfortro.gestoreta.repository.UserRepository;
 import com.vfortro.gestoreta.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,6 +28,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -37,6 +41,15 @@ public class UserController {
     private UserService userService;
 
 
+    @Autowired
+    private UserRepository testUserRepository;
+
+    @GetMapping("/testNeeds")
+    public ResponseEntity<?> getNeeds(Authentication authentication) {
+        String email = authentication.getName();
+        String[] needs = testUserRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("XD")).getNeeds();
+        return new ResponseEntity<>(needs, HttpStatus.OK);
+    }
 
     @Tags({
             @Tag(name = "Creación"),

@@ -1,5 +1,6 @@
 package com.vfortro.gestoreta.dto.users;
 
+import com.vfortro.gestoreta.model.enums.AccessType;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,6 +25,6 @@ public class UserCreateDTO {
     private @NotNull Boolean showBday;
     private @NotNull String email;
     private @NotNull String password;
-    private Boolean adminAccess;
+    private AccessType accessType;
 
 }

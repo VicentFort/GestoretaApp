@@ -67,14 +67,16 @@ public class UserService {
         User toSave = userConversor.fromDto2Entity(user);
         toSave.setCreationDate(LocalDateTime.now());
         User saved = userRepository.saveAndFlush(toSave);
-        if(user.getAdminAccess()!= null) {
-            Charge createPos = new Charge();
-            createPos.setUser(saved);
-            createPos.setName("Càrrec genèric");
-            createPos.setFalla(saved.getFalla());
-            createPos.setType(AccessType.MANAGER);
-            chargeRepository.saveAndFlush(createPos);
+        Charge charge = new Charge();
+        charge.setUser(saved);
+        charge.setName("Càrrec de creació");
+        charge.setFalla(saved.getFalla());
+        if(user.getAccessType() != null) {
+            charge.setType(user.getAccessType());
+        } else {
+            charge.setType(AccessType.EMPTY_CHARGE);
         }
+        chargeRepository.saveAndFlush(charge);
         return userConversor.fromEntity2Dto(saved);
     }
 

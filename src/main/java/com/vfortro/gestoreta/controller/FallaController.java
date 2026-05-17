@@ -1,6 +1,7 @@
 package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.*;
+import com.vfortro.gestoreta.dto.charges.ChargeUpdateDTO;
 import com.vfortro.gestoreta.dto.fallas.info.FallaAdminInfoDTO;
 import com.vfortro.gestoreta.dto.fallas.FallaCreateDTO;
 import com.vfortro.gestoreta.dto.fallas.FallaUpdateDTO;
@@ -163,13 +164,12 @@ public class FallaController {
         }
 
     }
-    @PostMapping("/editAdminAccess/{userId}")
+    @PostMapping("/editAccessType")
     public ResponseEntity<?> editAdminAccess(Authentication authentication,
-                                              @RequestBody AccessType access,
-                                             @PathVariable Long userId) {
+                                              @RequestBody @Valid ChargeUpdateDTO accessRequest) {
         String email = authentication.getName();
         try {
-            fallaService.editAccessType(userId,access, email);
+            fallaService.editAccessType(accessRequest.getUserId(), accessRequest.getAccessType(), email);
             return new ResponseEntity<>("Canvis fets", HttpStatus.OK);
         } catch(EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);

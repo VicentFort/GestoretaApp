@@ -1,5 +1,6 @@
 package com.vfortro.gestoreta.model;
 
+import com.vfortro.gestoreta.model.enums.FoodNeedType;
 import com.vfortro.gestoreta.model.payments.CouponStock;
 import com.vfortro.gestoreta.model.payments.Payment;
 import jakarta.persistence.*;
@@ -92,5 +93,8 @@ public class User implements Serializable {
 
     @Column(name="join_date")
     private LocalDate joinDate;
+
+    @Column(name = "food_needs")
+    private String[] needs;
 
 }
