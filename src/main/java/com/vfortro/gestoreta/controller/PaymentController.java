@@ -25,7 +25,7 @@ public class PaymentController {
     @Autowired
     private PaymentService paymentService;
 
-    @PostMapping("/sellCoupons")
+    @PostMapping("/sellCoupon")
     public ResponseEntity<?> sellCoupon(@Valid @RequestBody CouponPurchaseRequestDTO request, Authentication auth) {
         String email = auth.getName();
         try {
@@ -52,6 +52,8 @@ public class PaymentController {
             return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false),HttpStatus.UNAUTHORIZED);
         } catch(IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 

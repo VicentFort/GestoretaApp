@@ -6,9 +6,12 @@ import com.vfortro.gestoreta.dto.payments.GenericPaymentRequestDTO;
 import com.vfortro.gestoreta.dto.payments.coupons.CouponCreateDTO;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
 import com.vfortro.gestoreta.model.User;
+import com.vfortro.gestoreta.model.enums.ItemCategory;
+import com.vfortro.gestoreta.model.inventory.InventoryItem;
 import com.vfortro.gestoreta.model.payments.*;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import com.vfortro.gestoreta.repository.UserRepository;
+import com.vfortro.gestoreta.repository.inventory.InventoryItemRepository;
 import com.vfortro.gestoreta.repository.payments.*;
 import com.vfortro.gestoreta.service.payments.PaymentHandler;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class PaymentService {
@@ -31,6 +35,8 @@ public class PaymentService {
     private FallaRepository fallaRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private InventoryItemRepository itemRepository;
 
     @Autowired
     private UserService userService;
@@ -70,11 +76,15 @@ public class PaymentService {
     }
 
     @Transactional
-    public void createCoupon(CouponCreateDTO dto, String email) throws AccessDeniedException, IllegalAccessException {
+    public void createCoupon(CouponCreateDTO dto, String email) throws AccessDeniedException, IllegalAccessException, EntityNotFoundException {
+        User manager = userService.readUserAsEntity(email);
         if(!userService.checkManagerAccess(email)) {
             throw new AccessDeniedException("Sense permís!");
         }
+        InventoryItem item = itemRepository.findById(dto.getItemId()).orElseThrow(() -> new EntityNotFoundException("No existeix el item del tiquet"));
+        if(!Objects.equals(item.getFalla().getId(), manager.getFalla().getId())) throw new IllegalAccessException("La falla del cupó i del gestor no son la mateiza");
         Coupon toSave = couponConversor.fromDto2Entity(dto);
+        if(!(toSave.getItem().getItemCategory() == ItemCategory.DRINKS) && !(toSave.getItem().getItemCategory() == ItemCategory.FOOD)) throw new IllegalStateException("El tiquet ha de ser de menjar o beguda");
         couponRepository.save(toSave);
     }
 
