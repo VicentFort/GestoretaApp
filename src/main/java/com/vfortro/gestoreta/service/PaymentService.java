@@ -4,6 +4,7 @@ package com.vfortro.gestoreta.service;
 import com.vfortro.gestoreta.conversor.payments.CouponConversor;
 import com.vfortro.gestoreta.dto.payments.GenericPaymentRequestDTO;
 import com.vfortro.gestoreta.dto.payments.coupons.CouponCreateDTO;
+import com.vfortro.gestoreta.dto.payments.coupons.CouponEditDTO;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
 import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.model.enums.ItemCategory;
@@ -79,14 +80,31 @@ public class PaymentService {
     public void createCoupon(CouponCreateDTO dto, String email) throws AccessDeniedException, IllegalAccessException, EntityNotFoundException {
         User manager = userService.readUserAsEntity(email);
         if(!userService.checkManagerAccess(email)) {
-            throw new AccessDeniedException("Sense permís!");
+            throw new AccessDeniedException("Sense permís");
         }
         InventoryItem item = itemRepository.findById(dto.getItemId()).orElseThrow(() -> new EntityNotFoundException("No existeix el item del tiquet"));
-        if(!Objects.equals(item.getFalla().getId(), manager.getFalla().getId())) throw new IllegalAccessException("La falla del cupó i del gestor no son la mateiza");
+        if(!Objects.equals(item.getFalla().getId(), manager.getFalla().getId())) throw new IllegalAccessException("La falla del tiquet i del gestor no son la mateiza");
         Coupon toSave = couponConversor.fromDto2Entity(dto);
         if(!(toSave.getItem().getItemCategory() == ItemCategory.DRINKS) && !(toSave.getItem().getItemCategory() == ItemCategory.FOOD)) throw new IllegalStateException("El tiquet ha de ser de menjar o beguda");
         couponRepository.save(toSave);
     }
+
+    @Transactional
+    public void editCoupon(CouponEditDTO dto, String email) throws IllegalAccessException, AccessDeniedException, EntityNotFoundException {
+        User manager = userService.readUserAsEntity(email);
+        if(!userService.checkManagerAccess(email)) throw new AccessDeniedException("Sense permís");
+        Coupon coupon = couponRepository.findById(dto.getCouponId()).orElseThrow(() -> new EntityNotFoundException("No s'ha trobat el tiquet"));
+        if(!Objects.equals(coupon.getFalla().getId(), manager.getFalla().getId())) throw new IllegalAccessException("La falla del tiquet i del gestor no son la mateixa");
+        if(dto.getPrice() != null) coupon.setPrice(dto.getPrice());
+        if(dto.getName() != null && !dto.getName().isBlank()) coupon.setName(dto.getName());
+        if(dto.getItemId() != null) {
+            InventoryItem item = itemRepository.findById(dto.getItemId()).orElseThrow(() -> new EntityNotFoundException("No existeix el item assignat"));
+            if(item.getFalla().getId() != manager.getFalla().getId()) throw new IllegalAccessException("La falla del item no conicideix amb la del gestor");
+            coupon.setItem(item);
+        }
+        couponRepository.save(coupon);
+    }
+
 
 
 }
