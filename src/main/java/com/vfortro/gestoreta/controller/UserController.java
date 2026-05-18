@@ -73,8 +73,10 @@ public class UserController {
             UserCreateDTO result = userService.createUser(user);
             return new ResponseEntity<>(new ApiMessageResponse("Usuario con id: " + result.getUserId() + " creado en la base de datos.", true), HttpStatus.CREATED);
 
+        } catch (EntityExistsException | IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (Exception e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(),false), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

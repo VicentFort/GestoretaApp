@@ -54,8 +54,10 @@ public class UserService {
 
 
     @Transactional
-    public UserCreateDTO createUser(UserCreateDTO user) {
+    public UserCreateDTO createUser(UserCreateDTO user) throws EntityExistsException, IllegalArgumentException {
         if(userRepository.existsByEmail(user.getEmail()) || user.getEmail().isEmpty()) throw new EntityExistsException("Ja existeix un usuari amb email: " + user.getEmail());
+        LocalDateTime eighteenYearsAgoToday = LocalDateTime.now().minusYears(18);
+        if(user.getBirthday().isAfter(eighteenYearsAgoToday.toLocalDate())) { throw new IllegalArgumentException("L'usuari ha de ser major d'edat");}
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User toSave = userConversor.fromDto2Entity(user);
         toSave.setCreationDate(LocalDateTime.now());
