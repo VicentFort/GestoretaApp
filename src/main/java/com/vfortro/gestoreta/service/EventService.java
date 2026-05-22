@@ -59,6 +59,11 @@ public class EventService {
         return eventConversor.fromEntity2Dto(event);
     }
 
+    @Transactional(readOnly = true)
+    public List<Event> readEvents() {
+        return eventRepository.findAll();
+    }
+
 
     @Transactional
     public EventCreateDTO createEvent(@Valid EventCreateDTO event, String email) throws EntityNotFoundException, AccessDeniedException, IllegalAccessException {

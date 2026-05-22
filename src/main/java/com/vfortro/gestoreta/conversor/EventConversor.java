@@ -7,6 +7,7 @@ import com.vfortro.gestoreta.dto.events.EventInfoUserDTO;
 import com.vfortro.gestoreta.dto.food.info.FoodNeedInfoDTO;
 import com.vfortro.gestoreta.dto.attendants.AttendantEventInfoDTO;
 import com.vfortro.gestoreta.model.*;
+import com.vfortro.gestoreta.model.enums.FoodNeedType;
 import com.vfortro.gestoreta.repository.EventTagRepository;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -80,7 +81,7 @@ public class EventConversor {
             assists.add(assistConversor.formEntity2Dto(assist));
             User user = assist.getUser();
             if(!user.getNeeds().isEmpty()) {
-                for(String need : user.getNeeds()) {
+                for(FoodNeedType need : user.getNeeds()) {
                     FoodNeedInfoDTO aux = new FoodNeedInfoDTO();
                     aux.setFoodNeedType(need);
                     aux.setUserName(user.getName());

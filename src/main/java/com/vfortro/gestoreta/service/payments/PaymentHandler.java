@@ -10,5 +10,5 @@ import java.util.List;
 
 public interface PaymentHandler {
     boolean supports(PaymentType type);
-    List<Payment> processPayment(GenericPaymentRequestDTO dto, User manager) throws AccessDeniedException;
+    List<Payment> processPayment(GenericPaymentRequestDTO dto, User manager) throws AccessDeniedException, IllegalAccessException;
 }

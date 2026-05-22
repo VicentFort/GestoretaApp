@@ -9,6 +9,7 @@ import com.vfortro.gestoreta.dto.users.info.UserInfoDTO;
 import com.vfortro.gestoreta.dto.users.UserUpdateDTO;
 import com.vfortro.gestoreta.model.*;
 import com.vfortro.gestoreta.model.enums.AccessType;
+import com.vfortro.gestoreta.model.enums.FoodNeedType;
 import com.vfortro.gestoreta.repository.*;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
@@ -119,7 +120,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public User readUserAsEntity(Long userId) {
+    public User readUserAsEntity(Long userId) throws EntityNotFoundException{
         return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("No existeix el usuari amb id: " + userId));
     }
     @Transactional
@@ -155,18 +156,21 @@ public class UserService {
     }
 
     @Transactional
-    public void createFoodNeed(String desc, String email) throws AccessDeniedException, EntityNotFoundException, IllegalStateException {
+    public void createFoodNeed(String needType, String email) throws AccessDeniedException, EntityNotFoundException, IllegalStateException {
+        System.out.println("Need type: " + needType);
         User user = readUserAsEntity(email);
-        if(user.getNeeds().contains(desc)) throw new IllegalStateException("Ja existeix la preferència alimentària");
-        user.getNeeds().add(desc);
+        FoodNeedType need = FoodNeedType.fromString(needType);
+        if(user.getNeeds().contains(need)) throw new IllegalStateException("Ja existeix la preferència alimentària");
+        user.getNeeds().add(need);
         User saved = userRepository.save(user);
     }
 
     @Transactional
     public UserInfoDTO deleteFoodNeed(String needType, String email) throws AccessDeniedException, EntityNotFoundException {
+        FoodNeedType need = FoodNeedType.fromString(needType);
         User user = readUserAsEntity(email);
-        if(!user.getNeeds().contains(needType)) throw new AccessDeniedException("L'usuari no té aquesta necessitat alimentària");
-        user.getNeeds().remove(needType);
+        if(!user.getNeeds().contains(need)) throw new AccessDeniedException("L'usuari no té aquesta necessitat alimentària");
+        user.getNeeds().remove(need);
         User saved = userRepository.saveAndFlush(user);
         return userConversor.fromEntity2InfoDto(saved);
     }

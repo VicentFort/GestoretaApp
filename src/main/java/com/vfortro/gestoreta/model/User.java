@@ -1,5 +1,6 @@
 package com.vfortro.gestoreta.model;
 
+import com.vfortro.gestoreta.converters.FoodNeedTypeArrayConverter;
 import com.vfortro.gestoreta.model.enums.FoodNeedType;
 import com.vfortro.gestoreta.model.payments.CouponStock;
 import com.vfortro.gestoreta.model.payments.Payment;
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.ColumnTransformer;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -91,7 +93,9 @@ public class User implements Serializable {
     @Column(name="join_date")
     private LocalDate joinDate;
 
-    @Column(name = "food_needs")
-    private List<String> needs = new ArrayList<>();
+    @Column(name = "food_needs", columnDefinition = "food_need_type[]")
+    @Convert(converter = FoodNeedTypeArrayConverter.class)
+    @ColumnTransformer(write = "?::food_need_type[]")
+    private List<FoodNeedType> needs = new ArrayList<>();
 
 }

@@ -9,6 +9,7 @@ import com.vfortro.gestoreta.dto.users.info.UserInfoDTO;
 import com.vfortro.gestoreta.dto.users.info.UserInfoFallaDTO;
 import com.vfortro.gestoreta.model.*;
 import com.vfortro.gestoreta.model.enums.AccessType;
+import com.vfortro.gestoreta.model.enums.FoodNeedType;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,7 @@ public class UserConversor {
         dto.setNickname(user.getNickname());
 
         dto.setAccessType(filterChargeTypes(user));
-        List<String> needs = user.getNeeds();
+        List<FoodNeedType> needs = user.getNeeds();
         List<AttPrefInfoDTO> prefs = new ArrayList<>();
 
         dto.setFoodNeeds(needs);
@@ -80,7 +81,7 @@ public class UserConversor {
         dto.setAccessType(filterChargeTypes(user));
         if (user.getFalla() != null) dto.setFallaInfo(fromEntity2UserInfo(user.getFalla()));
         List<EventInfoUserDTO> events = new ArrayList<>();
-        List<String> needs = user.getNeeds();
+        List<FoodNeedType> needs = user.getNeeds();
         List<AttPrefInfoDTO> tagNamePrefs = new ArrayList<>();
         List<EventInfoUserDTO> attEvents = new ArrayList<>();
         for (Assist a : user.getAssists()) {

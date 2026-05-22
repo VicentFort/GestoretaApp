@@ -6,6 +6,7 @@ import com.vfortro.gestoreta.dto.requests.RequestUpdateDTO;
 import com.vfortro.gestoreta.dto.users.UserCreateDTO;
 import com.vfortro.gestoreta.dto.users.info.UserInfoDTO;
 import com.vfortro.gestoreta.dto.users.UserUpdateDTO;
+import com.vfortro.gestoreta.model.enums.FoodNeedType;
 import com.vfortro.gestoreta.repository.UserRepository;
 import com.vfortro.gestoreta.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,17 +37,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
-
-    @Autowired
-    private UserRepository testUserRepository;
-
-    @GetMapping("/testNeeds")
-    public ResponseEntity<?> getNeeds(Authentication authentication) {
-        String email = authentication.getName();
-        List<String> needs = testUserRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("XD")).getNeeds();
-        return new ResponseEntity<>(needs, HttpStatus.OK);
-    }
 
     @Tags({
             @Tag(name = "Creación"),
@@ -154,12 +144,12 @@ public class UserController {
     })
     @Operation(summary = "Crea una necesidad alimentaria para un usuario.")
     @PostMapping("/addFoodNeed")
-    public ResponseEntity<?> addFoodNeed(@RequestBody @Valid Map<String, String> payload,
+    public ResponseEntity<?> addFoodNeed(@RequestBody @Valid String needType,
                                          Authentication authentication) {
         String email = authentication.getName();
-        String desc = payload.get("desc").toString();
         try {
-            userService.createFoodNeed(desc, email);
+            System.out.println(needType);
+            userService.createFoodNeed(needType.replace("=", "").replace("\"", ""), email);
             return ResponseEntity.ok().build();
         } catch(AccessDeniedException accEx) {
             return new ResponseEntity<>(accEx.getMessage(), HttpStatus.UNAUTHORIZED);
@@ -176,10 +166,10 @@ public class UserController {
                                             Authentication authentication) {
         String email = authentication.getName();
         try {
-            UserInfoDTO result = userService.deleteFoodNeed(needType, email);
+            UserInfoDTO result = userService.deleteFoodNeed(needType.replace("=", "").replace("\"", ""), email);
             return new ResponseEntity<>(result,HttpStatus.OK);
         } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch(EntityNotFoundException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
         }
