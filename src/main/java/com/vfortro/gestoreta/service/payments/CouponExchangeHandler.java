@@ -47,13 +47,18 @@ public class CouponExchangeHandler implements PaymentHandler {
         CouponExchangeRequestDTO request = (CouponExchangeRequestDTO) dto;
         List<Payment> logs = new ArrayList<>();
         //1.1 Obtenemos el usuario que ha hecho la compra.
-        User user = userService.readUserAsEntity(request.getUserId());
+        User user = userService.readUserAsEntity(request.getUserEmail());
 
         for(CouponRequestDTO couponDTO: request.getCoupons()) {
             //2.0 Encontrar el cupon en la base de datos y crear un detalle de compra de se cupon.
             Coupon coupon = couponRepository.findById(couponDTO.getCouponId()).orElseThrow(() -> new EntityNotFoundException("No existeix el ticket amb id: " + couponDTO.getCouponId()));
 
-            String logMessage = couponDTO.getAmount() + " tickets bescanviats de: " + coupon.getName() + " amb id: " + coupon.getCouponId() + ". Gestionat per: " + manager.getName() + " " + manager.getSurname();
+            String logMessage = "";
+            if(request.getMessage() == null || request.getMessage().isBlank()) {
+                logMessage = couponDTO.getAmount() + " tickets bescanviats de: " + coupon.getName() + " amb id: " + coupon.getCouponId() + ". Gestionat per: " + manager.getName() + " " + manager.getSurname();
+            } else {
+                logMessage = request.getMessage();
+            }
 
             //2.1 Gestión del stock de cupones del usuario
             CouponStock stock = stockRepository.findByCouponCouponIdAndUserId(coupon.getCouponId(), user.getId()).orElseThrow(() -> new InsufficientStockException("El usuari no te stock de tiquets"));

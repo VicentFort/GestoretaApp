@@ -7,6 +7,8 @@ import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDTO;
 import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactInfoDTO;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementInfoDTO;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreInfoDTO;
+import com.vfortro.gestoreta.dto.payments.info.CouponFallaInfoDTO;
+import com.vfortro.gestoreta.dto.payments.info.PaymentInfoDTO;
 import com.vfortro.gestoreta.dto.requests.RequestInfoDTO;
 import com.vfortro.gestoreta.dto.users.info.UserInfoFallaDTO;
 import lombok.Data;
@@ -32,5 +34,7 @@ public class FallaAdminInfoDTO {
     private List<InventoryItemInfoDTO> inventoryItems;
     private List<LoanContactInfoDTO> contacts;
     private List<InventoryMovementInfoDTO> inventoryMovements;
+    private List<PaymentInfoDTO> payments;
+    private List<CouponFallaInfoDTO> coupons;
 
 }

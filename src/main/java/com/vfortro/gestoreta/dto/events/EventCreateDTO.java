@@ -16,7 +16,6 @@ public class EventCreateDTO {
     private Long id;
     private @NotNull String title;
     private @NotNull Boolean publicField;
-    private @NotNull Boolean done;
     private Double price;
     private @NotNull String description;
     private Integer maxPeople;

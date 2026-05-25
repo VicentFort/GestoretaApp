@@ -14,7 +14,8 @@ public class CouponPurchaseRequestDTO extends GenericPaymentRequestDTO {
     @NotNull
     private List<CouponRequestDTO> coupons;
     @NotNull
-    private Long userId;
+    private String userEmail;
+
     @NotNull
     private Double totalPrice;
 }

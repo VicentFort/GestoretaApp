@@ -21,9 +21,9 @@ public interface EventRepository extends JpaRepository<Event,Long>, JpaSpecifica
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE events SET done = true, open = false " +
+    @Query(value = "UPDATE events SET active = false, open = false " +
             "WHERE (end_date + end_hour) < CURRENT_TIMESTAMP " +
-            "AND done = false",
+            "AND active = true",
             nativeQuery = true)
     void closeEndedEvents();
 }

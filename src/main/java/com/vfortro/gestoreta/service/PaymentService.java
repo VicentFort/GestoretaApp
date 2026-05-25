@@ -8,6 +8,7 @@ import com.vfortro.gestoreta.dto.payments.coupons.CouponEditDTO;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
 import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.model.enums.ItemCategory;
+import com.vfortro.gestoreta.model.enums.PaymentType;
 import com.vfortro.gestoreta.model.inventory.InventoryItem;
 import com.vfortro.gestoreta.model.payments.*;
 import com.vfortro.gestoreta.repository.FallaRepository;
@@ -66,8 +67,9 @@ public class PaymentService {
         }
 
         //2. Procesar el pago
+        PaymentType pType = PaymentType.fromValue(request.getType());
         PaymentHandler handler = paymentHandlers.stream()
-                .filter(h -> h.supports(request.getType()))
+                .filter(h -> h.supports(pType))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No hi ha manjeador de pagament per a aquest tipus"));
         List<Payment> payments = handler.processPayment(request, manager);

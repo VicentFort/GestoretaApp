@@ -43,7 +43,7 @@ public class Event implements Serializable {
 
     @NotNull
     @ColumnDefault("false")
-    @Column(name = "done", nullable = false)
+    @Column(name = "active", nullable = false)
     private Boolean active;
 
     @Column(name = "price")

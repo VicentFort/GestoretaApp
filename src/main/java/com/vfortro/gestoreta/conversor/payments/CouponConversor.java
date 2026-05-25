@@ -1,6 +1,7 @@
 package com.vfortro.gestoreta.conversor.payments;
 
 import com.vfortro.gestoreta.dto.payments.coupons.CouponCreateDTO;
+import com.vfortro.gestoreta.dto.payments.info.CouponFallaInfoDTO;
 import com.vfortro.gestoreta.model.Falla;
 import com.vfortro.gestoreta.model.inventory.InventoryItem;
 import com.vfortro.gestoreta.model.payments.Coupon;
@@ -9,6 +10,8 @@ import com.vfortro.gestoreta.repository.inventory.InventoryItemRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 @Component
 public class CouponConversor{
@@ -27,5 +30,21 @@ public class CouponConversor{
         InventoryItem item = itemRepository.findById(dto.getItemId()).orElseThrow(() -> new EntityNotFoundException("No existeix el item amb id: " + dto.getItemId()));
         coupon.setItem(item);
         return coupon;
+    }
+
+    public CouponFallaInfoDTO fromEntity2Dto(Coupon coupon) {
+        CouponFallaInfoDTO dto = new CouponFallaInfoDTO();
+        dto.setId(coupon.getCouponId());
+        dto.setName(coupon.getName());
+        dto.setPrice(coupon.getPrice());
+        InventoryItem item = coupon.getItem();
+        dto.setItem(item.getName());
+        dto.setItemId(item.getItemId());
+        AtomicReference<Long> count = new AtomicReference<>(0L);
+        item.getStocks().forEach(stock -> {
+            count.updateAndGet(v -> v + stock.getAmount());
+        });
+        dto.setTotalAmount(count.get());
+        return dto;
     }
 }

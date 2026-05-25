@@ -4,6 +4,8 @@ import com.vfortro.gestoreta.conversor.inventory.InventoryItemConversor;
 import com.vfortro.gestoreta.conversor.inventory.InventoryMovementConversor;
 import com.vfortro.gestoreta.conversor.inventory.LoanContactConversor;
 import com.vfortro.gestoreta.conversor.inventory.StoreConversor;
+import com.vfortro.gestoreta.conversor.payments.CouponConversor;
+import com.vfortro.gestoreta.conversor.payments.PaymentConversor;
 import com.vfortro.gestoreta.dto.attendants.AttPrefAdminInfoDTO;
 import com.vfortro.gestoreta.dto.events.EventInfoDTO;
 import com.vfortro.gestoreta.dto.events.EventTagAdminInfoDTO;
@@ -13,6 +15,8 @@ import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDTO;
 import com.vfortro.gestoreta.dto.inventory.loans.contacts.LoanContactInfoDTO;
 import com.vfortro.gestoreta.dto.inventory.stocks.InventoryMovementInfoDTO;
 import com.vfortro.gestoreta.dto.inventory.stores.StoreInfoDTO;
+import com.vfortro.gestoreta.dto.payments.info.CouponFallaInfoDTO;
+import com.vfortro.gestoreta.dto.payments.info.PaymentInfoDTO;
 import com.vfortro.gestoreta.dto.requests.RequestInfoDTO;
 import com.vfortro.gestoreta.dto.users.info.UserInfoFallaDTO;
 import com.vfortro.gestoreta.model.*;
@@ -40,6 +44,12 @@ public class FallaConversor {
 
     @Autowired
     private InventoryMovementConversor inventoryMovementConversor;
+
+    @Autowired
+    private PaymentConversor paymentConversor;
+
+    @Autowired
+    private CouponConversor couponConversor;
 
 
     public FallaConversor(EventConversor eventConversor, UserConversor userConversor, EventTagConversor eventTagConversor, RequestConversor requestConversor) {
@@ -79,6 +89,8 @@ public class FallaConversor {
         List<InventoryItemInfoDTO> inventoryItems = new ArrayList<>();
         List<LoanContactInfoDTO> contacts = new ArrayList<>();
         List<InventoryMovementInfoDTO> inventoryMovements = new ArrayList<>();
+        List<PaymentInfoDTO> payments = new ArrayList<>();
+        List<CouponFallaInfoDTO> coupons = new ArrayList<>();
         FallaAdminInfoDTO dto = new FallaAdminInfoDTO();
         dto.setName(falla.getName());
         dto.setFallaId(falla.getId());
@@ -121,6 +133,16 @@ public class FallaConversor {
         for(InventoryMovement movement : falla.getMovements()) {
             inventoryMovements.add(inventoryMovementConversor.fromEntity2Dto(movement));
         }
+        falla.getPaymentLogs().forEach(payment -> {
+            PaymentInfoDTO payDto = paymentConversor.fromEntity2Dto(payment);
+            payments.add(payDto);
+        });
+        dto.setPayments(payments);
+        falla.getCoupons().forEach(coupon -> {
+            CouponFallaInfoDTO coupDto = couponConversor.fromEntity2Dto(coupon);
+            coupons.add(coupDto);
+        });
+        dto.setCoupons(coupons);
         dto.setInventoryMovements(inventoryMovements);
         return dto;
 

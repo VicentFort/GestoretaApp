@@ -67,14 +67,12 @@ public class EventService {
 
     @Transactional
     public EventCreateDTO createEvent(@Valid EventCreateDTO event, String email) throws EntityNotFoundException, AccessDeniedException, IllegalAccessException {
-        if(fallaRepository.existsById(event.getId())) {
-            throw new EntityNotFoundException("La falla a la que se está asociando el evento: " + event.getTitle() + " no existe");
-        }
         if(Objects.isNull(readEventTag(event.getTagId()))) {
             throw new EntityNotFoundException("La etiqueta a la que se está asociando el evento: " + event.getTitle() + " no existe");
         }
         if(!Objects.equals(event.getFallaId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
         if(!userService.checkManagerAccess(email)) throw new AccessDeniedException("Sin permiso.");
+        System.out.println(event.getActive());
         Event toSave = eventConversor.fromDto2Entity(event);
         Event saved = eventRepository.saveAndFlush(toSave);
 
@@ -112,7 +110,6 @@ public class EventService {
             throw new IllegalStateException("La data d'inici es posterior a la data de fi");
         }
 
-        if(newEvent.getDone() != null) updatedEvent.setActive(newEvent.getDone());
         if(newEvent.getPublicField() != null) updatedEvent.setPublicField(newEvent.getPublicField());
         if(newEvent.getTitle() != null) updatedEvent.setTitle(newEvent.getTitle());
         if(newEvent.getDescription() != null) updatedEvent.setDescription(newEvent.getDescription());
@@ -125,8 +122,6 @@ public class EventService {
         if(newEvent.getStartHour() != null) updatedEvent.setStartHour(newEvent.getStartHour());
         if(newEvent.getEndHour() != null) updatedEvent.setEndHour(newEvent.getEndHour());
         if(newEvent.getEndDate() != null && newEvent.getEndHour() != null) updatedEvent.setEndDate(LocalDateTime.of(newEvent.getEndDate(),newEvent.getEndHour()));
-
-
         if(newEvent.getAttendantIds() != null) {
             updatedEvent.getAttendants().clear();
             for (Long userId : newEvent.getAttendantIds()) {

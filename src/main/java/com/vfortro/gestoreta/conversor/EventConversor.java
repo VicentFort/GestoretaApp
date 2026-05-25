@@ -32,7 +32,6 @@ public class EventConversor {
         EventCreateDTO dto = new EventCreateDTO();
         dto.setId(event.getId());
         dto.setPublicField(event.getPublicField());
-        dto.setDone(event.getActive());
         dto.setPrice(event.getPrice());
         dto.setDescription(event.getDescription());
         dto.setMaxPeople(event.getMaxPeople());
@@ -65,7 +64,7 @@ public class EventConversor {
         dto.setDescription(event.getDescription());
         dto.setDate(event.getDate().toLocalDate());
         dto.setPrice(event.getPrice());
-        dto.setDone(event.getActive());
+        dto.setActive(event.getActive());
         dto.setTagName(event.getEventTag().getName());
         dto.setTagId(event.getEventTag().getId());
         dto.setStartHour(event.getStartHour());
@@ -109,7 +108,7 @@ public class EventConversor {
         Event event = new Event();
         event.setId(dto.getId());
         event.setPublicField(dto.getPublicField());
-        event.setActive(dto.getDone());
+        event.setActive(dto.getActive());
         event.setPrice(dto.getPrice());
         event.setDescription(dto.getDescription());
         event.setMaxPeople(dto.getMaxPeople());
@@ -120,7 +119,6 @@ public class EventConversor {
         event.setCreatedBy(dto.getCreatedBy());
         event.setCreatedAt(dto.getCreatedAt());
         event.setEndDate(LocalDateTime.of(dto.getEndDate(),dto.getEndHour()));
-        event.setActive(dto.getActive());
         event.setCheckNeeds(dto.getCheckNeeds());
         if(dto.getTagId() == null) throw new NullPointerException("El evento debe tener una id de etiqueta de evento");
         if(!tagRepository.existsById(dto.getTagId())) throw new EntityNotFoundException("La etiqueta asignada al evento no existe en la base de datos.");
@@ -143,7 +141,6 @@ public class EventConversor {
         dto.setDescription(event.getDescription());
         dto.setDate(event.getDate().toLocalDate());
         dto.setPrice(event.getPrice());
-        dto.setDone(event.getActive());
         dto.setTagName(event.getEventTag().getName());
         dto.setStartHour(event.getStartHour());
         dto.setEndHour(event.getEndHour());

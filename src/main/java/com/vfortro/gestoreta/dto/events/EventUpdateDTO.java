@@ -17,8 +17,6 @@ public class EventUpdateDTO {
     private String title;
     @Schema(example = "true", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private Boolean publicField;
-    @Schema(example = "false", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
-    private Boolean done;
     @Schema(example = "6.0", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private Double price;
     @Schema(example = "Event súper guay de la meua falla.", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)

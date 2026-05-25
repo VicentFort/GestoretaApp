@@ -20,7 +20,7 @@ public class EventInfoDTO {
     private @NotNull Long id;
     private String title;
     private String description;
-    private Boolean done;
+    private Boolean active;
     private Boolean publicField;
     private Double price;
     private LocalDate date;
@@ -34,7 +34,6 @@ public class EventInfoDTO {
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDate endDate;
-    private Boolean active;
     private Boolean checkNeeds;
 
 }

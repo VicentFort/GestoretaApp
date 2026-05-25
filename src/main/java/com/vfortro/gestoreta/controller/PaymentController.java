@@ -1,8 +1,8 @@
 package com.vfortro.gestoreta.controller;
 
-import com.vfortro.gestoreta.dto.ApiMessageResponse;
 import com.vfortro.gestoreta.dto.payments.CouponExchangeRequestDTO;
 import com.vfortro.gestoreta.dto.payments.CouponPurchaseRequestDTO;
+import com.vfortro.gestoreta.dto.payments.FeePaymentRequestDTO;
 import com.vfortro.gestoreta.dto.payments.coupons.CouponCreateDTO;
 import com.vfortro.gestoreta.dto.payments.coupons.CouponEditDTO;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
@@ -30,7 +30,7 @@ public class PaymentController {
             paymentService.createCoupon(coupon, email);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false),HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.UNAUTHORIZED);
         } catch(IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (EntityNotFoundException e) {
@@ -60,11 +60,11 @@ public class PaymentController {
             paymentService.processPayment(request,email);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (EntityNotFoundException | InsufficientStockException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (IllegalStateException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch(IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -77,11 +77,28 @@ public class PaymentController {
             paymentService.processPayment(request, email);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (InsufficientStockException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.PAYMENT_REQUIRED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.PAYMENT_REQUIRED);
         } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch(IllegalAccessException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @PostMapping("/feePayment")
+    public ResponseEntity<?> feePayment(@RequestBody FeePaymentRequestDTO request, Authentication auth) {
+        String email = auth.getName();
+        try {
+            paymentService.processPayment(request, email);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch (InsufficientStockException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.PAYMENT_REQUIRED);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch(IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }

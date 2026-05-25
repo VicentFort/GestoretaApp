@@ -35,10 +35,11 @@ public class CouponPaymentHandler implements PaymentHandler {
 
     @Override
     public List<Payment> processPayment(GenericPaymentRequestDTO dto, User manager) throws IllegalStateException {
+        System.out.println("INICIANT PROCESSAMENT DE VENDA DE TIQUET");
         CouponPurchaseRequestDTO request = (CouponPurchaseRequestDTO) dto;
         List<Payment> payments = new ArrayList<>();
         //1.1 Obtenemos el usuario que ha hecho la compra.
-        User user = userService.readUserAsEntity(request.getUserId());
+        User user = userService.readUserAsEntity(request.getUserEmail());
 
         //3. Procesar tickes (coupons) comprados.
         Double totalSum = 0.0D;
@@ -49,7 +50,12 @@ public class CouponPaymentHandler implements PaymentHandler {
             totalSum += coupon.getPrice()  * couponDto.getAmount();
 
             //3.1 Preparar el mensaje de log para el Payment y el registro de inventario.
-            String paymentMessage = couponDto.getAmount() + " tiquets venuts de: " + coupon.getName() + " amb id: " + coupon.getCouponId() + " per part de: " + manager.getName() + " " + manager.getSurname();
+            String paymentMessage = "";
+            if(request.getMessage() == null || request.getMessage().isBlank()) {
+                paymentMessage = couponDto.getAmount() + " tiquets venuts de: " + coupon.getName() + " amb id: " + coupon.getCouponId() + " per part de: " + manager.getName() + " " + manager.getSurname();
+            } else {
+                paymentMessage = request.getMessage();
+            }
 
             //3.2 Actualizar el stock de tickets.
             CouponStock stock = stockRepository.findByCouponCouponIdAndUserId(coupon.getCouponId(), user.getId())
@@ -76,12 +82,14 @@ public class CouponPaymentHandler implements PaymentHandler {
             payment.setType(PaymentType.COUPON_SOLD);
             payment.setMessage(paymentMessage);
             payments.add(payment);
+
         }
         //4. Comprobar que el total pagado sea mayor o igual a los precios de los cupones
         if(Math.abs(totalSum - request.getTotalPrice()) > 0.00001) {
             throw new IllegalStateException("El valor de la compra no coincideix a la quantitat abonada.");
         }
         //5. Guardar la compra
+        System.out.println("FINALITZAT PROCESSAMENT DE VENDA DE TIQUET");
         return payments;
     }
 }

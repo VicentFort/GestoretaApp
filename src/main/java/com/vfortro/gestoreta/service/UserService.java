@@ -151,7 +151,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public User readUserAsEntity(String email) throws EntityNotFoundException {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("No existeix el user amb email: " +email));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("No existeix el usuari amb email: " +email));
         return user;
     }
 

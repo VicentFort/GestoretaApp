@@ -7,5 +7,7 @@ import lombok.Data;
 @Data
 public abstract class GenericPaymentRequestDTO {
     @NotNull
-    private PaymentType type;
+    private String type;
+
+    private String message;
 }
