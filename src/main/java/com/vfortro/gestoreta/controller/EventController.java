@@ -56,13 +56,13 @@ public class EventController {
                                        Authentication auth) {
         String email = auth.getName();
         try {
-            if(event.getEndHour().isBefore(event.getStartHour()) || event.getStartHour().isAfter(event.getEndHour())) return new ResponseEntity<>(new ApiMessageResponse("El event té horaris imprecissos.", false), HttpStatus.FORBIDDEN);
+            if(event.getEndHour().isBefore(event.getStartHour()) || event.getStartHour().isAfter(event.getEndHour())) return new ResponseEntity<>("L'esdeveniment té horaris incorrectes", HttpStatus.FORBIDDEN);
             EventCreateDTO result = eventService.createEvent(event, email);
             return new ResponseEntity<>(result, HttpStatus.CREATED);
         } catch(EntityNotFoundException entityEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(entityEx.getMessage(), false), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(entityEx.getMessage(), HttpStatus.NOT_FOUND);
         }  catch (AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(accEx.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch(IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -91,9 +91,9 @@ public class EventController {
             eventService.deleteEvent(eventId, email);
             return new ResponseEntity<>(new ApiMessageResponse("Esdeveniment eliminat",true), HttpStatus.OK);
         } catch(AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(accEx.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (EntityNotFoundException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
         } catch(IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -126,12 +126,10 @@ public class EventController {
             EventCreateDTO result = eventService.updateEvent(newEvent, email);
             return new ResponseEntity<>("Esdeveniment actualitzat.", HttpStatus.OK);
         } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.NOT_FOUND);
-        } catch (IllegalStateException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
-        } catch(IllegalAccessException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (IllegalStateException | IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
 
@@ -156,9 +154,9 @@ public class EventController {
             AssistDTO result = eventService.createAssist(email, eventId);
             return new ResponseEntity<>(new ApiMessageResponse("Asistencia creada con id: " +  result.getAssistId(), true), HttpStatus.CREATED);
         } catch(EntityExistsException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         } catch(EntityNotFoundException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
 
     }

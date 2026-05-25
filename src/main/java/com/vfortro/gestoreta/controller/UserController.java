@@ -92,18 +92,12 @@ public class UserController {
                                         Authentication authentication) {
         String email = authentication.getName();
         try {
-            UserInfoDTO result = userService.updateUser(newUser, email);
-            if(newUser.getName().isBlank()) return new ResponseEntity<>(new ApiMessageResponse("Nom en blanc", false), HttpStatus.INTERNAL_SERVER_ERROR);
-
-            if(newUser.getSurname().isBlank()) return new ResponseEntity<>(new ApiMessageResponse("Cognoms en blanc", false), HttpStatus.INTERNAL_SERVER_ERROR);
-            if(Objects.isNull(result)) {
-                return new ResponseEntity<>(new ApiMessageResponse("El usuario no se ha podido actualizar", false), HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-            return new ResponseEntity<>(result, HttpStatus.OK);
+            userService.updateUser(newUser, email);
+            return ResponseEntity.ok("Usuari actualitzat");
         } catch (AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(),false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(accEx.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (NullPointerException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(),false), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
 
     }
@@ -127,12 +121,9 @@ public class UserController {
         String email = authentication.getName();
         try {
             UserInfoDTO result = userService.readUserSecure(email);
-            if(Objects.isNull(result)) {
-                return new ResponseEntity<>(new ApiMessageResponse("El usuario no existe.", false), HttpStatus.NOT_FOUND);
-            }
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(accEx.getMessage(), HttpStatus.FORBIDDEN);
         }
 
     }
@@ -187,13 +178,13 @@ public class UserController {
         String email = authentication.getName();
         try {
             userService.createAttPreferences(email, tagId);
-            return new ResponseEntity<>(new ApiMessageResponse("Preferencias guardadas", true), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiMessageResponse("Preferències guardades", true), HttpStatus.OK);
         } catch (AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(accEx.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch(EntityExistsException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
         }catch (Exception any) {
-            return new ResponseEntity<>(new ApiMessageResponse(any.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(any.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     
@@ -208,9 +199,9 @@ public class UserController {
         String email = authentication.getName();
         try {
             userService.removeAttPrefs(email, prefIds);
-            return new ResponseEntity<>(new ApiMessageResponse("Eliminadas: " + prefIds.size() + " preferencias.", true), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiMessageResponse("Eliminades: " + prefIds.size() + " preferències.", true), HttpStatus.OK);
         } catch (AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(accEx.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -246,13 +237,13 @@ public class UserController {
             RequestUpdateDTO result = userService.createRequest(requestDto, email);
             return new ResponseEntity<>(new ApiMessageResponse("Solicitud creada con id: " + result.getRequestId(), false), HttpStatus.CREATED);
         } catch(NullPointerException nullEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(nullEx.getMessage(), false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(nullEx.getMessage(), HttpStatus.FORBIDDEN);
         } catch(EntityNotFoundException entEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(entEx.getMessage(), false), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(entEx.getMessage(), HttpStatus.NOT_FOUND);
         } catch(IllegalAccessException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(accEx.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch(AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(accEx.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
 

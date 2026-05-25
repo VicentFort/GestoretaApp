@@ -81,9 +81,9 @@ public class FallaController {
             fallaService.updateFalla(newFalla, email);
             return new ResponseEntity<>(new ApiMessageResponse("Falla actaulizada.",true), HttpStatus.OK);
         } catch(AccessDeniedException accEx) {
-            return new ResponseEntity<>( new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>( accEx.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch(NullPointerException nullEx) {
-            return new ResponseEntity<>( new ApiMessageResponse(nullEx.getMessage(), false), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>( nullEx.getMessage(), HttpStatus.NOT_FOUND);
         } catch(IllegalAccessException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -110,13 +110,13 @@ public class FallaController {
                                            Authentication authentication) {
         String email = authentication.getName();
         if(Objects.isNull(userService.readRequest(dto.getRequestId()))) {
-            return new ResponseEntity<>(new ApiMessageResponse("La solicitud de unión con id: " + dto.getRequestId() + " no existe.", false), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("La sol·licitud no existiex", HttpStatus.NOT_FOUND);
         }
         try {
             userService.updateRequest(dto, email);
             return new ResponseEntity<>(new ApiMessageResponse("Solicitud con id: "+ dto.getRequestId() +" aceptada",true), HttpStatus.OK);
         } catch(AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(accEx.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch(IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -138,11 +138,11 @@ public class FallaController {
             fallaService.addEventTag(email, nameSolved);
             return new ResponseEntity<>(new ApiMessageResponse("Nueva etiqueta creada con nombre: " + name, true), HttpStatus.CREATED);
         } catch (AccessDeniedException accEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(accEx.getMessage(), false), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(accEx.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (EntityNotFoundException notFoundEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(notFoundEx.getMessage(), false), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(notFoundEx.getMessage(), HttpStatus.NOT_FOUND);
         } catch (EntityExistsException conflictEx) {
-            return new ResponseEntity<>(new ApiMessageResponse(conflictEx.getMessage(), false), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(conflictEx.getMessage(), HttpStatus.CONFLICT);
         } catch(IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -156,9 +156,9 @@ public class FallaController {
             FallaAdminInfoDTO result = fallaService.getFallaInfo(email);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (AccessDeniedException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }

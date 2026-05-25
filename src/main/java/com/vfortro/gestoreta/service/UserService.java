@@ -107,16 +107,10 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserInfoDTO readUserSecure(String email) throws AccessDeniedException {
-        UserCreateDTO user = readUser(email);
+        User user = readUserAsEntity(email);
         if(user == null) return null;
-        if(!Objects.equals(user.getUserId(), readUser(email).getUserId())) throw new AccessDeniedException("Sin permiso.");
-        User userEnt = userRepository.findUserByEmail(email);
-        List<Long> eventIds = new ArrayList<>(); List<String> eventTitles = new ArrayList<>();
-        for(Assist assist : userEnt.getAssists()) {
-            eventIds.add(assist.getEvent().getId());
-            eventTitles.add(assist.getEvent().getTitle());
-        }
-        return userConversor.fromEntity2InfoDto(userEnt);
+        if(!Objects.equals(user.getId(), readUser(email).getUserId())) throw new AccessDeniedException("Sense permís");
+        return userConversor.fromEntity2InfoDto(user);
     }
 
     @Transactional(readOnly = true)
@@ -194,8 +188,8 @@ public class UserService {
 
     @Transactional
     public void updateRequest(RequestUpdateDTO dto, String email) throws AccessDeniedException, IllegalAccessException {
-        if(!Objects.equals(dto.getIdFalla(), readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
-        if(!checkManagerAccess(email)) throw new AccessDeniedException("Sin permiso.");
+        if(!Objects.equals(dto.getIdFalla(), readUser(email).getFallaId())) throw new AccessDeniedException("Sense permís");
+        if(!checkManagerAccess(email)) throw new AccessDeniedException("Sense permís.");
         Request request = requestRepository.findRequestById(dto.getRequestId());
         request.setAproved(dto.getAproved());
         request.setReply(dto.getReply());

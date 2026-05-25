@@ -48,9 +48,9 @@ public class InventoryController {
                 StoreInfoDTO result = inventoryService.createStore(newStore,email);
                 return new ResponseEntity<>(result, HttpStatus.OK);
             }
-            return new ResponseEntity<>(new ApiMessageResponse("La informació del nou magatzem estava incompleta", false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("La informació del nou magatzem estava incompleta", HttpStatus.FORBIDDEN);
         } catch (AccessDeniedException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch(IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -69,9 +69,9 @@ public class InventoryController {
             InventoryItemInfoDTO result = inventoryService.createItem(newItem, email);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch(AccessDeniedException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch(Exception ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -83,9 +83,9 @@ public class InventoryController {
             InventoryMovementInfoDTO result = inventoryService.processMovement(movement, email);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch(AccessDeniedException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch(InsufficientStockException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch(IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -100,9 +100,9 @@ public class InventoryController {
             LoanInfoDTO result = inventoryService.returnLoan(returnDto, email);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch(AccessDeniedException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch(IllegalStateException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch(IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -117,9 +117,9 @@ public class InventoryController {
             inventoryService.updateStore(updatedStore, email);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (AccessDeniedException ex) {
-            return new  ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
+            return new  ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch(EntityNotFoundException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
         } catch(IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -134,9 +134,9 @@ public class InventoryController {
             inventoryService.updateItem(updatedItem, email);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (AccessDeniedException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch(EntityNotFoundException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
         } catch(IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -150,7 +150,7 @@ public class InventoryController {
             inventoryService.createContact(contact,email);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (AccessDeniedException e) {
-            return new  ResponseEntity<>(new ApiMessageResponse(e.getMessage(), false), HttpStatus.FORBIDDEN);
+            return new  ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch(IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
@@ -164,9 +164,9 @@ public class InventoryController {
             inventoryService.updateContact(contact,email);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch(AccessDeniedException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch(EntityNotFoundException ex) {
-            return new ResponseEntity<>(new ApiMessageResponse(ex.getMessage(), false), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
         } catch(IllegalAccessException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
