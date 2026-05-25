@@ -77,7 +77,7 @@ public class CouponPaymentHandler implements PaymentHandler {
             payment.setUser(user);
             payment.setItem(coupon.getItem());
             payment.setCouponSold(coupon);
-            payment.setPrice(coupon.getPrice());
+            payment.setPrice(coupon.getPrice()*couponDto.getAmount());
             payment.setDate(LocalDateTime.now());
             payment.setType(PaymentType.COUPON_SOLD);
             payment.setMessage(paymentMessage);
