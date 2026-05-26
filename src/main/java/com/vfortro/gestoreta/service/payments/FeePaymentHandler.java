@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -37,7 +38,7 @@ public class FeePaymentHandler implements  PaymentHandler{
         LocalDateTime now = LocalDateTime.now();
         String message = "";
         if(request.getMessage() == null || request.getMessage().isBlank()) {
-            message = "Pagament de la quota de faller a la falla: " + manager.getFalla().getName() + " del / la membre: " + user.getName() + " " + user.getSurname() + " amb un import de: " + request.getFeeAmount() + " i amb data: " + now;
+            message = "Pagament de la quota de faller a la falla: " + manager.getFalla().getName() + " del / la membre: " + user.getName() + " " + user.getSurname() + " amb un import de: " + request.getFeeAmount() + " i amb data: " + now.truncatedTo(ChronoUnit.MINUTES);
         } else {
             message = request.getMessage();
         }

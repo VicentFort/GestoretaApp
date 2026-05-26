@@ -30,6 +30,7 @@ public class AssistConversor {
         dto.setUserId(assist.getUser().getId());
         dto.setEventId(assist.getEvent().getId());
         dto.setPaid(assist.getPaid());
+        dto.setUserName(assist.getUser().getName() + " " + assist.getUser().getSurname());
         return dto;
     }
 

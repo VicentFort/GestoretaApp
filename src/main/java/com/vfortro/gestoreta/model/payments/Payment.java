@@ -1,5 +1,6 @@
 package com.vfortro.gestoreta.model.payments;
 
+import com.vfortro.gestoreta.model.Event;
 import com.vfortro.gestoreta.model.Falla;
 import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.model.enums.PaymentType;
@@ -63,6 +64,10 @@ public class Payment implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     private InventoryItem item;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id")
+    private Event event;
 
 
 }

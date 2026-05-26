@@ -16,6 +16,7 @@ public class UserInfoFallaDTO {
     private Long id;
     private String name;
     private String surname;
+    private String fullName;
     private String nickname;
     private LocalDate birthday;
     private Boolean showBday;

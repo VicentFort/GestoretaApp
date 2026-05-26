@@ -16,7 +16,7 @@ public class PaymentConversor {
         dto.setMessage(payment.getMessage());
         dto.setManager(payment.getManager().getName() + " " + payment.getManager().getSurname());
         dto.setFalla(payment.getFalla().getName());
-        dto.setType(payment.getType().getValue());
+        dto.setType(payment.getType().getValue().replace('.', '\''));
         if(payment.getCouponExchanged() != null) {
             dto.setCouponExchanged(payment.getCouponExchanged().getName());
         }
@@ -28,6 +28,9 @@ public class PaymentConversor {
         }
         if(payment.getItem() != null) {
             dto.setItem(payment.getItem().getName());
+        }
+        if(payment.getEvent() != null) {
+            dto.setEvent((payment.getEvent().getTitle()));
         }
         return dto;
     }

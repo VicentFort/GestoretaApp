@@ -2,6 +2,7 @@ package com.vfortro.gestoreta.controller;
 
 import com.vfortro.gestoreta.dto.payments.CouponExchangeRequestDTO;
 import com.vfortro.gestoreta.dto.payments.CouponPurchaseRequestDTO;
+import com.vfortro.gestoreta.dto.payments.EventPaymentRequestDTO;
 import com.vfortro.gestoreta.dto.payments.FeePaymentRequestDTO;
 import com.vfortro.gestoreta.dto.payments.coupons.CouponCreateDTO;
 import com.vfortro.gestoreta.dto.payments.coupons.CouponEditDTO;
@@ -100,6 +101,23 @@ public class PaymentController {
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch(IllegalAccessException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @PostMapping("/eventPayment")
+    public ResponseEntity<?> eventPayment(@RequestBody EventPaymentRequestDTO request, Authentication auth) {
+        String email = auth.getName();
+        try {
+            paymentService.processPayment(request, email);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch (InsufficientStockException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.PAYMENT_REQUIRED);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch(IllegalAccessException | IllegalStateException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
     }

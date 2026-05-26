@@ -1,5 +1,6 @@
 package com.vfortro.gestoreta.model;
 
+import com.vfortro.gestoreta.model.payments.Payment;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -75,6 +76,9 @@ public class Event implements Serializable {
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Attendant> attendants = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Payment> payments = new LinkedHashSet<>();
 
     @NotNull
     @Column(name="created_by", nullable = false)

@@ -22,7 +22,7 @@ public enum PaymentType {
     DONATION("Donació"),
     OTHER_EXPENSES("Altre gasto"),
     OTHER_PAYMENTS("Altre pagament"),
-    EVENT_PAYMENT("Pagament d.event");
+    EVENT_PAYMENT("Pagament d.esdeveniment");
 
     private final String value;
 

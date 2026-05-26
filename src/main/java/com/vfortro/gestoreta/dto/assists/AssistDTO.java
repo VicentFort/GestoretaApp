@@ -14,4 +14,6 @@ public class AssistDTO {
     private @NotNull Long userId;
     private @NotNull Long eventId;
     private Boolean paid;
+    private String userName;
+
 }

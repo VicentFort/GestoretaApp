@@ -15,6 +15,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -47,6 +49,7 @@ public class UserConversor {
         dto.setId(user.getId());
         dto.setName(user.getName());
         dto.setSurname(user.getSurname());
+        dto.setFullName(user.getName() + " " + user.getSurname());
         dto.setBirthday(user.getBirthday());
         dto.setShowBday(user.getShowBday());
         dto.setJoinDate(user.getJoinDate());
@@ -114,8 +117,11 @@ public class UserConversor {
             throw new EntityNotFoundException("La falla asociada al usuario no existe en la base de datos.");
         user.setFalla(fallaRepository.findFallaById(dto.getFallaId()));
 
-        if (dto.getJoinDate() != null)
+        if (dto.getJoinDate() != null) {
             user.setJoinDate(dto.getJoinDate());
+        } else {
+            user.setJoinDate(LocalDate.now());
+        }
 
         user.setUrlPfp(dto.getUrlPfp());
         user.setBirthday(dto.getBirthday());

@@ -144,7 +144,11 @@ public class EventService {
         }
 
         return eventConversor.fromEntity2Dto(eventRepository.saveAndFlush(updatedEvent));
+    }
 
+    @Transactional(readOnly = true)
+    public Event readEventAsEntity(Long eventId) {
+        return eventRepository.findById(eventId).orElseThrow(() -> new EntityNotFoundException("No existeix l'esdeveniment amb id: " + eventId));
     }
 
     @Transactional(readOnly = true)
@@ -154,11 +158,11 @@ public class EventService {
         return assistConversor.formEntity2Dto(assist);
     }
 
+
     @Transactional
     public AssistDTO createAssist(String email, Long eventId) throws EntityNotFoundException, EntityExistsException {
-        if(!eventRepository.existsById(eventId)) {
-            throw new EntityNotFoundException("L'esdeveniment amb id: " + eventId + " no existex");
-        }
+
+        Event event = readEventAsEntity(eventId);
 
         User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("L'usuari amb email: " + email + " no existeix."));
         if(assistRepository.existsByUserIdAndEventId(user.getId(), eventId)) {
@@ -168,6 +172,9 @@ public class EventService {
         AssistDTO dto = new AssistDTO();
         dto.setUserId(user.getId());
         dto.setEventId(eventId);
+        if(event.getPrice() > 0) {
+            dto.setPaid(true);
+        }
 
         Assist saved = assistRepository.saveAndFlush(assistConversor.fromDto2Entity(dto));
         return assistConversor.formEntity2Dto(saved);
@@ -181,6 +188,15 @@ public class EventService {
             throw new IllegalStateException("L'assistència no pertany a l'usuari indicat");
         }
         assistRepository.delete(assist);
+    }
+
+    @Transactional
+    public void payAssist(Long userId, Long eventId) throws EntityNotFoundException, IllegalStateException{
+        Assist assist = assistRepository.findByUserIdAndEventId(userId,eventId).orElseThrow(() -> new EntityNotFoundException("La assistència de l'usuari i esdeveniment indicats no existeix"));
+        if(assist.getPaid() == null) throw new IllegalStateException("L'esdeveniment no s'ha de pagar");
+        if(assist.getPaid()) throw new IllegalStateException("L'usuari ja havia pagat l'esdeveniment");
+        assist.setPaid(true);
+        assistRepository.saveAndFlush(assist);
     }
 
     @Transactional(readOnly = true)

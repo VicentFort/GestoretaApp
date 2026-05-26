@@ -25,4 +25,5 @@ public class PaymentInfoDTO {
     private String username;
     private String type;
     private String item;
+    private String event;
 }
