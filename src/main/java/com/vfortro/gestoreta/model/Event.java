@@ -6,8 +6,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.type.descriptor.jdbc.BinaryJdbcType;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -80,6 +82,9 @@ public class Event implements Serializable {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Payment> payments = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "event")
+    private Set<UserNotification> notifications = new LinkedHashSet<>();
+
     @NotNull
     @Column(name="created_by", nullable = false)
     private String createdBy;
@@ -98,5 +103,13 @@ public class Event implements Serializable {
     @Column(name="check_needs", nullable = false)
     @ColumnDefault("false")
     private Boolean checkNeeds;
+
+    @Lob
+    @JdbcType(BinaryJdbcType.class)
+    @Column(name = "img_content", nullable = true)
+    private byte[] imageContent;
+
+    @Column(name="total_revenue")
+    private Double totalRevenue;
 
 }

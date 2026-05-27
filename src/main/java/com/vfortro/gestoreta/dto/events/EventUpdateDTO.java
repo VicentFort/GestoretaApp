@@ -32,5 +32,6 @@ public class EventUpdateDTO {
     private LocalDate endDate;
     private Boolean active;
     private Boolean checkNeeds;
+    private byte[] image;
     private List<Long> attendantIds;
 }

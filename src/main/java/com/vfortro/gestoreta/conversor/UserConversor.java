@@ -1,12 +1,17 @@
 package com.vfortro.gestoreta.conversor;
 
+import com.vfortro.gestoreta.conversor.payments.CouponConversor;
+import com.vfortro.gestoreta.dto.assists.AssistDTO;
 import com.vfortro.gestoreta.dto.attendants.AttPrefInfoDTO;
+import com.vfortro.gestoreta.dto.events.EventInfoDTO;
 import com.vfortro.gestoreta.dto.events.EventInfoUserDTO;
 import com.vfortro.gestoreta.dto.events.EventTagAdminInfoDTO;
 import com.vfortro.gestoreta.dto.fallas.info.FallaUserInfoDTO;
+import com.vfortro.gestoreta.dto.payments.info.CouponStockInfoDTO;
 import com.vfortro.gestoreta.dto.users.UserCreateDTO;
 import com.vfortro.gestoreta.dto.users.info.UserInfoDTO;
 import com.vfortro.gestoreta.dto.users.info.UserInfoFallaDTO;
+import com.vfortro.gestoreta.dto.users.notifications.NotificationInfoDTO;
 import com.vfortro.gestoreta.model.*;
 import com.vfortro.gestoreta.model.enums.AccessType;
 import com.vfortro.gestoreta.model.enums.FoodNeedType;
@@ -28,6 +33,13 @@ public class UserConversor {
     private EventConversor eventConversor;
     @Autowired
     private EventTagConversor eventTagConversor;
+    @Autowired
+    private UserNotificationCovnersor notificationCovnersor;
+    @Autowired
+    private AssistConversor assistConversor;
+    @Autowired
+    private CouponConversor couponConversor;
+
 
     private final Map<AccessType, Integer> prios = Map.of(AccessType.EMPTY_CHARGE, 0, AccessType.REPRESENTATIVE, 1, AccessType.MANAGER, 2, AccessType.SUPERUSER, 3);
 
@@ -37,7 +49,6 @@ public class UserConversor {
         dto.setName(user.getName());
         dto.setSurname(user.getSurname());
         if (Objects.nonNull(user.getFalla())) dto.setFallaId(user.getFalla().getId());
-        dto.setUrlPfp(user.getUrlPfp());
         dto.setBirthday(user.getBirthday());
         dto.setShowBday(user.getShowBday());
         dto.setNickname(user.getNickname());
@@ -87,8 +98,12 @@ public class UserConversor {
         List<FoodNeedType> needs = user.getNeeds();
         List<AttPrefInfoDTO> tagNamePrefs = new ArrayList<>();
         List<EventInfoUserDTO> attEvents = new ArrayList<>();
+        List<NotificationInfoDTO> nots = new ArrayList<>();
+        List<CouponStockInfoDTO> coupons = new ArrayList<>();
         for (Assist a : user.getAssists()) {
-            events.add(eventConversor.fromEntity2InfoUserDto(a.getEvent()));
+            EventInfoUserDTO eInfo = eventConversor.fromEntity2InfoUserDto(a.getEvent());
+            eInfo.setAssist(assistConversor.formEntity2Dto(a));
+            events.add(eInfo);
         }
         for (AttendantPreference pref : user.getAttendantPreferences()) {
             AttPrefInfoDTO att = new AttPrefInfoDTO();
@@ -100,10 +115,20 @@ public class UserConversor {
         for(Attendant att : user.getAttendedEvents()) {
             attEvents.add(eventConversor.fromEntity2InfoUserDto(att.getEvent()));
         }
+
+        user.getNotifications().forEach( notification -> {
+            nots.add(notificationCovnersor.fromEntity2Dto(notification));
+        });
+
+        user.getStocks().forEach(stock -> {
+            coupons.add(couponConversor.fromEntity2Dto(stock));
+        });
+        dto.setNotifications(nots);
         dto.setEvents(events);
         dto.setFoodNeeds(needs);
         dto.setEventTagPrefs(tagNamePrefs);
         dto.setAttEvents(attEvents);
+        dto.setCouponStocks(coupons);
         return dto;
     }
 
@@ -123,7 +148,6 @@ public class UserConversor {
             user.setJoinDate(LocalDate.now());
         }
 
-        user.setUrlPfp(dto.getUrlPfp());
         user.setBirthday(dto.getBirthday());
         user.setShowBday(dto.getShowBday());
         user.setEmail(dto.getEmail());

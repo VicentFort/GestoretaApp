@@ -2,9 +2,11 @@ package com.vfortro.gestoreta.conversor.payments;
 
 import com.vfortro.gestoreta.dto.payments.coupons.CouponCreateDTO;
 import com.vfortro.gestoreta.dto.payments.info.CouponFallaInfoDTO;
+import com.vfortro.gestoreta.dto.payments.info.CouponStockInfoDTO;
 import com.vfortro.gestoreta.model.Falla;
 import com.vfortro.gestoreta.model.inventory.InventoryItem;
 import com.vfortro.gestoreta.model.payments.Coupon;
+import com.vfortro.gestoreta.model.payments.CouponStock;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import com.vfortro.gestoreta.repository.inventory.InventoryItemRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -45,6 +47,15 @@ public class CouponConversor{
             count.updateAndGet(v -> v + stock.getAmount());
         });
         dto.setTotalAmount(count.get());
+        return dto;
+    }
+
+    public CouponStockInfoDTO fromEntity2Dto(CouponStock stock) {
+        CouponStockInfoDTO dto = new CouponStockInfoDTO();
+        dto.setId(stock.getStockId());
+        dto.setAmount(stock.getAmount());
+        dto.setCouponId(stock.getCoupon().getCouponId());
+        dto.setCoupon(stock.getCoupon().getName());
         return dto;
     }
 }

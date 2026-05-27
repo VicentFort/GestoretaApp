@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event,Long>, JpaSpecificationExecutor<Event> {
 
@@ -26,4 +27,7 @@ public interface EventRepository extends JpaRepository<Event,Long>, JpaSpecifica
             "AND active = true",
             nativeQuery = true)
     void closeEndedEvents();
+
+    @Query(value = "SELECT * FROM events e WHERE e.total_revenue IS NULL and e.active = FALSE and e.price > 0", nativeQuery = true)
+    List<Event> findByTotalRevenueIsNotNullAndInactiveAndWithPrice();
 }

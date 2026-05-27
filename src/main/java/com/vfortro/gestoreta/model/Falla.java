@@ -75,4 +75,6 @@ public class Falla implements Serializable {
     @OneToMany(mappedBy = "falla")
     private Set<Payment> paymentLogs = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "falla")
+    private Set<UserNotification> notifications = new LinkedHashSet<>();
 }

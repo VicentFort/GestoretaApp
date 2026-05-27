@@ -4,6 +4,7 @@ import com.vfortro.gestoreta.dto.*;
 import com.vfortro.gestoreta.dto.assists.AssistDTO;
 import com.vfortro.gestoreta.dto.events.EventCreateDTO;
 import com.vfortro.gestoreta.dto.events.EventUpdateDTO;
+import com.vfortro.gestoreta.repository.EventRepository;
 import com.vfortro.gestoreta.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,6 +33,14 @@ public class EventController {
     @Autowired
     private EventService eventService;
 
+    @Autowired
+    private EventRepository testRepo;
+
+    @GetMapping("/testRevenue")
+    public ResponseEntity<?> getTestRevenue(Authentication auth) {
+        eventService.getTotalRevenue();
+        return ResponseEntity.ok(testRepo.findByTotalRevenueIsNotNullAndInactiveAndWithPrice().size());
+    }
 
     @Tags({
             @Tag(name = "Creación"),

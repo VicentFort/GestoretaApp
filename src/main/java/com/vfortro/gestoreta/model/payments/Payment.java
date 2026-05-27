@@ -3,6 +3,7 @@ package com.vfortro.gestoreta.model.payments;
 import com.vfortro.gestoreta.model.Event;
 import com.vfortro.gestoreta.model.Falla;
 import com.vfortro.gestoreta.model.User;
+import com.vfortro.gestoreta.model.UserNotification;
 import com.vfortro.gestoreta.model.enums.PaymentType;
 import com.vfortro.gestoreta.model.inventory.InventoryItem;
 import jakarta.persistence.*;
@@ -68,6 +69,9 @@ public class Payment implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
     private Event event;
+
+    @OneToMany(mappedBy = "payment")
+    private Set<UserNotification> notifications = new LinkedHashSet<>();
 
 
 }

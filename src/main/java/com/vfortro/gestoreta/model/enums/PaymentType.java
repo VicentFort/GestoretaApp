@@ -24,6 +24,7 @@ public enum PaymentType {
     OTHER_PAYMENTS("Altre pagament"),
     EVENT_PAYMENT("Pagament d.esdeveniment");
 
+
     private final String value;
 
     PaymentType(String value) { this.value = value; }

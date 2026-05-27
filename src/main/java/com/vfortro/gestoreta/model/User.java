@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.ColumnTransformer;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.type.descriptor.jdbc.BinaryJdbcType;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -37,9 +39,6 @@ public class User implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "falla")
     private Falla falla;
-
-    @Column(name = "url_pfp", length = Integer.MAX_VALUE)
-    private String urlPfp;
 
     @NotNull
     @Column(name = "birthday", nullable = false)
@@ -82,6 +81,9 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "manager")
     private Set<Payment> managedPayments = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "user")
+    private Set<UserNotification> notifications = new LinkedHashSet<>();
+
     @Column(name="nickname")
     private String nickname;
 
@@ -97,5 +99,10 @@ public class User implements Serializable {
     @Convert(converter = FoodNeedTypeArrayConverter.class)
     @ColumnTransformer(write = "?::food_need_type[]")
     private List<FoodNeedType> needs = new ArrayList<>();
+
+    @Lob
+    @JdbcType(BinaryJdbcType.class)
+    @Column(name = "pfp_content", nullable = true)
+    private byte[] pfpContent;
 
 }

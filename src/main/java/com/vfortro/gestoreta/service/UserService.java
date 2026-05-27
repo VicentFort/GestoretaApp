@@ -10,17 +10,20 @@ import com.vfortro.gestoreta.dto.users.UserUpdateDTO;
 import com.vfortro.gestoreta.model.*;
 import com.vfortro.gestoreta.model.enums.AccessType;
 import com.vfortro.gestoreta.model.enums.FoodNeedType;
+import com.vfortro.gestoreta.model.enums.UserNotificationType;
 import com.vfortro.gestoreta.repository.*;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,6 +43,8 @@ public class UserService {
     private ChargeRepository chargeRepository;
     @Autowired
     private FallaRepository fallaRepository;
+    @Autowired
+    private UserNotificationRepository notificationRepository;
 
     //CONVERSORS
     @Autowired
@@ -98,7 +103,6 @@ public class UserService {
         if(newUser.getSurname() != null) updatedUser.setSurname(newUser.getSurname());
         if(newUser.getBirthday() != null) updatedUser.setBirthday(newUser.getBirthday());
         if(newUser.getShowBday() != null) updatedUser.setShowBday(newUser.getShowBday());
-        if(newUser.getUrlPfp() != null) updatedUser.setUrlPfp(newUser.getUrlPfp());
         if(newUser.getNickname() != null) updatedUser.setNickname(newUser.getNickname());
         User saved = userRepository.saveAndFlush(updatedUser);
         return userConversor.fromEntity2InfoDto(saved);
@@ -228,5 +232,32 @@ public class UserService {
             if(charge.getType() == AccessType.SUPERUSER) return true;
         }
         return false;
+    }
+
+    @Transactional
+    public void changePfp(MultipartFile pfpImage, String email) throws IOException {
+        User user = readUserAsEntity(email);
+        user.setPfpContent(pfpImage.getBytes());
+        userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public ByteArrayResource downloadPfp(String email) throws NullPointerException, EntityNotFoundException {
+        User user = readUserAsEntity(email);
+        if(user.getPfpContent() == null) throw new NullPointerException("L'usuari no te imatge de perfil");
+        return new ByteArrayResource(user.getPfpContent());
+    }
+
+    @Transactional
+    public void readNotification(Long notificationId, String email) throws EntityNotFoundException, AccessDeniedException, IllegalStateException {
+        User user = readUserAsEntity(email);
+        if(user.getNotifications().stream().noneMatch(n -> Objects.equals(n.getNotificationId(), notificationId))) {
+            throw new AccessDeniedException("Sense permís");
+        }
+        UserNotification notification = notificationRepository.findById(notificationId).orElseThrow(() -> new EntityNotFoundException("No existeix la notificació"));
+        if(notification.getRead()) throw new IllegalStateException("La notificació ja s'ha llegit anteriorment");
+
+        notification.setRead(true);
+        notificationRepository.save(notification);
     }
 }

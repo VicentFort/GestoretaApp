@@ -74,6 +74,8 @@ public class EventConversor {
         dto.setEndDate(event.getEndDate().toLocalDate());
         dto.setActive(event.getActive());
         dto.setCheckNeeds(event.getCheckNeeds());
+        dto.setTotalRevenue(event.getTotalRevenue());
+        dto.setImage(event.getImageContent());
         List<FoodNeedInfoDTO> needs = new ArrayList<>();
         List<AssistDTO> assists = new ArrayList<>();
         for(Assist assist : event.getAssists()) {
@@ -120,6 +122,7 @@ public class EventConversor {
         event.setCreatedAt(dto.getCreatedAt());
         event.setEndDate(LocalDateTime.of(dto.getEndDate(),dto.getEndHour()));
         event.setCheckNeeds(dto.getCheckNeeds());
+        event.setImageContent(dto.getEventImage());
         if(dto.getTagId() == null) throw new NullPointerException("El evento debe tener una id de etiqueta de evento");
         if(!tagRepository.existsById(dto.getTagId())) throw new EntityNotFoundException("La etiqueta asignada al evento no existe en la base de datos.");
         EventTag tag = tagRepository.findById(dto.getTagId()).orElse(null);
@@ -147,6 +150,7 @@ public class EventConversor {
         dto.setCreatedBy(event.getCreatedBy());
         dto.setEndDate(event.getEndDate().toLocalDate());
         dto.setActive(event.getActive());
+        dto.setImage(event.getImageContent());
         return dto;
     }
 }

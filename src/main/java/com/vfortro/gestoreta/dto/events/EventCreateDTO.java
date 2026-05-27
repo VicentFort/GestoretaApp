@@ -30,4 +30,5 @@ public class EventCreateDTO {
     private LocalDate endDate;
     private Boolean active;
     private Boolean checkNeeds;
+    private byte[] eventImage;
 }

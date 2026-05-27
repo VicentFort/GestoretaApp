@@ -21,11 +21,15 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Map;
@@ -246,6 +250,48 @@ public class UserController {
             return new ResponseEntity<>(accEx.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
+
+    @PostMapping(value = "/changePfp", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> changePfp(@RequestParam MultipartFile pfpImage, Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            userService.changePfp(pfpImage, email);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping(value = "/downloadPfp", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<?> donwloadPfp(Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            ByteArrayResource image = userService.downloadPfp(email);
+            return ResponseEntity.ok(image);
+        } catch (NullPointerException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/readNotification")
+    public ResponseEntity<?> readNotification(@RequestBody Long notificationId, Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            userService.readNotification(notificationId, email);
+            return ResponseEntity.ok().build();
+        } catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch(IllegalStateException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+        } catch(AccessDeniedException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
 
 
 }

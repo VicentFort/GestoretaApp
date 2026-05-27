@@ -3,6 +3,8 @@ package com.vfortro.gestoreta.dto.users.info;
 import com.vfortro.gestoreta.dto.attendants.AttPrefInfoDTO;
 import com.vfortro.gestoreta.dto.events.EventInfoUserDTO;
 import com.vfortro.gestoreta.dto.fallas.info.FallaUserInfoDTO;
+import com.vfortro.gestoreta.dto.payments.info.CouponStockInfoDTO;
+import com.vfortro.gestoreta.dto.users.notifications.NotificationInfoDTO;
 import com.vfortro.gestoreta.model.enums.AccessType;
 import com.vfortro.gestoreta.model.enums.FoodNeedType;
 import lombok.AllArgsConstructor;
@@ -33,6 +35,8 @@ public class UserInfoDTO {
     private List<EventInfoUserDTO> attEvents;
     private List<FoodNeedType> foodNeeds;
     private List<AttPrefInfoDTO> eventTagPrefs;
+    private List<NotificationInfoDTO> notifications;
+    private List<CouponStockInfoDTO> couponStocks;
 
 
 }

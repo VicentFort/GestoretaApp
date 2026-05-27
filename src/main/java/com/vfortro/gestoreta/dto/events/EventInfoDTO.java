@@ -35,5 +35,7 @@ public class EventInfoDTO {
     private LocalDateTime createdAt;
     private LocalDate endDate;
     private Boolean checkNeeds;
+    private Double totalRevenue;
+    private byte[] image;
 
 }

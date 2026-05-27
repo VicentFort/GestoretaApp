@@ -1,6 +1,7 @@
 package com.vfortro.gestoreta.model.payments;
 
 import com.vfortro.gestoreta.model.Falla;
+import com.vfortro.gestoreta.model.UserNotification;
 import com.vfortro.gestoreta.model.inventory.InventoryItem;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -49,4 +50,6 @@ public class Coupon implements Serializable {
     @OneToMany(mappedBy = "couponSold")
     private Set<Payment> soldPayments = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "coupon")
+    private Set<UserNotification> notifications = new LinkedHashSet<>();
 }

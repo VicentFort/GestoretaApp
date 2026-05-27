@@ -1,5 +1,6 @@
 package com.vfortro.gestoreta.dto.events;
 
+import com.vfortro.gestoreta.dto.assists.AssistDTO;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,4 +25,6 @@ public class EventInfoUserDTO {
     private LocalTime endHour;
     private String createdBy;
     private Boolean active;
+    private AssistDTO assist;
+    private byte[] image;
 }
