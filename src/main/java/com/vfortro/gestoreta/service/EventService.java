@@ -72,7 +72,7 @@ public class EventService {
 
     @Transactional
     public EventCreateDTO createEvent(@Valid EventCreateDTO event, String email) throws EntityNotFoundException, AccessDeniedException, IllegalAccessException {
-        if(Objects.isNull(readEventTag(event.getTagId()))) {
+        if(!eventTagRepository.existsById(event.getTagId())) {
             throw new EntityNotFoundException("La etiqueta a la que se está asociando el evento: " + event.getTitle() + " no existe");
         }
         if(!Objects.equals(event.getFallaId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso para esta falla.");
@@ -131,6 +131,7 @@ public class EventService {
             updatedEvent.setEventTag(eventTagRepository.findTagById(newEvent.getTagId()));
         }
         if(newEvent.getImage() != null) {
+            System.out.println("SAME IMAGE?: "+ Arrays.equals(newEvent.getImage(), updatedEvent.getImageContent()));
             updatedEvent.setImageContent(newEvent.getImage());
         }
         if(newEvent.getPrice() != null) updatedEvent.setPrice(newEvent.getPrice());
@@ -239,13 +240,6 @@ public class EventService {
         if(assist.getPaid()) throw new IllegalStateException("L'usuari ja havia pagat l'esdeveniment");
         assist.setPaid(true);
         assistRepository.saveAndFlush(assist);
-    }
-
-    @Transactional(readOnly = true)
-    public EventTagAdminInfoDTO readEventTag(Long tagId) {
-        EventTag tag = eventTagRepository.findById(tagId).orElse(null);
-        if(tag == null) return null;
-        return eventTagConversor.fromEntity2Dto(tag);
     }
 
 

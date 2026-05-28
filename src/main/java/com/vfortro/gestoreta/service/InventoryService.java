@@ -145,52 +145,6 @@ public class InventoryService {
         return infoDto;
     }
 
-    @Transactional
-    public void processMovement(InventoryMovementRequestDTO dto, User manager) throws AccessDeniedException, InsufficientStockException {
-        Stock stock = stockRepository.findByStoreStoreIdAndInventoryItemItemId(dto.getStoreId(), dto.getItemId())
-                .orElseGet(() -> {
-                    if (dto.getType() == MovementType.INCOMING) {
-                        Stock newStock = new Stock();
-                        newStock.setStore(storeRepository.findById(dto.getStoreId()).orElseThrow(() -> new EntityNotFoundException("No existeix el magaztem")));
-                        newStock.setInventoryItem(inventoryItemRepository.findById(dto.getItemId()).orElseThrow(() -> new EntityNotFoundException("No existeix el magaztem")));
-                        newStock.setAmount(0L);
-                        return newStock;
-                    }
-                    throw new InsufficientStockException("No hi ha registre de stock per a este item!");
-                });
-        if(dto.getType() == MovementType.OUTGOING|| dto.getType() == MovementType.LOAN) {
-            if(stock.getAmount() < dto.getAmount()) {
-                throw new InsufficientStockException("Stock insuficient!");
-            }
-            stock.setAmount(stock.getAmount() - dto.getAmount());
-        } else {
-            stock.setAmount(stock.getAmount() + dto.getAmount());
-        }
-        Loan newLoan = null;
-        if(dto.getType()==MovementType.LOAN) {
-            newLoan = registerLoan(dto, stock.getInventoryItem());
-        }
-
-        InventoryMovement mov = new InventoryMovement();
-        mov.setItem(stock.getInventoryItem());
-        mov.setStore(stock.getStore());
-        mov.setAmount(dto.getAmount());
-        mov.setType(dto.getType());
-        mov.setMessage(dto.getMessage());
-        mov.setCreatedBy(manager.getName()+ " " + manager.getSurname());
-        mov.setLoan(newLoan);
-        mov.setFalla(stock.getStore().getFalla());
-        mov.setDate(LocalDateTime.now());
-
-        InventoryMovement saved = movementRepository.saveAndFlush(mov);
-        if(stock.getAmount()>0L) {
-            stockRepository.saveAndFlush(stock);
-        } else {
-            stockRepository.deleteById(stock.getStockId());
-        }
-
-        InventoryMovementInfoDTO infoDto = movementConversor.fromEntity2Dto(saved);
-    }
 
     @Transactional
     public Loan registerLoan(InventoryMovementRequestDTO dto, InventoryItem item) throws EntityNotFoundException {
@@ -285,14 +239,6 @@ public class InventoryService {
     }
 
     @Transactional
-    public void deleteItem(Long itemId, String email) throws AccessDeniedException, EntityNotFoundException, IllegalAccessException {
-        if(!userService.checkManagerAccess(email)) {throw new AccessDeniedException("Sense permís!");}
-        if(!inventoryItemRepository.existsById(itemId)) {throw new EntityNotFoundException("No existeix el item");}
-        inventoryItemRepository.deleteById(itemId);
-    }
-
-
-    @Transactional
     public void updateItem(InventoryItemUpdateDTO updatedItem, String email) throws AccessDeniedException, EntityNotFoundException, IllegalAccessException {
         if(!userService.checkManagerAccess(email)) { throw new AccessDeniedException("Sense permís!");}
         InventoryItem itemToUpdate = inventoryItemRepository.findById(updatedItem.getItemId()).orElseThrow(() -> new EntityNotFoundException("No existeix el item"));
@@ -327,4 +273,6 @@ public class InventoryService {
 
         contactRepository.saveAndFlush(toUpdate);
     }
+
+
 }

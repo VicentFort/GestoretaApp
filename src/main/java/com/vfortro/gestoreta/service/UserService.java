@@ -96,8 +96,8 @@ public class UserService {
 
     @Transactional
     public UserInfoDTO updateUser(UserUpdateDTO newUser, String email) throws AccessDeniedException, NullPointerException {
-        if(!userRepository.existsByEmail(email)) throw new NullPointerException("El usuario no existe.");
-        if(!Objects.equals(email, userRepository.findUserByEmail(email).getEmail())) throw new AccessDeniedException("Sin permiso.");
+        if(!userRepository.existsByEmail(email)) throw new NullPointerException("El usuari no existeix.");
+        if(!Objects.equals(email, userRepository.findUserByEmail(email).getEmail())) throw new AccessDeniedException("Sesne permís.");
         User updatedUser = userRepository.findUserByEmail(email);
         if(newUser.getName() != null) updatedUser.setName(newUser.getName());
         if(newUser.getSurname() != null) updatedUser.setSurname(newUser.getSurname());

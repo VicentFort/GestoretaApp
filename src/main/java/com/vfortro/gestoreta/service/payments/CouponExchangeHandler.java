@@ -43,7 +43,7 @@ public class CouponExchangeHandler implements PaymentHandler {
     }
 
     @Override
-    public List<Payment> processPayment(GenericPaymentRequestDTO dto, User manager) throws AccessDeniedException, InsufficientStockException {
+    public List<Payment> processPayment(GenericPaymentRequestDTO dto, User manager) throws AccessDeniedException, InsufficientStockException, IllegalAccessException {
         CouponExchangeRequestDTO request = (CouponExchangeRequestDTO) dto;
         List<Payment> logs = new ArrayList<>();
         //1.1 Obtenemos el usuario que ha hecho la compra.
@@ -76,7 +76,7 @@ public class CouponExchangeHandler implements PaymentHandler {
             movementDto.setAmount(couponDTO.getAmount());
             movementDto.setStoreId(request.getStoreId());
             movementDto.setType(MovementType.OUTGOING);
-            inventoryService.processMovement(movementDto, manager);
+            inventoryService.processMovement(movementDto, manager.getEmail());
 
             //2.3 Generar Payment.
             Payment log = new Payment();

@@ -1,75 +1,79 @@
 package com.vfortro.gestoreta.controller;
 
-import com.vfortro.gestoreta.dto.ApiMessageResponse;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vfortro.gestoreta.dto.users.LoginRequestDTO;
 import com.vfortro.gestoreta.service.auth.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.context.bean.override.mockito.MockitoBean; // <-- Nuevo import en Spring Boot moderno
+import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(AuthController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class AuthControllerTest {
 
-    @Mock
-    private AuthenticationManager authenticationManager;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @Mock
-    private JwtService jwtService;
+    private ObjectMapper objectMapper;
 
-    @Mock
-    private UserDetailsService userDetailsService;
+    // Actualizado al nuevo estándar para evitar problemas de detección y deprecación
+    @MockitoBean private AuthenticationManager authenticationManager;
+    @MockitoBean private JwtService jwtService;
+    @MockitoBean private UserDetailsService userDetailsService;
 
-    @InjectMocks
-    private AuthController authController;
-
-    private LoginRequestDTO request;
+    private LoginRequestDTO loginRequest;
+    private UserDetails mockUserDetails;
 
     @BeforeEach
     void setUp() {
-        request = new LoginRequestDTO("vicent@email.com", "1234");
+        objectMapper = new ObjectMapper();
+        loginRequest = new LoginRequestDTO("fallero@falla.com", "password123");
+        mockUserDetails = mock(UserDetails.class);
     }
 
     @Test
-    void login_ShouldReturnToken_WhenCredentialsAreValid() {
-        UserDetails user = User
-                .withUsername("vicent@email.com")
-                .password("1234")
-                .roles("USER")
-                .build();
+    void login_Success_ShouldReturnJwtToken() throws Exception {
+        String expectedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mockToken...";
 
-        when(userDetailsService.loadUserByUsername(anyString())).thenReturn(user);
-        when(jwtService.generateToken(user)).thenReturn("jwt-token");
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password()));
 
-        ResponseEntity<?> response = authController.login(request);
+        when(userDetailsService.loadUserByUsername(loginRequest.email())).thenReturn(mockUserDetails);
+        when(jwtService.generateToken(mockUserDetails)).thenReturn(expectedToken);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("jwt-token", response.getBody());
-
-        verify(authenticationManager, times(1)).authenticate(any());
-        verify(jwtService, times(1)).generateToken(user);
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(expectedToken));
     }
 
     @Test
-    void login_ShouldReturnInternalServerError_WhenAuthenticationFails() {
-        when(authenticationManager.authenticate(any()))
-                .thenThrow(new RuntimeException("Invalid credentials"));
+    void login_Failure_ShouldReturnInternalServerErrorWithMessage() throws Exception {
+        String exceptionMessage = "Credencials incorrectes";
 
-        ResponseEntity<?> response = authController.login(request);
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow(new BadCredentialsException(exceptionMessage));
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertInstanceOf(ApiMessageResponse.class, response.getBody());
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string(exceptionMessage));
     }
 }
