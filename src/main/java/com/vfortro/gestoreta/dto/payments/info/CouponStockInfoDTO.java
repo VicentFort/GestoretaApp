@@ -14,5 +14,6 @@ public class CouponStockInfoDTO {
     private Long id;
     private Long amount;
     private Long couponId;
+    private String qrCode;
     private String coupon;
 }

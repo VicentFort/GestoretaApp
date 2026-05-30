@@ -23,6 +23,7 @@ import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class CouponExchangeHandler implements PaymentHandler {
@@ -45,53 +46,51 @@ public class CouponExchangeHandler implements PaymentHandler {
     @Override
     public List<Payment> processPayment(GenericPaymentRequestDTO dto, User manager) throws AccessDeniedException, InsufficientStockException, IllegalAccessException {
         CouponExchangeRequestDTO request = (CouponExchangeRequestDTO) dto;
-        List<Payment> logs = new ArrayList<>();
         //1.1 Obtenemos el usuario que ha hecho la compra.
-        User user = userService.readUserAsEntity(request.getUserEmail());
 
-        for(CouponRequestDTO couponDTO: request.getCoupons()) {
-            //2.0 Encontrar el cupon en la base de datos y crear un detalle de compra de se cupon.
-            Coupon coupon = couponRepository.findById(couponDTO.getCouponId()).orElseThrow(() -> new EntityNotFoundException("No existeix el ticket amb id: " + couponDTO.getCouponId()));
+        CouponStock stock = stockRepository.findById(request.getStockId()).orElseThrow(() -> new EntityNotFoundException("No existeix el stock"));
 
-            String logMessage = "";
-            if(request.getMessage() == null || request.getMessage().isBlank()) {
-                logMessage = couponDTO.getAmount() + " tickets bescanviats de: " + coupon.getName() + " amb id: " + coupon.getCouponId() + ". Gestionat per: " + manager.getName() + " " + manager.getSurname();
-            } else {
-                logMessage = request.getMessage();
-            }
+        User user = stock.getUser();
+        //2.0 Encontrar el cupon en la base de datos y crear un detalle de compra de se cupon.
+        Coupon coupon = couponRepository.findById(request.getCoupon().getCouponId()).orElseThrow(() -> new EntityNotFoundException("No existeix el ticket amb id: " + request.getCoupon().getCouponId()));
 
-            //2.1 Gestión del stock de cupones del usuario
-            CouponStock stock = stockRepository.findByCouponCouponIdAndUserId(coupon.getCouponId(), user.getId()).orElseThrow(() -> new InsufficientStockException("El usuari no te stock de tiquets"));
-            if(stock.getAmount() - couponDTO.getAmount() < 0) {
-                throw new InsufficientStockException("L'usuari no té prou tickets per a fer el bescanvi");
-            }
-            stock.setAmount(stock.getAmount() - couponDTO.getAmount());
-            stockRepository.save(stock);
+        if(!Objects.equals(stock.getCoupon().getCouponId(), coupon.getCouponId())) throw new IllegalAccessException("El stock no es del tiquet: " + coupon.getName());
 
-
-            //2.2 Generar el movimiento de inventario.
-            InventoryMovementRequestDTO movementDto = new InventoryMovementRequestDTO();
-            movementDto.setMessage(logMessage);
-            movementDto.setItemId(coupon.getItem().getItemId());
-            movementDto.setAmount(couponDTO.getAmount());
-            movementDto.setStoreId(request.getStoreId());
-            movementDto.setType(MovementType.OUTGOING);
-            inventoryService.processMovement(movementDto, manager.getEmail());
-
-            //2.3 Generar Payment.
-            Payment log = new Payment();
-            log.setManager(manager);
-            log.setFalla(manager.getFalla());
-            log.setUser(user);
-            log.setCouponExchanged(coupon);
-            //NO HAY COMPRA
-            log.setItem(coupon.getItem());
-            log.setPrice(coupon.getPrice());
-            log.setDate(LocalDateTime.now());
-            log.setType(PaymentType.COUPON_EXCHANGED);
-            log.setMessage(logMessage);
-            logs.add(log);
+        String logMessage = "";
+        if(request.getMessage() == null || request.getMessage().isBlank()) {
+            logMessage = request.getCoupon().getAmount() + " tickets bescanviats de: " + coupon.getName() + " amb id: " + coupon.getCouponId() + ". Gestionat per: " + manager.getName() + " " + manager.getSurname();
+        } else {
+            logMessage = request.getMessage();
         }
-        return logs;
+
+        //2.1 Gestión del stock de cupones del usuario
+        if(stock.getAmount() - request.getCoupon().getAmount() < 0) {
+            throw new InsufficientStockException("L'usuari no té prou tickets per a fer el bescanvi");
+        }
+        stock.setAmount(stock.getAmount() - request.getCoupon().getAmount());
+        stockRepository.save(stock);
+
+
+        //2.2 Generar el movimiento de inventario.
+        InventoryMovementRequestDTO movementDto = new InventoryMovementRequestDTO();
+        movementDto.setMessage(logMessage);
+        movementDto.setItemId(coupon.getItem().getItemId());
+        movementDto.setAmount(request.getCoupon().getAmount());
+        movementDto.setStoreId(request.getStoreId());
+        movementDto.setType(MovementType.OUTGOING);
+        inventoryService.processMovement(movementDto, manager.getEmail());
+
+        //2.3 Generar Payment.
+        Payment log = new Payment();
+        log.setManager(manager);
+        log.setFalla(manager.getFalla());
+        log.setUser(user);
+        log.setCouponExchanged(coupon);
+        log.setItem(coupon.getItem());
+        log.setPrice(coupon.getPrice());
+        log.setDate(LocalDateTime.now());
+        log.setType(PaymentType.COUPON_EXCHANGED);
+        log.setMessage(logMessage);
+        return List.of(log);
     }
 }

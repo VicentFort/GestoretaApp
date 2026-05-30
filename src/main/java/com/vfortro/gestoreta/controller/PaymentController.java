@@ -121,4 +121,23 @@ public class PaymentController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
     }
+
+    @GetMapping("/generateCouponQR")
+    public ResponseEntity<?> generateCouponQR(@RequestParam Long couponId, @RequestParam Long stockId, @RequestParam Long amount, Authentication auth) {
+        String email = auth.getName();
+        try {
+            String result = paymentService.generateStockQR(couponId, stockId, amount, email);
+            return ResponseEntity.ok(result);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.UNAUTHORIZED);
+        } catch(IllegalAccessException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+        } catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 }

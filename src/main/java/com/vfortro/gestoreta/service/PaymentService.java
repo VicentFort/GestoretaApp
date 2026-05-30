@@ -5,11 +5,13 @@ import com.vfortro.gestoreta.conversor.payments.CouponConversor;
 import com.vfortro.gestoreta.dto.payments.GenericPaymentRequestDTO;
 import com.vfortro.gestoreta.dto.payments.coupons.CouponCreateDTO;
 import com.vfortro.gestoreta.dto.payments.coupons.CouponEditDTO;
+import com.vfortro.gestoreta.dto.payments.info.CouponStockInfoDTO;
 import com.vfortro.gestoreta.exceptions.InsufficientStockException;
 import com.vfortro.gestoreta.model.User;
 import com.vfortro.gestoreta.model.enums.ItemCategory;
 import com.vfortro.gestoreta.model.enums.PaymentType;
 import com.vfortro.gestoreta.model.inventory.InventoryItem;
+import com.vfortro.gestoreta.model.inventory.Stock;
 import com.vfortro.gestoreta.model.payments.*;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import com.vfortro.gestoreta.repository.UserRepository;
@@ -18,6 +20,7 @@ import com.vfortro.gestoreta.repository.payments.*;
 import com.vfortro.gestoreta.service.payments.PaymentHandler;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,9 +45,13 @@ public class PaymentService {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private QrCodeService qrCodeService;
 
     @Autowired
     private CouponConversor couponConversor;
+
+
 
 
     private final List<PaymentHandler> paymentHandlers;
@@ -108,5 +115,42 @@ public class PaymentService {
     }
 
 
+    public void getCouponStockOfUser(Long userId, Long stockId, String email) throws IllegalAccessException, AccessDeniedException, EntityNotFoundException {
+        if(!userService.checkManagerAccess(email)) throw new AccessDeniedException("Sense permís");
 
+        CouponStock stock = stockRepository.findById(stockId).orElseThrow(() -> new EntityNotFoundException("No existeix el stock amb id: " + stockId));
+
+        if(!Objects.equals(stock.getUser().getId(), userId)) throw new IllegalAccessException("El stock no es d'aquest usuari");
+
+        CouponStockInfoDTO dto = couponConversor.fromEntity2Dto(stock);
+
+    }
+
+    public String generateStockQR(Long couponId, Long stockId, Long amount, String email) throws Exception, EntityNotFoundException, IllegalAccessException,AccessDeniedException {
+        User user = userService.readUserAsEntity(email);
+        CouponStock stock = stockRepository.findById(stockId).orElseThrow(() -> new EntityNotFoundException("No existeix el stock"));
+        if(!Objects.equals(stock.getCoupon().getCouponId(), couponId)) throw new IllegalAccessException("El stock no es del tiquet indicat");
+        if(!Objects.equals(stock.getUser().getId(), user.getId())) throw new AccessDeniedException("No es pot accedir als tiquets d'aquest usuari, no es el teu");
+
+
+        try {
+            // 1. Crear la cadena de texto con el formato que leerá el Dispositivo B
+            // Ejemplo: app://exchange?couponId=5&amount=1&stockId=12&storeId=99
+            String qrContent = String.format(
+                    "app://exchange?couponId=%d&stockId=%d&amount=%d",
+                    stock.getCoupon().getCouponId(),
+                    stock.getStockId(),
+                    amount // Inyectamos la cantidad seleccionada por el usuario
+            );
+            // 2. Generar el QR convertido a String Base64 (Tamaño ideal para móvil: 350x350)
+            String qrBase64 = qrCodeService.generateQrCodeBase64(qrContent, 350, 350);
+
+            return qrBase64;
+            // 3. Construir la respuesta con el DTO
+        } catch (Exception e) {
+            System.out.println("ERROR AL GENERAR EL QR DEL TIQUET");
+            throw e;
+        }
+
+    }
 }

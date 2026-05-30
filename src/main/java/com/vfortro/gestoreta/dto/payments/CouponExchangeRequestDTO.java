@@ -3,8 +3,6 @@ package com.vfortro.gestoreta.dto.payments;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,9 +11,9 @@ import java.util.List;
 
 public class CouponExchangeRequestDTO extends GenericPaymentRequestDTO{
     @NotNull
-    private List<CouponRequestDTO> coupons;
+    private CouponRequestDTO coupon;
     @NotNull
-    private String userEmail;
+    private Long stockId;
     @NotNull
     private Long storeId;
 

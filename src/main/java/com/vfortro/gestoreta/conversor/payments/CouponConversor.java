@@ -9,6 +9,7 @@ import com.vfortro.gestoreta.model.payments.Coupon;
 import com.vfortro.gestoreta.model.payments.CouponStock;
 import com.vfortro.gestoreta.repository.FallaRepository;
 import com.vfortro.gestoreta.repository.inventory.InventoryItemRepository;
+import com.vfortro.gestoreta.service.QrCodeService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,7 @@ public class CouponConversor{
 
     @Autowired
     private InventoryItemRepository itemRepository;
+
 
     public Coupon fromDto2Entity(CouponCreateDTO dto) throws EntityNotFoundException {
         Coupon coupon = new Coupon();
@@ -56,6 +58,8 @@ public class CouponConversor{
         dto.setAmount(stock.getAmount());
         dto.setCouponId(stock.getCoupon().getCouponId());
         dto.setCoupon(stock.getCoupon().getName());
+
+
         return dto;
     }
 }
