@@ -75,6 +75,9 @@ public class InventoryService {
     @Autowired
     private LoanNotificationRepository notificationRepository;
 
+    @Autowired
+    private EmailService emailService;
+
 
 
     @Transactional
@@ -158,6 +161,7 @@ public class InventoryService {
         LoanContact contact = contactRepository.findById(dto.getContactId()).orElseThrow(() -> new EntityNotFoundException("No existeix el contacte"));
         loan.setContact(contact);
         Loan saved = loanRepository.save(loan);
+        emailService.sendLoanCreationMail(saved.getContact().getEmail(),"Creació del préstec amb id: " + saved.getLoanId(), saved);
         registerLoanNotification(saved, NotificationType.CONFIRMATION);
         return saved;
 
@@ -213,6 +217,8 @@ public class InventoryService {
         loan.setRealReturnDate(LocalDateTime.now());
         loan.setState(LoanState.RETURNED);
         Loan saved = loanRepository.save(loan);
+
+        emailService.sendLoanReturnedMail(saved.getContact().getEmail(), "Retorn del préstec amb id: " + saved.getLoanId(), saved);
 
         return loanConversor.fromEntity2Dto(saved);
     }

@@ -17,6 +17,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
 
     @Query(value = "SELECT l FROM Loan l " +
             "WHERE l.state = com.vfortro.gestoreta.model.enums.LoanState.DELAYED " +
-            "AND NOT EXISTS ( SELECT n FROM l.notifications n WHERE n.type = com.vfortro.gestoreta.model.enums.NotificationType.DELAY)")
+            "AND NOT EXISTS ( SELECT n FROM l.notifications n WHERE n.type = com.vfortro.gestoreta.model.enums.NotificationType.REMINDER)")
     List<Loan> findPendingLoansWithoutDelayNotifications();
 }

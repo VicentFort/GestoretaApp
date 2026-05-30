@@ -5,6 +5,7 @@ import com.vfortro.gestoreta.model.inventory.Loan;
 import com.vfortro.gestoreta.model.inventory.LoanNotification;
 import com.vfortro.gestoreta.repository.inventory.LoanNotificationRepository;
 import com.vfortro.gestoreta.repository.inventory.LoanRepository;
+import com.vfortro.gestoreta.service.EmailService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,12 +22,15 @@ public class CheckLoanDate {
     @Autowired
     private LoanNotificationRepository notificationRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     @Scheduled(fixedRate = 60000)
     @Transactional
     public void checkLoanDate() {
         loanRepository.closeEndedLoans();
-        System.out.println("Prèstecs actualitzats");
         List<Loan> pendingLoans =  loanRepository.findPendingLoansWithoutDelayNotifications();
+        System.out.println(pendingLoans.size());
         for(Loan loan : pendingLoans) {
             LoanNotification loanNotification = new LoanNotification();
             loanNotification.setLoan(loan);
@@ -34,8 +38,16 @@ public class CheckLoanDate {
             loanNotification.setDate(LocalDateTime.now());
             loanNotification.setContact(loan.getContact());
             loanNotification.setSuccessful(true);
+            String emailDestino = loan.getContact().getEmail();
+            Long idPrestamo = loan.getLoanId();
+            String nombreFalla = loan.getFalla().getName();
 
-            notificationRepository.saveAndFlush(loanNotification);
+            emailService.sendLoanReminderMail(
+                    emailDestino,
+                    "Recordatori de préstec pendent",
+                    idPrestamo,
+                    nombreFalla
+            );            notificationRepository.saveAndFlush(loanNotification);
         }
     }
 }

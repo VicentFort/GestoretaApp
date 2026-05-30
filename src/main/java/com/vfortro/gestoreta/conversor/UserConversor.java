@@ -112,9 +112,17 @@ public class UserConversor {
             att.setTagId(pref.getEventTag().getId());
             tagNamePrefs.add(att);
         }
-        for(Attendant att : user.getAttendedEvents()) {
-            attEvents.add(eventConversor.fromEntity2InfoUserDto(att.getEvent()));
-        }
+        user.getAttendedEvents().forEach(att -> {
+            Event event = att.getEvent();
+            EventInfoUserDTO eDto = eventConversor.fromEntity2InfoUserDto(event);
+            event.getAssists().forEach(assist -> {
+                if(Objects.equals(assist.getUser().getId(), user.getId())) {
+                    eDto.setAssist(assistConversor.formEntity2Dto(assist));
+                }
+            });
+            attEvents.add(eDto);
+        });
+
 
         user.getNotifications().forEach( notification -> {
             nots.add(notificationCovnersor.fromEntity2Dto(notification));

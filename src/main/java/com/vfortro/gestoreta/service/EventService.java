@@ -216,7 +216,7 @@ public class EventService {
         dto.setUserId(user.getId());
         dto.setEventId(eventId);
         if(event.getPrice() > 0) {
-            dto.setPaid(true);
+            dto.setPaid(false);
         }
 
         Assist saved = assistRepository.saveAndFlush(assistConversor.fromDto2Entity(dto));

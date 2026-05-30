@@ -181,12 +181,12 @@ public class EventController {
                     @ExampleObject(name = "Asistencia inexistente.", value = "La asistencia del usuario con id: 1 al evento con id: 1 no existe.")
             })})
     })
-    @DeleteMapping("/leave/{eventId}")
-    public ResponseEntity<?> leaveEvent(@PathVariable @Valid Long eventId,
+    @DeleteMapping("/leave/{assistId}")
+    public ResponseEntity<?> leaveEvent(@PathVariable @Valid Long assistId,
                                         Authentication authentication) {
         String email = authentication.getName();
         try {
-            eventService.deleteAssist(eventId, email);
+            eventService.deleteAssist(assistId, email);
             return new ResponseEntity<>("OK!", HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
