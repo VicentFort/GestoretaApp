@@ -62,14 +62,12 @@ public class FallaService {
 
     @Transactional
     public void updateFalla(FallaUpdateDTO newFalla, String email) throws AccessDeniedException, EntityNotFoundException, IllegalAccessException {
-        if(!userService.checkManagerAccess(email)) throw new AccessDeniedException("Sin permiso.");
-        UserCreateDTO user = userService.readUser(email);
-        if(user.getFallaId() == null) throw new NullPointerException("El usuario no tiene falla asignada.");
-        Falla updatedFalla = fallaRepository.findFallaById(user.getFallaId());
-        if(!Objects.equals(updatedFalla.getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso a esta falla.");
+        if(!userService.checkManagerAccess(email)) throw new AccessDeniedException("Sense permís.");
+        Falla updatedFalla = fallaRepository.findById(newFalla.getId()).orElseThrow(() -> new EntityNotFoundException("No existeix la falla amb id: " + newFalla.getId()));
+        if(!Objects.equals(updatedFalla.getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sense permís.");
         if(newFalla.getDescription() != null) updatedFalla.setName(newFalla.getDescription());
+        if(newFalla.getOpenRequests() != null) updatedFalla.setOpenRequests(newFalla.getOpenRequests());
         fallaRepository.saveAndFlush(updatedFalla);
-
     }
 
     @Transactional(readOnly = true)
