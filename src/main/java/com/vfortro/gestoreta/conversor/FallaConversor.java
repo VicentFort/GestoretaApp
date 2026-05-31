@@ -95,6 +95,10 @@ public class FallaConversor {
         List<PaymentInfoDTO> payments = new ArrayList<>();
         List<CouponFallaInfoDTO> coupons = new ArrayList<>();
         FallaAdminInfoDTO dto = new FallaAdminInfoDTO();
+        dto.setOpenRequests(falla.getOpenRequests());
+        if(falla.getDescription() != null) {
+            dto.setDescription(falla.getDescription());
+        }
         dto.setName(falla.getName());
         dto.setFallaId(falla.getId());
         if(falla.getShieldUrl() != null) {

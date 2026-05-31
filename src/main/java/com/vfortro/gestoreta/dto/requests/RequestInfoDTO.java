@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,4 +18,6 @@ public class RequestInfoDTO {
     private String message;
     private Boolean aproved;
     private String reply;
+    private LocalDateTime creationDate;
+    private LocalDateTime resolutionDate;
 }

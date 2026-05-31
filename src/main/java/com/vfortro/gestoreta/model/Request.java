@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -37,6 +38,13 @@ public class Request implements Serializable {
 
     @Column(name = "reply", length = Integer.MAX_VALUE)
     private String reply;
+
+    @NotNull
+    @Column(name = "creation_date")
+    private LocalDateTime creationDate;
+
+    @Column(name = "resolution_date")
+    private LocalDateTime resolutionDate;
 
 
 }

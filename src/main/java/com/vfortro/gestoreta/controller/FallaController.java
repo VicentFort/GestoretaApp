@@ -5,6 +5,7 @@ import com.vfortro.gestoreta.dto.charges.ChargeUpdateDTO;
 import com.vfortro.gestoreta.dto.fallas.info.FallaAdminInfoDTO;
 import com.vfortro.gestoreta.dto.fallas.FallaCreateDTO;
 import com.vfortro.gestoreta.dto.fallas.FallaUpdateDTO;
+import com.vfortro.gestoreta.dto.requests.RequestCreateDTO;
 import com.vfortro.gestoreta.dto.requests.RequestUpdateDTO;
 import com.vfortro.gestoreta.model.enums.AccessType;
 import com.vfortro.gestoreta.service.FallaService;
@@ -38,6 +39,7 @@ public class FallaController {
 
     @Autowired
     private FallaService fallaService;
+
 
 
 
@@ -195,4 +197,16 @@ public class FallaController {
         }
     }
 
+    @PostMapping("/createRequest")
+    public ResponseEntity<?> joinFalla(@RequestBody RequestCreateDTO request, Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            fallaService.createRequest(request);
+            return ResponseEntity.ok().build();
+        } catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch(Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

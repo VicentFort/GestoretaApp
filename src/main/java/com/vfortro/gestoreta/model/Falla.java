@@ -40,6 +40,13 @@ public class Falla implements Serializable {
     @Column(name = "shield_url", length = Integer.MAX_VALUE)
     private byte[] shieldUrl;
 
+    @NotNull
+    @Column(name="open_requests")
+    private Boolean openRequests;
+
+    @Column(name="description")
+    private String description;
+
     @OneToMany(mappedBy = "falla")
     private Set<EventTag> eventTags = new LinkedHashSet<>();
 

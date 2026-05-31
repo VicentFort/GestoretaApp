@@ -27,6 +27,8 @@ public class FallaAdminInfoDTO {
     private Long fallaId;
     private String name;
     private String shield;
+    private Boolean openRequests;
+    private String description;
     private List<EventTagAdminInfoDTO> tags;
     private List<UserInfoFallaDTO> users;
     private List<EventInfoDTO> events;
@@ -38,5 +40,6 @@ public class FallaAdminInfoDTO {
     private List<InventoryMovementInfoDTO> inventoryMovements;
     private List<PaymentInfoDTO> payments;
     private List<CouponFallaInfoDTO> coupons;
+
 
 }

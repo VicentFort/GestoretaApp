@@ -17,4 +17,6 @@ public class FallaAdInfoDTO {
     private Integer memberCount;
     private String shield;
     private LocalDate creationDate;
+    private Boolean openRequests;
+    private String description;
 }

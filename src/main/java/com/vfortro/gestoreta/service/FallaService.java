@@ -5,6 +5,7 @@ import com.vfortro.gestoreta.dto.fallas.info.FallaAdminInfoDTO;
 import com.vfortro.gestoreta.dto.fallas.FallaCreateDTO;
 import com.vfortro.gestoreta.dto.fallas.info.FallaUserInfoDTO;
 import com.vfortro.gestoreta.dto.fallas.FallaUpdateDTO;
+import com.vfortro.gestoreta.dto.requests.RequestCreateDTO;
 import com.vfortro.gestoreta.dto.requests.RequestUpdateDTO;
 import com.vfortro.gestoreta.dto.users.UserCreateDTO;
 import com.vfortro.gestoreta.model.*;
@@ -44,6 +45,8 @@ public class FallaService {
     //CONVERSORS
     @Autowired
     private FallaConversor fallaConversor;
+    @Autowired
+    private RequestConversor requestConversor;
 
     //SERVICES
     @Autowired
@@ -195,6 +198,7 @@ public class FallaService {
         } else {
             req.setAproved(false);
         }
+        req.setResolutionDate(LocalDateTime.now());
         requestRepository.save(req);
     }
     @Transactional
@@ -214,5 +218,20 @@ public class FallaService {
         charge.setName("Càrrec de la falla: " + falla.getName());
         chargeRepository.save(charge);
 
+    }
+
+    @Transactional
+    public void createRequest(RequestCreateDTO request) throws EntityNotFoundException {
+        if(!fallaRepository.existsById(request.getIdFalla())) {
+            throw new EntityNotFoundException("La falla no existeix");
+        }
+        User user = userService.readUserAsEntity(request.getIdUser());
+
+        if(user.getFalla() != null) throw new IllegalStateException("L'usuari ja te falla.");
+        if(request.getMessage().isBlank()) throw new IllegalStateException("El missatge está en blanc");
+
+        Request toSave = requestConversor.fromDto2Entity(request);
+        toSave.setCreationDate(LocalDateTime.now());
+        requestRepository.save(toSave);
     }
 }

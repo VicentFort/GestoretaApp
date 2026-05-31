@@ -39,6 +39,10 @@ public class RequestConversor {
         dto.setAproved(req.getAproved());
         dto.setUserId(req.getUser().getId());
         dto.setFallaId(req.getFalla().getId());
+        dto.setCreationDate(req.getCreationDate());
+        if(req.getResolutionDate() != null) {
+            dto.setResolutionDate(req.getResolutionDate());
+        }
         return dto;
     }
 

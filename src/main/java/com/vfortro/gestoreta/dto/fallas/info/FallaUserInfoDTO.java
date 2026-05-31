@@ -19,6 +19,8 @@ public class FallaUserInfoDTO {
     private String name;
     private String shield;
     private LocalDate creationDate;
+    private Boolean openRequests;
+    private String description;
     private List<EventInfoUserDTO> events;
     private List<EventTagAdminInfoDTO> tags;
 
