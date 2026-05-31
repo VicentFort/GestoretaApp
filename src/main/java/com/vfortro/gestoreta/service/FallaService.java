@@ -65,7 +65,7 @@ public class FallaService {
         if(!userService.checkManagerAccess(email)) throw new AccessDeniedException("Sense permís.");
         Falla updatedFalla = fallaRepository.findById(newFalla.getId()).orElseThrow(() -> new EntityNotFoundException("No existeix la falla amb id: " + newFalla.getId()));
         if(!Objects.equals(updatedFalla.getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sense permís.");
-        if(newFalla.getDescription() != null) updatedFalla.setName(newFalla.getDescription());
+        if(newFalla.getDescription() != null) updatedFalla.setDescription(newFalla.getDescription());
         if(newFalla.getOpenRequests() != null) updatedFalla.setOpenRequests(newFalla.getOpenRequests());
         fallaRepository.saveAndFlush(updatedFalla);
     }
