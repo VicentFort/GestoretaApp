@@ -221,11 +221,12 @@ public class FallaService {
     }
 
     @Transactional
-    public void createRequest(RequestCreateDTO request) throws EntityNotFoundException {
+    public void createRequest(RequestCreateDTO request, String email) throws EntityNotFoundException, IllegalAccessException {
         if(!fallaRepository.existsById(request.getIdFalla())) {
             throw new EntityNotFoundException("La falla no existeix");
         }
         User user = userService.readUserAsEntity(request.getIdUser());
+        if(!Objects.equals(user.getEmail(), email)) throw new IllegalAccessException("Els usuaris no coinicidxen");
 
         if(user.getFalla() != null) throw new IllegalStateException("L'usuari ja te falla.");
         if(request.getMessage().isBlank()) throw new IllegalStateException("El missatge está en blanc");

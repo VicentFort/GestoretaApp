@@ -201,10 +201,12 @@ public class FallaController {
     public ResponseEntity<?> joinFalla(@RequestBody RequestCreateDTO request, Authentication authentication) {
         String email = authentication.getName();
         try {
-            fallaService.createRequest(request);
+            fallaService.createRequest(request,email);
             return ResponseEntity.ok().build();
         } catch(EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch(IllegalAccessException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch(Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

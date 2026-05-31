@@ -178,6 +178,8 @@ public class UserConversor {
         dto.setFallaId(falla.getId());
         dto.setCreationDate(falla.getCreationDate());
         dto.setName(falla.getName());
+        dto.setDescription(falla.getDescription());
+        dto.setOpenRequests(falla.getOpenRequests());
         if(falla.getShieldUrl() != null) {
             String base64Image = Base64.getEncoder().encodeToString(falla.getShieldUrl());
             dto.setShield("data:image/jpeg;base64," + base64Image);
@@ -219,6 +221,8 @@ public class UserConversor {
         dto.setName(falla.getName());
         dto.setCreationDate(falla.getCreationDate());
         dto.setMemberCount(falla.getUsers().size());
+        dto.setDescription(falla.getDescription());
+        dto.setOpenRequests(falla.getOpenRequests());
         if(falla.getShieldUrl() != null) {
             String base64Image = Base64.getEncoder().encodeToString(falla.getShieldUrl());
             dto.setShield("data:image/jpeg;base64," + base64Image);
