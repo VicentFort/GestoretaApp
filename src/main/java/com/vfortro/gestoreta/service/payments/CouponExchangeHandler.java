@@ -47,7 +47,7 @@ public class CouponExchangeHandler implements PaymentHandler {
     public List<Payment> processPayment(GenericPaymentRequestDTO dto, User manager) throws AccessDeniedException, InsufficientStockException, IllegalAccessException {
         CouponExchangeRequestDTO request = (CouponExchangeRequestDTO) dto;
         //1.1 Obtenemos el usuario que ha hecho la compra.
-
+        if(Objects.equals(request.getFallaId(), manager.getFalla().getId())) throw new IllegalAccessException("El tiquet no es de la falla");
         CouponStock stock = stockRepository.findById(request.getStockId()).orElseThrow(() -> new EntityNotFoundException("No existeix el stock"));
 
         User user = stock.getUser();

@@ -12,16 +12,19 @@ import lombok.*;
 @Getter
 @Setter
 public class RequestUpdateDTO {
+    @NotNull
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private Long requestId;
+    @NotNull
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private @NotNull Long idUser;
+    @NotNull
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private @NotNull Long idFalla;
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
-    private @NotNull String message;
+    @NotNull
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private Boolean aproved;
+    @NotNull
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private String reply;
 }

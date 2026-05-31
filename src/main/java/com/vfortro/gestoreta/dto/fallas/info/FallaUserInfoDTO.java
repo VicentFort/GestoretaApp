@@ -17,6 +17,7 @@ import java.util.List;
 public class FallaUserInfoDTO {
     private Long fallaId;
     private String name;
+    private String shield;
     private LocalDate creationDate;
     private List<EventInfoUserDTO> events;
     private List<EventTagAdminInfoDTO> tags;

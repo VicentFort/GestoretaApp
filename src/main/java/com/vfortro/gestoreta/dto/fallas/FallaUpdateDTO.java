@@ -14,6 +14,5 @@ public class FallaUpdateDTO {
     private String name;
     @Schema(example = "2000-01-01", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
     private LocalDate creationDate;
-    @Schema(example = "", requiredMode = Schema.RequiredMode.NOT_REQUIRED, nullable = true)
-    private String shieldUrl;
+
 }

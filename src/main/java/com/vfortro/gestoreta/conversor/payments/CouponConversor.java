@@ -58,8 +58,9 @@ public class CouponConversor{
         dto.setAmount(stock.getAmount());
         dto.setCouponId(stock.getCoupon().getCouponId());
         dto.setCoupon(stock.getCoupon().getName());
-
-
+        dto.setItemId(stock.getCoupon().getItem().getItemId());
+        dto.setFallaId(stock.getCoupon().getFalla().getId());
+        dto.setFalla(stock.getCoupon().getFalla().getName());
         return dto;
     }
 }

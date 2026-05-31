@@ -22,10 +22,13 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.Objects;
 
@@ -36,8 +39,6 @@ public class FallaController {
     @Autowired
     private FallaService fallaService;
 
-    @Autowired
-    private UserService userService;
 
 
     @Tags({
@@ -89,39 +90,7 @@ public class FallaController {
         }
     }
 
-    @Tags({
-            @Tag(name = "Actualización"),
-            @Tag(name = "Solicitudes"),
-            @Tag(name = "Usuarios"),
-            @Tag(name = "Fallas")
-    })
-    @Operation(summary = "Cambia el estado de una solicitud de un usuario")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class))}),
-            @ApiResponse(responseCode = "404", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Solicitud no encontrada", value ="{\"message\":\"La solicitud con id: 1 no existe.\",\"success\":false}")
-            })}),
-            @ApiResponse(responseCode = "403", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ApiMessageResponse.class), examples = {
-                    @ExampleObject(name = "Permisos inecesarios.", value = "{\"message\":\"Sin permiso.\",\"success\":false}"),
-            })})
-    })
-    @PutMapping("/updateRequest")
-    public ResponseEntity<?> updateRequest(@RequestBody @Valid RequestUpdateDTO dto,
-                                           Authentication authentication) {
-        String email = authentication.getName();
-        if(Objects.isNull(userService.readRequest(dto.getRequestId()))) {
-            return new ResponseEntity<>("La sol·licitud no existiex", HttpStatus.NOT_FOUND);
-        }
-        try {
-            userService.updateRequest(dto, email);
-            return new ResponseEntity<>(new ApiMessageResponse("Solicitud con id: "+ dto.getRequestId() +" aceptada",true), HttpStatus.OK);
-        } catch(AccessDeniedException accEx) {
-            return new ResponseEntity<>(accEx.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch(IllegalAccessException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
-        }
 
-    }
 
 
     @Tags({
@@ -193,6 +162,36 @@ public class FallaController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch(IllegalAccessException | IllegalStateException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @PostMapping(value = "/updateShield", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateShield(@RequestParam MultipartFile shieldImage, @RequestParam Long fallaId, Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            fallaService.updateShield(shieldImage, fallaId, email);
+            return ResponseEntity.ok().build();
+        } catch (IOException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (IllegalAccessException | IllegalStateException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/updateRequest")
+    public ResponseEntity<?> updateRequest(@RequestBody RequestUpdateDTO request, Authentication authentication) {
+        String email = authentication.getName();
+        try {
+            fallaService.updateRequest(request, email);
+            return ResponseEntity.ok().build();
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch (IllegalAccessException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+        } catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 

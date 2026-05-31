@@ -137,10 +137,12 @@ public class PaymentService {
             // 1. Crear la cadena de texto con el formato que leerá el Dispositivo B
             // Ejemplo: app://exchange?couponId=5&amount=1&stockId=12&storeId=99
             String qrContent = String.format(
-                    "app://exchange?couponId=%d&stockId=%d&amount=%d",
+                    "app://exchange?couponId=%d&stockId=%d&amount=%d&itemId=%d&fallaId=%d",
                     stock.getCoupon().getCouponId(),
                     stock.getStockId(),
-                    amount // Inyectamos la cantidad seleccionada por el usuario
+                    amount, // Inyectamos la cantidad seleccionada por el usuario
+                    stock.getCoupon().getItem().getItemId(),
+                    stock.getCoupon().getFalla().getId()
             );
             // 2. Generar el QR convertido a String Base64 (Tamaño ideal para móvil: 350x350)
             String qrBase64 = qrCodeService.generateQrCodeBase64(qrContent, 350, 350);

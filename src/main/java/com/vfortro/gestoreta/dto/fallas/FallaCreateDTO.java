@@ -14,5 +14,5 @@ public class FallaCreateDTO {
     private Long fallaId;
     private @NotNull String name;
     private @NotNull LocalDate creationDate;
-    private String shieldUrl;
+    private byte[] shieldUrl;
 }

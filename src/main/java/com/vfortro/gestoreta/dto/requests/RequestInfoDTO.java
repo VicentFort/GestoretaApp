@@ -9,6 +9,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class RequestInfoDTO {
     private Long requestId;
+    private Long fallaId;
+    private Long userId;
     private String username;
     private String fallaName;
     private String message;

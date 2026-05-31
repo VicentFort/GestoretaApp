@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.type.descriptor.jdbc.BinaryJdbcType;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -33,8 +35,10 @@ public class Falla implements Serializable {
     @Column(name = "creation_date", nullable = false)
     private LocalDate creationDate;
 
+    @Lob
+    @JdbcType(BinaryJdbcType.class)
     @Column(name = "shield_url", length = Integer.MAX_VALUE)
-    private String shieldUrl;
+    private byte[] shieldUrl;
 
     @OneToMany(mappedBy = "falla")
     private Set<EventTag> eventTags = new LinkedHashSet<>();

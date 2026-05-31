@@ -9,6 +9,7 @@ import com.vfortro.gestoreta.conversor.payments.PaymentConversor;
 import com.vfortro.gestoreta.dto.attendants.AttPrefAdminInfoDTO;
 import com.vfortro.gestoreta.dto.events.EventInfoDTO;
 import com.vfortro.gestoreta.dto.events.EventTagAdminInfoDTO;
+import com.vfortro.gestoreta.dto.fallas.info.FallaAdInfoDTO;
 import com.vfortro.gestoreta.dto.fallas.info.FallaAdminInfoDTO;
 import com.vfortro.gestoreta.dto.fallas.FallaCreateDTO;
 import com.vfortro.gestoreta.dto.inventory.items.InventoryItemInfoDTO;
@@ -22,9 +23,11 @@ import com.vfortro.gestoreta.dto.users.info.UserInfoFallaDTO;
 import com.vfortro.gestoreta.model.*;
 import com.vfortro.gestoreta.model.inventory.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -94,7 +97,10 @@ public class FallaConversor {
         FallaAdminInfoDTO dto = new FallaAdminInfoDTO();
         dto.setName(falla.getName());
         dto.setFallaId(falla.getId());
-
+        if(falla.getShieldUrl() != null) {
+            String base64Image = Base64.getEncoder().encodeToString(falla.getShieldUrl());
+            dto.setShield("data:image/jpeg;base64," + base64Image);
+        }
         for(Event event: falla.getEvents()) {
             events.add(eventConversor.fromEntity2InfoDto(event));
         }
@@ -110,9 +116,11 @@ public class FallaConversor {
         }
         dto.setTags(tags);
 
-        for(Request req : falla.getRequests()) {
-            requests.add(requestConversor.fromEntity2InfoDto(req));
-        }
+        falla.getRequests().forEach(request -> {
+            if(request.getAproved() == null) {
+                requests.add(requestConversor.fromEntity2InfoDto(request));
+            }
+        });
         dto.setRequests(requests);
 
         for(Store store : falla.getStores()) {
@@ -147,4 +155,6 @@ public class FallaConversor {
         return dto;
 
     }
+
+
 }

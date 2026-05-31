@@ -15,6 +15,7 @@ import com.vfortro.gestoreta.repository.*;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -46,38 +47,50 @@ public class UserService {
     @Autowired
     private UserNotificationRepository notificationRepository;
 
+    private FallaService fallaService;
+
     //CONVERSORS
     @Autowired
     private UserConversor userConversor;
     @Autowired
     private RequestConversor requestConversor;
 
+
+
     //OTHER
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-
-
+    public UserService(@Lazy FallaService fallaService) {
+        this.fallaService = fallaService;
+    }
 
     @Transactional
-    public UserCreateDTO createUser(UserCreateDTO user) throws EntityExistsException, IllegalArgumentException {
+    public UserCreateDTO createUser(UserCreateDTO user, MultipartFile pfp) throws EntityExistsException, IllegalArgumentException {
         if(userRepository.existsByEmail(user.getEmail()) || user.getEmail().isEmpty()) throw new EntityExistsException("Ja existeix un usuari amb email: " + user.getEmail());
         LocalDateTime eighteenYearsAgoToday = LocalDateTime.now().minusYears(18);
         if(user.getBirthday().isAfter(eighteenYearsAgoToday.toLocalDate())) { throw new IllegalArgumentException("L'usuari ha de ser major d'edat");}
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User toSave = userConversor.fromDto2Entity(user);
-        toSave.setCreationDate(LocalDateTime.now());
-        User saved = userRepository.saveAndFlush(toSave);
-        Charge charge = new Charge();
-        charge.setUser(saved);
-        charge.setName("Càrrec de creació");
-        charge.setFalla(saved.getFalla());
-        if(user.getAccessType() != null) {
-            charge.setType(user.getAccessType());
-        } else {
-            charge.setType(AccessType.EMPTY_CHARGE);
+        if(pfp != null && !pfp.isEmpty()) {
+            try {
+                toSave.setPfpContent(pfp.getBytes());
+            } catch (IOException e) {
+                System.out.println("Error al afegir la foto de perfil a l'usuari: " + toSave.getName());
+            }
         }
-        chargeRepository.saveAndFlush(charge);
+        toSave.setCreationDate(LocalDateTime.now());
+        if(user.getFallaId() != null) {
+            try {
+                Falla falla = fallaRepository.findById(user.getFallaId()).orElseThrow(() -> new EntityNotFoundException("No existeix la falla amb id: " + user.getFallaId()));
+                fallaService.joinFalla(toSave, falla);
+            } catch(Exception e) {
+                System.out.println("ERROR AL ASSIGNAR EL USUARI A LA FALLA: " + e.getMessage());
+            }
+
+        }
+        User saved = userRepository.saveAndFlush(toSave);
+
         return userConversor.fromEntity2Dto(saved);
     }
 
@@ -244,7 +257,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public ByteArrayResource downloadPfp(String email) throws NullPointerException, EntityNotFoundException {
         User user = readUserAsEntity(email);
-        if(user.getPfpContent() == null) throw new NullPointerException("L'usuari no te imatge de perfil");
+        if(user.getPfpContent() == null) return null;
         return new ByteArrayResource(user.getPfpContent());
     }
 

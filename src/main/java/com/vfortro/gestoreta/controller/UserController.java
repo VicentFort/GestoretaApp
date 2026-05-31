@@ -61,10 +61,10 @@ public class UserController {
                                 })
                 })
     })
-    @PostMapping("/create")
-    public ResponseEntity<?> postUser(@RequestBody @Valid UserCreateDTO user) {
+    @PostMapping(value = "/create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> postUser(@RequestPart @Valid UserCreateDTO user, @RequestParam(required = false) MultipartFile pfp) {
         try {
-            UserCreateDTO result = userService.createUser(user);
+            UserCreateDTO result = userService.createUser(user, pfp);
             return new ResponseEntity<>(new ApiMessageResponse("Usuario con id: " + result.getUserId() + " creado en la base de datos.", true), HttpStatus.CREATED);
 
         } catch (EntityExistsException | IllegalArgumentException e) {
@@ -269,6 +269,8 @@ public class UserController {
         String email = authentication.getName();
         try {
             ByteArrayResource image = userService.downloadPfp(email);
+            if(image == null)
+                return ResponseEntity.ok().build();
             return ResponseEntity.ok(image);
         } catch (NullPointerException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);

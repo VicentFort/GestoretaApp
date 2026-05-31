@@ -16,5 +16,7 @@ public class CouponExchangeRequestDTO extends GenericPaymentRequestDTO{
     private Long stockId;
     @NotNull
     private Long storeId;
+    @NotNull
+    private Long fallaId;
 
 }

@@ -22,7 +22,7 @@ public class OpenAPIConfiguration {
         localhost.setDescription("Gestoreta APP");
 
         Server pcLocal = new Server();
-        pcLocal.setUrl("http://192.168.1.21:8080");
+        pcLocal.setUrl("https://nondistributive-nonhedonistically-monserrate.ngrok-free.dev");
         pcLocal.setDescription("Gestoreta APP Máquina privada");
 
         Server publicServer = new Server();

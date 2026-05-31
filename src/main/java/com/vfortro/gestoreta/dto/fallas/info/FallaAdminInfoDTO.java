@@ -15,6 +15,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.core.io.ByteArrayResource;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ import java.util.List;
 public class FallaAdminInfoDTO {
     private Long fallaId;
     private String name;
+    private String shield;
     private List<EventTagAdminInfoDTO> tags;
     private List<UserInfoFallaDTO> users;
     private List<EventInfoDTO> events;

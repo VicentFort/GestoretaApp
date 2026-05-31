@@ -24,7 +24,6 @@ public class RequestConversor {
         dto.setRequestId(request.getId());
         dto.setIdUser(request.getUser().getId());
         dto.setIdFalla(request.getFalla().getId());
-        dto.setMessage(request.getMessage());
         dto.setAproved(request.getAproved());
         dto.setReply(request.getReply());
         return dto;
@@ -38,6 +37,8 @@ public class RequestConversor {
         dto.setRequestId(req.getId());
         dto.setMessage(req.getMessage());
         dto.setAproved(req.getAproved());
+        dto.setUserId(req.getUser().getId());
+        dto.setFallaId(req.getFalla().getId());
         return dto;
     }
 
@@ -69,8 +70,7 @@ public class RequestConversor {
         if(!fallaRepository.existsById(dto.getIdFalla())) throw new EntityNotFoundException("La falla con id: " + dto.getIdFalla() + " no existe.");
         req.setFalla(fallaRepository.findFallaById(dto.getIdFalla()));
 
-        if(dto.getMessage().isBlank()) throw new NullPointerException("El mensaje debe tener contenido.");
-        req.setMessage(dto.getMessage());
+
 
         req.setAproved(dto.getAproved());
         req.setReply(dto.getReply());

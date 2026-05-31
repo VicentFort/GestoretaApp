@@ -6,6 +6,7 @@ import com.vfortro.gestoreta.dto.attendants.AttPrefInfoDTO;
 import com.vfortro.gestoreta.dto.events.EventInfoDTO;
 import com.vfortro.gestoreta.dto.events.EventInfoUserDTO;
 import com.vfortro.gestoreta.dto.events.EventTagAdminInfoDTO;
+import com.vfortro.gestoreta.dto.fallas.info.FallaAdInfoDTO;
 import com.vfortro.gestoreta.dto.fallas.info.FallaUserInfoDTO;
 import com.vfortro.gestoreta.dto.payments.info.CouponStockInfoDTO;
 import com.vfortro.gestoreta.dto.users.UserCreateDTO;
@@ -20,6 +21,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -94,6 +96,7 @@ public class UserConversor {
         dto.setNickname(user.getNickname());
         dto.setAccessType(filterChargeTypes(user));
         if (user.getFalla() != null) dto.setFallaInfo(fromEntity2UserInfo(user.getFalla()));
+        List<FallaAdInfoDTO> fallaAds = new ArrayList<>();
         List<EventInfoUserDTO> events = new ArrayList<>();
         List<FoodNeedType> needs = user.getNeeds();
         List<AttPrefInfoDTO> tagNamePrefs = new ArrayList<>();
@@ -112,6 +115,14 @@ public class UserConversor {
             att.setTagId(pref.getEventTag().getId());
             tagNamePrefs.add(att);
         }
+
+        if(user.getFalla() == null) {
+            List<Falla> fallas = fallaRepository.findAll();
+            fallas.forEach(falla -> {
+                fallaAds.add(fromEntity2Ad(falla));
+            });
+        }
+
         user.getAttendedEvents().forEach(att -> {
             Event event = att.getEvent();
             EventInfoUserDTO eDto = eventConversor.fromEntity2InfoUserDto(event);
@@ -137,6 +148,7 @@ public class UserConversor {
         dto.setEventTagPrefs(tagNamePrefs);
         dto.setAttEvents(attEvents);
         dto.setCouponStocks(coupons);
+        dto.setFallaAds(fallaAds);
         return dto;
     }
 
@@ -146,15 +158,13 @@ public class UserConversor {
         user.setName(dto.getName());
         user.setSurname(dto.getSurname());
         user.setNickname(dto.getNickname());
-        if (dto.getFallaId() != null && !fallaRepository.existsById(dto.getFallaId()))
-            throw new EntityNotFoundException("La falla asociada al usuario no existe en la base de datos.");
-        user.setFalla(fallaRepository.findFallaById(dto.getFallaId()));
 
         if (dto.getJoinDate() != null) {
             user.setJoinDate(dto.getJoinDate());
         } else {
             user.setJoinDate(LocalDate.now());
         }
+
 
         user.setBirthday(dto.getBirthday());
         user.setShowBday(dto.getShowBday());
@@ -168,6 +178,10 @@ public class UserConversor {
         dto.setFallaId(falla.getId());
         dto.setCreationDate(falla.getCreationDate());
         dto.setName(falla.getName());
+        if(falla.getShieldUrl() != null) {
+            String base64Image = Base64.getEncoder().encodeToString(falla.getShieldUrl());
+            dto.setShield("data:image/jpeg;base64," + base64Image);
+        }
         List<EventInfoUserDTO> events = new ArrayList<>();
         List<EventTagAdminInfoDTO> tags = new ArrayList<>();
         for (Event e : falla.getEvents()) {
@@ -197,6 +211,19 @@ public class UserConversor {
             }
         }
         return accessPivot;
+    }
+
+    public FallaAdInfoDTO fromEntity2Ad(Falla falla) {
+        FallaAdInfoDTO dto = new FallaAdInfoDTO();
+        dto.setId(falla.getId());
+        dto.setName(falla.getName());
+        dto.setCreationDate(falla.getCreationDate());
+        dto.setMemberCount(falla.getUsers().size());
+        if(falla.getShieldUrl() != null) {
+            String base64Image = Base64.getEncoder().encodeToString(falla.getShieldUrl());
+            dto.setShield("data:image/jpeg;base64," + base64Image);
+        }
+        return dto;
     }
 }
 
