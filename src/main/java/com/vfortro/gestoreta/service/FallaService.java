@@ -67,8 +67,7 @@ public class FallaService {
         if(user.getFallaId() == null) throw new NullPointerException("El usuario no tiene falla asignada.");
         Falla updatedFalla = fallaRepository.findFallaById(user.getFallaId());
         if(!Objects.equals(updatedFalla.getId(), userService.readUser(email).getFallaId())) throw new AccessDeniedException("Sin permiso a esta falla.");
-        if(newFalla.getName() != null) updatedFalla.setName(newFalla.getName());
-        if(newFalla.getCreationDate() != null) updatedFalla.setCreationDate(newFalla.getCreationDate());
+        if(newFalla.getDescription() != null) updatedFalla.setName(newFalla.getDescription());
         fallaRepository.saveAndFlush(updatedFalla);
 
     }
