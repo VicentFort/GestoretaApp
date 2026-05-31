@@ -23,7 +23,6 @@ public class EmailService {
     @Autowired
     private TemplateEngine templateEngine;
 
-    private Dotenv dotEnv = Dotenv.load();
 
     public void sendLoanReminderMail(String to, String subject, Long loanId, String fallaName) {
         try {
