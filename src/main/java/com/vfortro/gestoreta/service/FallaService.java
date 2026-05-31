@@ -180,23 +180,25 @@ public class FallaService {
         if(manager.getFalla().getId() != req.getFalla().getId()) throw new IllegalAccessException("La falla de la sol·licitud no conicideix amb la falla del gestor");
 
         if(request.getReply().isBlank()) throw new IllegalStateException("La resposta està en blanc");
-
+        UserNotification notification = new UserNotification();
+        notification.setRead(false);
+        notification.setUser(user);
+        notification.setType(UserNotificationType.REQUEST_RESOLUTION);
+        notification.setDate(LocalDateTime.now());
+        notification.setMessage("");
+        notification.setFalla(falla);
         if(request.getAproved()) {
             joinFalla(user, falla);
             req.setAproved(true);
-            UserNotification notification = new UserNotification();
-            notification.setRead(false);
-            notification.setUser(user);
             notification.setMessage("La teua sol·licitud a la falla: " + falla.getName() + " ha sigut aprovada amb la resolució: " + req.getReply());
-            notification.setType(UserNotificationType.REQUEST_RESOLUTION);
-            notification.setDate(LocalDateTime.now());
-            notification.setFalla(falla);
-            notificationRepository.save(notification);
         } else {
             req.setAproved(false);
+            notification.setMessage("La teua sol·licitud a la falla: " + falla.getName() + " ha sigut denegada amb la resolució: " + req.getReply());
         }
         req.setResolutionDate(LocalDateTime.now());
         requestRepository.save(req);
+        notificationRepository.save(notification);
+
     }
     @Transactional
     public void joinFalla(User user, Falla falla) throws IllegalStateException {
@@ -205,8 +207,7 @@ public class FallaService {
         }
         user.setFalla(falla);
         user.setJoinDate(LocalDate.now());
-
-        User saved = userRepository.save(user);
+        User saved = userRepository.saveAndFlush(user);
 
         Charge charge = new Charge();
         charge.setType(AccessType.EMPTY_CHARGE);
