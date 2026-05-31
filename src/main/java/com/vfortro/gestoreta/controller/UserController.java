@@ -143,7 +143,6 @@ public class UserController {
                                          Authentication authentication) {
         String email = authentication.getName();
         try {
-            System.out.println(needType);
             userService.createFoodNeed(needType.replace("=", "").replace("\"", ""), email);
             return ResponseEntity.ok().build();
         } catch(AccessDeniedException accEx) {

@@ -30,7 +30,6 @@ public class CheckLoanDate {
     public void checkLoanDate() {
         loanRepository.closeEndedLoans();
         List<Loan> pendingLoans =  loanRepository.findPendingLoansWithoutDelayNotifications();
-        System.out.println(pendingLoans.size());
         for(Loan loan : pendingLoans) {
             LoanNotification loanNotification = new LoanNotification();
             loanNotification.setLoan(loan);

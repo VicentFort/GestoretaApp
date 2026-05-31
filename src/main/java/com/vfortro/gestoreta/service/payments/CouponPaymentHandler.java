@@ -35,7 +35,6 @@ public class CouponPaymentHandler implements PaymentHandler {
 
     @Override
     public List<Payment> processPayment(GenericPaymentRequestDTO dto, User manager) throws IllegalStateException {
-        System.out.println("INICIANT PROCESSAMENT DE VENDA DE TIQUET");
         CouponPurchaseRequestDTO request = (CouponPurchaseRequestDTO) dto;
         List<Payment> payments = new ArrayList<>();
         //1.1 Obtenemos el usuario que ha hecho la compra.
@@ -89,7 +88,6 @@ public class CouponPaymentHandler implements PaymentHandler {
             throw new IllegalStateException("El valor de la compra no coincideix a la quantitat abonada.");
         }
         //5. Guardar la compra
-        System.out.println("FINALITZAT PROCESSAMENT DE VENDA DE TIQUET");
         return payments;
     }
 }

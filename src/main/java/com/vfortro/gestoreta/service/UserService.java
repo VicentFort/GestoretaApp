@@ -168,7 +168,6 @@ public class UserService {
 
     @Transactional
     public void createFoodNeed(String needType, String email) throws AccessDeniedException, EntityNotFoundException, IllegalStateException {
-        System.out.println("Need type: " + needType);
         User user = readUserAsEntity(email);
         FoodNeedType need = FoodNeedType.fromString(needType);
         if(user.getNeeds().contains(need)) throw new IllegalStateException("Ja existeix la preferència alimentària");

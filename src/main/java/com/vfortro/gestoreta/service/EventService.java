@@ -131,7 +131,6 @@ public class EventService {
             updatedEvent.setEventTag(eventTagRepository.findTagById(newEvent.getTagId()));
         }
         if(newEvent.getImage() != null) {
-            System.out.println("SAME IMAGE?: "+ Arrays.equals(newEvent.getImage(), updatedEvent.getImageContent()));
             updatedEvent.setImageContent(newEvent.getImage());
         }
         if(newEvent.getPrice() != null) updatedEvent.setPrice(newEvent.getPrice());

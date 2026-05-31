@@ -157,7 +157,6 @@ public class FallaService {
             throw new IllegalAccessException("Sense permís.");
         }
 
-        System.out.println("Shield image length: "+shieldImage.getBytes().length);
         Falla falla = fallaRepository.findById(fallaId).orElseThrow(() -> new EntityNotFoundException("No existeix la falla amb id: " + fallaId));
         falla.setShieldUrl(shieldImage.getBytes());
 
