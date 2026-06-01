@@ -63,6 +63,7 @@ public class UserConversor {
         dto.setName(user.getName());
         dto.setSurname(user.getSurname());
         dto.setFullName(user.getName() + " " + user.getSurname());
+        dto.setEmail(user.getEmail());
         dto.setBirthday(user.getBirthday());
         dto.setShowBday(user.getShowBday());
         dto.setJoinDate(user.getJoinDate());

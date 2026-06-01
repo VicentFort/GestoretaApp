@@ -18,6 +18,7 @@ public class UserInfoFallaDTO {
     private String surname;
     private String fullName;
     private String nickname;
+    private String email;
     private LocalDate birthday;
     private Boolean showBday;
     private AccessType accessType;
