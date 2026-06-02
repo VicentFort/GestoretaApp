@@ -27,6 +27,7 @@ import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 @Service
 public class UserService {
@@ -56,6 +57,8 @@ public class UserService {
     private RequestConversor requestConversor;
 
 
+    private final String emailPattern = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
+
 
     //OTHER
     @Autowired
@@ -65,8 +68,15 @@ public class UserService {
         this.fallaService = fallaService;
     }
 
+    public boolean emailMatchesPattern(String emailAddress) {
+        return Pattern.compile(emailPattern)
+                .matcher(emailAddress)
+                .matches();
+    }
+
     @Transactional
     public UserCreateDTO createUser(UserCreateDTO user, MultipartFile pfp) throws EntityExistsException, IllegalArgumentException {
+        if(!emailMatchesPattern(user.getEmail())) throw new IllegalArgumentException("El correu electrònic està mal format");
         if(userRepository.existsByEmail(user.getEmail()) || user.getEmail().isEmpty()) throw new EntityExistsException("Ja existeix un usuari amb email: " + user.getEmail());
         LocalDateTime eighteenYearsAgoToday = LocalDateTime.now().minusYears(18);
         if(user.getBirthday().isAfter(eighteenYearsAgoToday.toLocalDate())) { throw new IllegalArgumentException("L'usuari ha de ser major d'edat");}
