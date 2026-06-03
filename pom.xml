@@ -198,6 +198,7 @@
 				<configuration>
 					<includes>
 						<include>com/vfortro/gestoreta/service/*ServiceTest.java</include>
+						<include>com/vfortro/gestoreta/service/*Test.java</include>
 					</includes>
 				</configuration>
 			</plugin>
@@ -221,6 +222,7 @@
 						<configuration>
 							<includes>
 								<include>com/vfortro/gestoreta/service/**</include>
+								<include>com/vfortro/gestoreta/tasks/**</include>
 							</includes>
 						</configuration>
 					</execution>

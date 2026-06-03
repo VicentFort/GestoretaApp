@@ -14,6 +14,7 @@ import com.vfortro.gestoreta.model.enums.UserNotificationType;
 import com.vfortro.gestoreta.repository.*;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ByteArrayResource;
@@ -24,12 +25,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     //REPOSITORIES
@@ -48,7 +51,6 @@ public class UserService {
     @Autowired
     private UserNotificationRepository notificationRepository;
 
-    private FallaService fallaService;
 
     //CONVERSORS
     @Autowired
@@ -64,10 +66,6 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public UserService(@Lazy FallaService fallaService) {
-        this.fallaService = fallaService;
-    }
-
     public boolean emailMatchesPattern(String emailAddress) {
         return Pattern.compile(emailPattern)
                 .matcher(emailAddress)
@@ -78,8 +76,7 @@ public class UserService {
     public UserCreateDTO createUser(UserCreateDTO user, MultipartFile pfp) throws EntityExistsException, IllegalArgumentException {
         if(!emailMatchesPattern(user.getEmail())) throw new IllegalArgumentException("El correu electrònic està mal format");
         if(userRepository.existsByEmail(user.getEmail()) || user.getEmail().isEmpty()) throw new EntityExistsException("Ja existeix un usuari amb email: " + user.getEmail());
-        LocalDateTime eighteenYearsAgoToday = LocalDateTime.now().minusYears(18);
-        if(user.getBirthday().isAfter(eighteenYearsAgoToday.toLocalDate())) { throw new IllegalArgumentException("L'usuari ha de ser major d'edat");}
+        if(user.getBirthday().isAfter(LocalDate.now().minusYears(18))) { throw new IllegalArgumentException("L'usuari ha de ser major d'edat");}
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User toSave = userConversor.fromDto2Entity(user);
         if(pfp != null && !pfp.isEmpty()) {
@@ -93,11 +90,10 @@ public class UserService {
         if(user.getFallaId() != null) {
             try {
                 Falla falla = fallaRepository.findById(user.getFallaId()).orElseThrow(() -> new EntityNotFoundException("No existeix la falla amb id: " + user.getFallaId()));
-                fallaService.joinFalla(toSave, falla);
+                joinFalla(toSave, falla);
             } catch(Exception e) {
                 System.out.println("ERROR AL ASSIGNAR EL USUARI A LA FALLA: " + e.getMessage());
             }
-
         }
         User saved = userRepository.saveAndFlush(toSave);
 
@@ -281,5 +277,22 @@ public class UserService {
 
         notification.setRead(true);
         notificationRepository.save(notification);
+    }
+
+    @Transactional
+    private void joinFalla(User user, Falla falla) throws IllegalStateException {
+        if(user.getFalla() != null) {
+            throw new IllegalStateException("El usuari ja te falla.");
+        }
+        user.setFalla(falla);
+        user.setJoinDate(LocalDate.now());
+
+        Charge charge = new Charge();
+        charge.setType(AccessType.EMPTY_CHARGE);
+        charge.setFalla(falla);
+        charge.setUser(user);
+        charge.setName("Càrrec de la falla: " + falla.getName());
+        chargeRepository.save(charge);
+
     }
 }
