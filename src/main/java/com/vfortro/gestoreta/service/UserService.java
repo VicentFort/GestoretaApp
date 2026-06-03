@@ -118,14 +118,10 @@ public class UserService {
         if(!userRepository.existsByEmail(email)) throw new NullPointerException("El usuari no existeix.");
         if(!Objects.equals(email, userRepository.findUserByEmail(email).getEmail())) throw new AccessDeniedException("Sesne permís.");
         User updatedUser = userRepository.findUserByEmail(email);
-        if(newUser.getName() != null) updatedUser.setName(newUser.getName());
-        if(newUser.getSurname() != null) updatedUser.setSurname(newUser.getSurname());
-        if(newUser.getBirthday() != null) updatedUser.setBirthday(newUser.getBirthday());
         if(newUser.getShowBday() != null) updatedUser.setShowBday(newUser.getShowBday());
         if(newUser.getNickname() != null) updatedUser.setNickname(newUser.getNickname());
         User saved = userRepository.saveAndFlush(updatedUser);
         return userConversor.fromEntity2InfoDto(saved);
-
     }
 
     @Transactional(readOnly = true)

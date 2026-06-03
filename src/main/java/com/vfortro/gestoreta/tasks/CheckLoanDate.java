@@ -40,13 +40,13 @@ public class CheckLoanDate {
             String emailDestino = loan.getContact().getEmail();
             Long idPrestamo = loan.getLoanId();
             String nombreFalla = loan.getFalla().getName();
-
+            /*
             emailService.sendLoanReminderMail(
                     emailDestino,
                     "Recordatori de préstec pendent",
                     idPrestamo,
                     nombreFalla
-            );            notificationRepository.saveAndFlush(loanNotification);
+            ); */           notificationRepository.saveAndFlush(loanNotification);
         }
     }
 }

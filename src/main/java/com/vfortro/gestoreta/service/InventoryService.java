@@ -218,7 +218,7 @@ public class InventoryService {
         loan.setState(LoanState.RETURNED);
         Loan saved = loanRepository.save(loan);
 
-        emailService.sendLoanReturnedMail(saved.getContact().getEmail(), "Retorn del préstec amb id: " + saved.getLoanId(), saved);
+        //emailService.sendLoanReturnedMail(saved.getContact().getEmail(), "Retorn del préstec amb id: " + saved.getLoanId(), saved);
 
         return loanConversor.fromEntity2Dto(saved);
     }
